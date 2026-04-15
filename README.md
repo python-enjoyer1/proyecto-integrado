@@ -2,4 +2,4 @@
 
 Things to add:
  - Player sprite.
- - ...
+ - Add layer var.
