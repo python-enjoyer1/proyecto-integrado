@@ -15,3 +15,10 @@ end
 function love.draw()
     player:draw()
 end
+
+-- Jokes on you, it's still here.
+function love.keypressed(key)
+    if key == "escape" then
+        love.event.quit()
+    end
+end

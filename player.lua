@@ -6,7 +6,7 @@ require("utils")
 player = {
     x = 100,
     y = 100,
-    speed = 50,
+    speed = 100,
     attack = 30,
     attack_speed = 5
 }
