@@ -14,7 +14,7 @@ player = {
 -- Just so you know, you normalize EXCLUSIVELY the vector.
 -- Also, sometime we should make a vector class/table.
 function player:update(dt)
-    local movement_vector = {x = 0, y = 0}
+    local movement_vector = vector:new()
 
     if love.keyboard.isDown("w") then
         movement_vector.y = movement_vector.y - 1
@@ -25,18 +25,17 @@ function player:update(dt)
     end
 
     if love.keyboard.isDown("a") then
-        movement_vector.x = movement_vector.y - 1
+        movement_vector.x = movement_vector.x - 1
     end
 
     if love.keyboard.isDown("d") then
-        movement_vector.x = movement_vector.y + 1
+        movement_vector.x = movement_vector.x + 1
     end
 
-    -- Normalized.
-    local n_movement_vector = normalize(movement_vector.x, movement_vector.y)
+    movement_vector:normalize()
 
-    player.x = player.x + (n_movement_vector.x * dt * player.speed)
-    player.y = player.y + (n_movement_vector.y * dt * player.speed)
+    player.x = player.x + (movement_vector.x * dt * player.speed)
+    player.y = player.y + (movement_vector.y * dt * player.speed)
 end
 
 function player:draw()
