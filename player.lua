@@ -1,8 +1,9 @@
 local love = require("love")
-require("utils")
+local utils = require("utils")
 
 -- If you can think of more stats, then, fucking add them already.
 -- Very important. DO NOT MAKE THIS TABLE LOCAL. YOU WILL FUCK IT UP.
+--R we should prolly make a 
 player = {
     x = 100,
     y = 100,
@@ -14,7 +15,7 @@ player = {
 -- Just so you know, you normalize EXCLUSIVELY the vector.
 -- Also, sometime we should make a vector class/table.
 function player:update(dt)
-    local movement_vector = vector:new()
+    local movement_vector = utils.Vector:new()
 
     if love.keyboard.isDown("w") then
         movement_vector.y = movement_vector.y - 1
@@ -42,3 +43,5 @@ function player:draw()
     -- Replace with an actual sprite later on.
     love.graphics.rectangle("fill", player.x, player.y, 50, 50)
 end
+
+return player
