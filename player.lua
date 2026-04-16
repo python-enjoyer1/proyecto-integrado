@@ -11,28 +11,32 @@ player = {
     attack_speed = 5
 }
 
--- Add normalization.
+-- Just so you know, you normalize EXCLUSIVELY the vector.
+-- Also, sometime we should make a vector class/table.
 function player:update(dt)
-    local movement = {0, 0}
+    local movement_vector = {x = 0, y = 0}
 
     if love.keyboard.isDown("w") then
-        movement[2] = movement[2] - 1
+        movement_vector.y = movement_vector.y - 1
     end
 
     if love.keyboard.isDown("s") then
-        movement[2] = movement[2] + 1
+        movement_vector.y = movement_vector.y + 1
     end
 
     if love.keyboard.isDown("a") then
-        movement[1] = movement[1] - 1
+        movement_vector.x = movement_vector.y - 1
     end
 
     if love.keyboard.isDown("d") then
-        movement[1] = movement[1] + 1
+        movement_vector.x = movement_vector.y + 1
     end
 
-    player.x = player.x + (movement[1] * dt * player.speed)
-    player.y = player.y + (movement[2] * dt * player.speed)
+    -- Normalized.
+    local n_movement_vector = normalize(movement_vector.x, movement_vector.y)
+
+    player.x = player.x + (n_movement_vector.x * dt * player.speed)
+    player.y = player.y + (n_movement_vector.y * dt * player.speed)
 end
 
 function player:draw()
