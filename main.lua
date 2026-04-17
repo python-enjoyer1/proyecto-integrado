@@ -1,5 +1,6 @@
 local love = require("love")
-require("player") -- Local player does not work for some reason. It is supposedly a "boolean".
+local Player = require("Player")
+local utils = require("utils") -- Local Player does not work for some reason. It is supposedly a "boolean".
 
 -- DECLARE variables here (not define), local please.
 -- ...
@@ -9,11 +10,12 @@ function love.load()
 end
 
 function love.update(dt)
-    player:update(dt)
+    Player:update(dt)
+    utils.Timer.Update(dt)
 end
 
 function love.draw()
-    player:draw()
+    Player:draw()
 end
 
 -- Jokes on you, it's still here.

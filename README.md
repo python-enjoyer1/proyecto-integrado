@@ -3,3 +3,4 @@
 Things to add:
  - Player sprite.
  - Add layer var.
+ - Z Axis scaling and layering.

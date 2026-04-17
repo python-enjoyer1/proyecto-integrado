@@ -28,12 +28,13 @@ function Main.Timer:new(Duration, OnComplete) --R Set amount of time u want to w
 end
 
 -- Good shit, but remember to only capitalize if making a class, not a variable.
+--R Got it.
 function Main.Timer:Update(dt) --R just put this into love.update()
     for i=#Main.Timer.Stored_Times, 1,-1 do --R this prevents other indexes to fill in gaps after deletion.
-        local Stored = Main.Timer.Stored_Times[i]
-        Stored.Time = Stored.Time - dt
-        if Stored.Time <= 0 then
-            Stored.Callback()
+        local stored = Main.Timer.Stored_Times[i]
+        stored.Time = stored.Time - dt
+        if stored.Time <= 0 then
+            stored.Callback()
             table.remove(Main.Timer.Stored_Times, i)
         end
     end
