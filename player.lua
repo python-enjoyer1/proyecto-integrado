@@ -3,7 +3,6 @@ local utils = require("utils")
 
 -- If you can think of more stats, then, fucking add them already.
 -- Very important. DO NOT MAKE THIS TABLE LOCAL. YOU WILL FUCK IT UP.
---R we should prolly make a 
 player = {
     x = 100,
     y = 100,

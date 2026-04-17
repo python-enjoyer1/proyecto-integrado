@@ -27,6 +27,7 @@ function Main.Timer:new(Duration, OnComplete) --R Set amount of time u want to w
     table.insert(Main.Timer.Stored_Times, {Time = Duration, Callback = OnComplete})
 end
 
+-- Good shit, but remember to only capitalize if making a class, not a variable.
 function Main.Timer:Update(dt) --R just put this into love.update()
     for i=#Main.Timer.Stored_Times, 1,-1 do --R this prevents other indexes to fill in gaps after deletion.
         local Stored = Main.Timer.Stored_Times[i]
