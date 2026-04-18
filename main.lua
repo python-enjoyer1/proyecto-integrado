@@ -19,6 +19,7 @@ function love.draw()
 end
 
 -- Jokes on you, it's still here.
+--R what the fuck
 function love.keypressed(key)
     if key == "escape" then
         love.event.quit()
