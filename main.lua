@@ -1,17 +1,16 @@
 local love = require("love")
-local Player = require("Player")
-local utils = require("utils") -- Local Player does not work for some reason. It is supposedly a "boolean".
+local Player = require("player")
+local utils = require("utils")
 
--- DECLARE variables here (not define), local please.
--- ...
+-- Declare variables here, local please.
+local fullscreen
 
 function love.load()
-    love.window.setTitle("Proyecto Integrado")
+    fullscreen = false
 end
 
 function love.update(dt)
     Player:update(dt)
-    utils.Timer.Update(dt)
 end
 
 function love.draw()
@@ -22,5 +21,9 @@ end
 function love.keypressed(key)
     if key == "escape" then
         love.event.quit()
+    end
+    if key == "f11" then
+        fullscreen = not fullscreen
+        love.window.setFullscreen(fullscreen, "desktop")
     end
 end
