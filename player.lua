@@ -2,11 +2,23 @@ local love = require("love")
 local utils = require("utils")
 
 -- If you can think of more stats, then, fucking add them already.
+--R Remove the stats that you think wouldn't work, aight?
 local Player = {
     position = {x = 100, y = 100, z = 0}, -- Layers on the z-axis, maybe scaling, we'll see.
-    speed = 100,
-    attack = 30,
-    attack_speed = 5
+    stats = {
+        speed = 100,
+        attack_damage = 30,
+        attack_speed = 5,
+        crit_chance = 1, --R You did mention something about adding critical hits to the game didn't you?
+        knockback = 3,
+        souls = 30, --R In seconds perhaps?
+        soul_gain = 4,
+        soul_limit = 60,
+        luck = 1,
+        view_distance = 500,
+        weight = 20 --R How much knockback player takes.
+    }
+
 }
 
 -- Just so you know, you normalize EXCLUSIVELY the vector.
