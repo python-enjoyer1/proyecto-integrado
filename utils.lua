@@ -6,7 +6,7 @@ local Main = {}
 
 Main.Timer = {stored_times = {}} --R basically a wait() then does a callback
 Main.Vector = {x = 0, y = 0}
-Main.Animation = {frames = {}, speed = 1}
+Main.Animation = {speed = 1, current_frame = 1}
 
 function Main.Vector:new(o)
     o = o or {}
@@ -26,18 +26,18 @@ end
 --R Timer Functions. Only use if it's for delayed triggers, else use coroutines.
 
 function Main.Timer:new(duration, on_complete) --R Set amount of time u want to wait then runs code.
-    table.insert(Main.Timer.stored_times, {time = duration, callback = on_complete})
+    table.insert(self.stored_times, {time = duration, callback = on_complete})
 end
 
 -- Good shit, but remember to only capitalize if making a class, not a variable.
 --R Got it.
 function Main.Timer:update(dt) --R just put this into love.update()
-    for i=#Main.Timer.stored_times, 1,-1 do --R this prevents other indexes to fill in gaps after deletion.
-        local stored = Main.Timer.stored_times[i]
+    for i=#self.stored_times, 1,-1 do --R this prevents other indexes to fill in gaps after deletion.
+        local stored = self.stored_times[i]
         stored.time = stored.time - dt
         if stored.time <= 0 then
             stored.callback()
-            table.remove(Main.Timer.stored_times, i)
+            table.remove(self.stored_times, i)
         end
     end
 end
@@ -49,7 +49,24 @@ function Main.Animation:new(o)
     return o
 end
 
+-- Basically, we have to add the quad thingy.
+function Main.Animation:manage_spritesheet(image, sprite_size, sprite_number, columns) -- Don't call this on update, call on load.
+    self.image = love.graphics.newImage(image)
+    self.frames = {}
+    for i=sprite_number, 1, -1 do
+        table.insert(
+            self.frames,
+            love.graphics.newQuad(0, 0, sprite_size, sprite_size, self.image) -- I FUCKING HATE THIS.
+        )
+    end
+end
+
+-- Add the main animation. Basically increases the current_frame until you reach the last frame, then resets current_frame. Also wait based on the speed var.
 function Main.Animation:update(dt)
+end
+
+function Main.Animation:draw(x, y, size)
+    love.graphics.draw(self.image, self.frames[self.current_frame], x, y, 0, size, size)
 end
 
 return Main
