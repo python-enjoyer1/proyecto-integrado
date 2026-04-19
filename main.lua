@@ -3,10 +3,17 @@ local Player = require("player")
 local utils = require("utils")
 
 -- Declare variables here, local please.
-
+local render_width, render_height
+local desktop_width, desktop_height
+local scale_x, scale_y
 
 -- For pre-loading. Loads stuff after loading modules.
 function love.load()
+    render_width, render_height = 640, 360
+    desktop_width, desktop_height = love.window.getDesktopDimensions()
+    scale_x = desktop_width / render_width
+    scale_y = desktop_height / render_height
+
     love.graphics.setDefaultFilter("nearest", "nearest") -- Makes it so pixel art doesn't look blurry as shit.
 end
 
@@ -15,6 +22,7 @@ function love.update(dt)
 end
 
 function love.draw()
+    love.graphics.scale(scale_x, scale_y)
     Player:draw()
 end
 

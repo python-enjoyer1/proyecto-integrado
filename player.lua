@@ -4,7 +4,7 @@ local utils = require("utils")
 -- If you can think of more stats, then, fucking add them already.
 --R Remove the stats that you think wouldn't work, aight?
 local Player = {
-    position = {x = 100, y = 100, z = 0}, -- Layers on the z-axis, maybe scaling, we'll see.
+    position = {x = 320, y = 180, z = 0}, -- Layers on the z-axis, maybe scaling, we'll see.
     stats = {
         speed = 100,
         attack_damage = 30,
@@ -54,7 +54,7 @@ end
 
 function Player:draw()
     -- Replace with an actual sprite later on.
-    love.graphics.rectangle("fill", Player.position.x, Player.position.y, 30, 30)
+    love.graphics.rectangle("fill", Player.position.x, Player.position.y, 20, 20)
 end
 
 return Player   
