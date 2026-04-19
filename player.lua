@@ -54,7 +54,7 @@ end
 
 function Player:draw()
     -- Replace with an actual sprite later on.
-    love.graphics.rectangle("fill", Player.position.x, Player.position.y, 50, 50)
+    love.graphics.rectangle("fill", Player.position.x, Player.position.y, 30, 30)
 end
 
 return Player   
