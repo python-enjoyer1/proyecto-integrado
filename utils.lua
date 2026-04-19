@@ -1,3 +1,4 @@
+local love = require("love")
 local Main = {}
 
 -- Yoooooooo. I implemented the vector class. If there's any shit you feel ain't right then change it.
@@ -5,6 +6,7 @@ local Main = {}
 
 Main.Timer = {stored_times = {}} --R basically a wait() then does a callback
 Main.Vector = {x = 0, y = 0}
+Main.Animation = {frames = {}, speed = 1}
 
 function Main.Vector:new(o)
     o = o or {}
@@ -29,7 +31,7 @@ end
 
 -- Good shit, but remember to only capitalize if making a class, not a variable.
 --R Got it.
-function Main.Timer:Update(dt) --R just put this into love.update()
+function Main.Timer:update(dt) --R just put this into love.update()
     for i=#Main.Timer.stored_times, 1,-1 do --R this prevents other indexes to fill in gaps after deletion.
         local stored = Main.Timer.stored_times[i]
         stored.time = stored.time - dt
@@ -38,6 +40,16 @@ function Main.Timer:Update(dt) --R just put this into love.update()
             table.remove(Main.Timer.stored_times, i)
         end
     end
+end
+
+function Main.Animation:new(o)
+    o = o or {}
+    setmetatable(o, self)
+    self.__index = self
+    return o
+end
+
+function Main.Animation:update(dt)
 end
 
 return Main
