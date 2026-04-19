@@ -54,11 +54,11 @@ function Main.Animation:manage_spritesheet(image, sprite_size, sprite_number, co
     self.image = love.graphics.newImage(image)
     self.frames = {}
     for i=0, sprite_number-1 do
-        local x = (i%columns)*sprite_size
-        local y = math.floor(i/columns)*sprite_size
+        local x = (i % columns) * sprite_size
+        local y = math.floor(i / columns) * sprite_size
         table.insert(
             self.frames,
-            love.graphics.newQuad(x,y, sprite_size, sprite_size, self.image)
+            love.graphics.newQuad(x, y, sprite_size, sprite_size, self.image)
         )
     end
 end
