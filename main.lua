@@ -12,8 +12,7 @@ function love.load()
     desktop_width, desktop_height = love.window.getDesktopDimensions()
     scale_x = desktop_width / consts.RENDER_WIDTH
     scale_y = desktop_height / consts.RENDER_HEIGHT
-
-    love.graphics.setDefaultFilter(consts.DEFAULT_FILTER, consts.DEFAULT_FILTER) -- Makes it so pixel art doesn't look blurry as shit.
+    love.graphics.setDefaultFilter("nearest", "nearest")
 end
 
 function love.update(dt)

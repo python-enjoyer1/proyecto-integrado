@@ -52,6 +52,7 @@ end
 -- Basically, we have to add the quad thingy.
 function Main.Animation:manage_spritesheet(image, sprite_size, sprite_number, columns) -- Don't call this on update, call on load.
     self.image = love.graphics.newImage(image)
+    self.image:setFilter("nearest", "nearest")
     self.frames = {}
     for i=0, sprite_number-1 do
         local x = (i % columns) * sprite_size
@@ -64,14 +65,16 @@ function Main.Animation:manage_spritesheet(image, sprite_size, sprite_number, co
 end
 
 -- Add the main animation. Basically increases the current_frame until you reach the last frame, then resets current_frame. Also wait based on the speed var.
-function Main.Animation:update(dt)
-    self.timer = (self.timer or 0) + dt --R (self.timer or 0) just checks whether self.timer exists, if it doesn't then it uses 0 instead
-    if self.timer >= self.speed then
-        self.timer = self.timer - self.speed
-        self.current_frame = self.current_frame + 1
+function Main.Animation:update(dt, paused)
+    if not paused then
+        self.timer = (self.timer or 0) + dt --R (self.timer or 0) just checks whether self.timer exists, if it doesn't then it uses 0 instead
+        if self.timer >= self.speed then
+            self.timer = self.timer - self.speed
+            self.current_frame = self.current_frame + 1
 
-        if self.current_frame > #self.frames then
-            self.current_frame = 1
+            if self.current_frame > #self.frames then
+                self.current_frame = 1
+            end
         end
     end
 end

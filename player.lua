@@ -1,5 +1,9 @@
 local love = require("love")
 local utils = require("utils")
+local consts = require("constants")
+
+local player_sprite = utils.Animation:new({5})
+player_sprite:manage_spritesheet("stuff/assets/characters/consumer.png", consts.CHARACTER_SIZE, 7, 3)
 
 -- If you can think of more stats, then, fucking add them already.
 --R Remove the stats that you think wouldn't work, aight?
@@ -50,11 +54,13 @@ function Player:update(dt)
 
     Player.position.x = Player.position.x + (movement_vector.x * dt * Player.stats.speed)
     Player.position.y = Player.position.y + (movement_vector.y * dt * Player.stats.speed)
+
+    player_sprite:update(dt, false)
 end
 
 function Player:draw()
     -- Replace with an actual sprite later on.
-    love.graphics.rectangle("fill", Player.position.x, Player.position.y, 32, 32)
+    player_sprite:draw(Player.position.x, Player.position.y, 1)
 end
 
 return Player   
