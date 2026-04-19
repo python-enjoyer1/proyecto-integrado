@@ -1,1 +1,5 @@
--- Add shit later.
+Main = {}
+
+Main.SPRITE_SIZE = 128
+
+return Main
