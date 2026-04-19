@@ -9,14 +9,18 @@ local Player = {
         speed = 100,
         attack_damage = 30,
         attack_speed = 5,
-        crit_chance = 1, --R You did mention something about adding critical hits to the game didn't you?
+        crit_chance = 1, --R You did mention something about adding critical hits to the game didn't you? No, but it's a good idea.
         knockback = 3,
         souls = 30, --R In seconds perhaps?
-        soul_gain = 4,
+        soul_gain = 4, -- We could possibly add some randomness.
         soul_limit = 60,
+        essence = 0, -- Money.
+        essence_gain = 5, -- Add some randomness.
+        essence_limit = 100,
         luck = 1,
         view_distance = 500,
-        weight = 20 --R How much knockback player takes.
+        weight = 20, --R How much knockback player takes.
+        ammo_boost = 1 -- How much your ammo is multiplied by. By default it's nothing (1), but the Reichmann Relic changes it to 2, duplicating ammo.
     }
 
 }
@@ -44,13 +48,13 @@ function Player:update(dt)
 
     movement_vector:normalize()
 
-    Player.position.x = Player.position.x + (movement_vector.x * dt * Player.speed)
-    Player.position.y = Player.position.y + (movement_vector.y * dt * Player.speed)
+    Player.position.x = Player.position.x + (movement_vector.x * dt * Player.stats.speed)
+    Player.position.y = Player.position.y + (movement_vector.y * dt * Player.stats.speed)
 end
 
 function Player:draw()
     -- Replace with an actual sprite later on.
-    love.graphics.rectangle("fill", Player.position.x, Player.position.y, 50, 50)
+    love.graphics.rectangle("fill", Player.position.x, Player.position.y, 30, 30)
 end
 
 return Player   
