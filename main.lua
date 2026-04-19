@@ -5,7 +5,7 @@ local utils = require("utils")
 -- Declare variables here, local please.
 local fullscreen
 
--- For pre-loading.
+-- For pre-loading. Loads stuff after loading modules.
 function love.load()
     fullscreen = false
 end
