@@ -60,9 +60,7 @@ function Player:update(dt, scale_x, scale_y)
     mouse_x, mouse_y = love.mouse.getPosition()
     mouse_x = mouse_x / scale_x
     mouse_y = mouse_y / scale_y
-    self.angle = math.atan(mouse_y - self.position.y, mouse_x - self.position.x) -- RADIANS ALL THE FUCKING TIME.
-    print("plr pos: ".. self.position.x, self.position.y)
-    print(mouse_x, mouse_y)
+    self.angle = math.atan2(mouse_y - self.position.y, mouse_x - self.position.x) -- RADIANS ALL THE FUCKING TIME.
 
     player_sprite:update(dt)
 end
