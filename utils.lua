@@ -66,6 +66,7 @@ end
 
 -- Add the main animation. Basically increases the current_frame until you reach the last frame, then resets current_frame. Also wait based on the speed var.
 function Main.Animation:update(dt, paused)
+    paused = paused or false
     if not paused then
         self.timer = (self.timer or 0) + dt --R (self.timer or 0) just checks whether self.timer exists, if it doesn't then it uses 0 instead
         if self.timer >= self.speed then
@@ -79,8 +80,11 @@ function Main.Animation:update(dt, paused)
     end
 end
 
-function Main.Animation:draw(x, y, size)
-    love.graphics.draw(self.image, self.frames[self.current_frame], x, y, 0, size, size)
+function Main.Animation:draw(x, y, rotate, size)
+    rotate = rotate or 0
+    size = size or 1
+    local origin_x, origin_y = self.image:getWidth() / 2, self.image:getHeight() / 2
+    love.graphics.draw(self.image, self.frames[self.current_frame], x, y, rotate, size, size, origin_x, origin_y)
 end
 
 return Main

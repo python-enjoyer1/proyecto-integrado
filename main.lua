@@ -7,6 +7,8 @@ local consts = require("constants")
 local desktop_width, desktop_height
 local scale_x, scale_y
 
+local mouse_x, mouse_y
+
 -- For pre-loading. Loads stuff after loading modules.
 function love.load()
     desktop_width, desktop_height = love.window.getDesktopDimensions()
@@ -16,6 +18,7 @@ function love.load()
 end
 
 function love.update(dt)
+    mouse_x, mouse_y = love.mouse.getPosition()
     Player:update(dt)
 end
 

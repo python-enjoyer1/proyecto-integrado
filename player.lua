@@ -2,7 +2,7 @@ local love = require("love")
 local utils = require("utils")
 local consts = require("constants")
 
-local player_sprite = utils.Animation:new({5})
+local player_sprite = utils.Animation:new({speed = 0.1})
 player_sprite:manage_spritesheet("stuff/assets/characters/consumer.png", consts.CHARACTER_SIZE, 7, 3)
 
 -- If you can think of more stats, then, fucking add them already.
@@ -25,8 +25,8 @@ local Player = {
         view_distance = 500,
         weight = 20, --R How much knockback player takes.
         ammo_boost = 1 -- How much your ammo is multiplied by. By default it's nothing (1), but the Reichmann Relic changes it to 2, duplicating ammo.
-    }
-
+    },
+    angle = 0 -- Make it look at cursor.
 }
 
 -- Just so you know, you normalize EXCLUSIVELY the vector.
@@ -52,15 +52,15 @@ function Player:update(dt)
 
     movement_vector:normalize()
 
-    Player.position.x = Player.position.x + (movement_vector.x * dt * Player.stats.speed)
-    Player.position.y = Player.position.y + (movement_vector.y * dt * Player.stats.speed)
+    self.position.x = self.position.x + (movement_vector.x * dt * self.stats.speed)
+    self.position.y = self.position.y + (movement_vector.y * dt * self.stats.speed)
 
-    player_sprite:update(dt, false)
+    player_sprite:update(dt)
 end
 
 function Player:draw()
     -- Replace with an actual sprite later on.
-    player_sprite:draw(Player.position.x, Player.position.y, 1)
+    player_sprite:draw(self.position.x, self.position.y, self.angle)
 end
 
-return Player   
+return Player
