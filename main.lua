@@ -12,14 +12,13 @@ local mouse_x, mouse_y
 -- For pre-loading. Loads stuff after loading modules.
 function love.load()
     desktop_width, desktop_height = love.window.getDesktopDimensions()
-    scale_x = desktop_width / consts.RENDER_WIDTH
-    scale_y = desktop_height / consts.RENDER_HEIGHT
+    scale_x = math.floor(desktop_width / consts.RENDER_WIDTH)
+    scale_y = math.floor(desktop_height / consts.RENDER_HEIGHT)
     love.graphics.setDefaultFilter("nearest", "nearest")
 end
 
 function love.update(dt)
-    mouse_x, mouse_y = love.mouse.getPosition()
-    Player:update(dt)
+    Player:update(dt, scale_x, scale_y)
 end
 
 function love.draw()

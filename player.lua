@@ -5,6 +5,8 @@ local consts = require("constants")
 local player_sprite = utils.Animation:new({speed = 0.1})
 player_sprite:manage_spritesheet("stuff/assets/characters/consumer.png", consts.CHARACTER_SIZE, 7, 3)
 
+local mouse_x, mouse_y
+
 -- If you can think of more stats, then, fucking add them already.
 --R Remove the stats that you think wouldn't work, aight?
 local Player = {
@@ -31,7 +33,7 @@ local Player = {
 
 -- Just so you know, you normalize EXCLUSIVELY the vector.
 -- Also, sometime we should make a vector class/table.
-function Player:update(dt)
+function Player:update(dt, scale_x, scale_y)
     local movement_vector = utils.Vector:new()
 
     if love.keyboard.isDown("w") then
@@ -54,6 +56,13 @@ function Player:update(dt)
 
     self.position.x = self.position.x + (movement_vector.x * dt * self.stats.speed)
     self.position.y = self.position.y + (movement_vector.y * dt * self.stats.speed)
+
+    mouse_x, mouse_y = love.mouse.getPosition()
+    mouse_x = mouse_x / scale_x
+    mouse_y = mouse_y / scale_y
+    self.angle = math.atan(mouse_y - self.position.y, mouse_x - self.position.x) -- RADIANS ALL THE FUCKING TIME.
+    print("plr pos: ".. self.position.x, self.position.y)
+    print(mouse_x, mouse_y)
 
     player_sprite:update(dt)
 end

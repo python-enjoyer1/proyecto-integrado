@@ -54,6 +54,7 @@ function Main.Animation:manage_spritesheet(image, sprite_size, sprite_number, co
     self.image = love.graphics.newImage(image)
     self.image:setFilter("nearest", "nearest")
     self.frames = {}
+    self.sprite_size = sprite_size
     for i=0, sprite_number-1 do
         local x = (i % columns) * sprite_size
         local y = math.floor(i / columns) * sprite_size
@@ -83,7 +84,7 @@ end
 function Main.Animation:draw(x, y, rotate, size)
     rotate = rotate or 0
     size = size or 1
-    local origin_x, origin_y = self.image:getWidth() / 2, self.image:getHeight() / 2
+    local origin_x, origin_y = self.sprite_size / 2, self.sprite_size / 2
     love.graphics.draw(self.image, self.frames[self.current_frame], x, y, rotate, size, size, origin_x, origin_y)
 end
 
