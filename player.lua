@@ -62,15 +62,11 @@ function Player:update(dt, scale_x, scale_y)
 
     movement_vector:normalize()
 
-    if movement_vector.x == 0 and movement_vector.y == 0 and not self.states.punch then
+    if movement_vector.x == 0 and movement_vector.y == 0 then
         self.states.idle = true
     else
         self.states.idle = false
         self.player_animation = player_walk
-    end
-
-    if self.states.punch then
-        self.player_animation = player_punch
     end
 
     self.position.x = self.position.x + (movement_vector.x * dt * self.stats.speed)
@@ -92,6 +88,7 @@ end
 function love.mousepressed(x, y, button)
     if button == 1 then
         Player.states.punch = true
+        print("nigger.")
     end
 end
 
