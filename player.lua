@@ -2,8 +2,11 @@ local love = require("love")
 local utils = require("utils")
 local consts = require("constants")
 
-local player_sprite = utils.Animation:new({speed = 0.1}) -- Tweak the speed a bit and see if you can find a better number.
-player_sprite:manage_spritesheet(consts.ASSETS_PATH .. "characters/consumer/consumer.png", consts.CHARACTER_SIZE, 7, 3)
+local player_walk = utils.Animation:new({speed = 0.1})
+local player_punch = utils.Animation:new({speed = 0.1})
+
+player_walk:manage_spritesheet(consts.ASSETS_PATH .. "characters/consumer/consumer_walk.png", consts.CHARACTER_SIZE, 7, 3)
+player_punch:manage_spritesheet(consts.ASSETS_PATH .. "characters/consumer/consumer_punch.png", consts.CHARACTER_SIZE, 10, 4)
 
 local mouse_x, mouse_y
 
@@ -30,9 +33,10 @@ local Player = {
     },
     states = {
         idle = true,
-        paused = false -- For the pause menu, we'll manage it later when we get an idle sprite.
+        punch = false
     },
-    angle = 0
+    angle = 0,
+    player_animation = player_walk
 }
 
 -- Just so you know, you normalize EXCLUSIVELY the vector.
@@ -58,10 +62,15 @@ function Player:update(dt, scale_x, scale_y)
 
     movement_vector:normalize()
 
-    if movement_vector.x == 0 and movement_vector.y == 0 then
+    if movement_vector.x == 0 and movement_vector.y == 0 and not self.states.punch then
         self.states.idle = true
     else
         self.states.idle = false
+        self.player_animation = player_walk
+    end
+
+    if self.states.punch then
+        self.player_animation = player_punch
     end
 
     self.position.x = self.position.x + (movement_vector.x * dt * self.stats.speed)
@@ -72,12 +81,18 @@ function Player:update(dt, scale_x, scale_y)
     mouse_y = mouse_y / scale_y
     self.angle = math.atan2(mouse_y - self.position.y, mouse_x - self.position.x) -- RADIANS ALL THE FUCKING TIME.
 
-    player_sprite:update(dt, self.states.idle)
+    self.player_animation:update(dt, self.states.idle)
 end
 
 function Player:draw()
     -- Replace with an actual sprite later on.
-    player_sprite:draw(self.position.x, self.position.y, self.angle)
+    self.player_animation:draw(self.position.x, self.position.y, self.angle)
+end
+
+function love.mousepressed(x, y, button)
+    if button == 1 then
+        Player.states.punch = true
+    end
 end
 
 return Player
