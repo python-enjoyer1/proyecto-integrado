@@ -28,6 +28,7 @@ end
 
 -- Jokes on you, it's still here.
 --R what the fuck
+-- READ THE DOCUMENTATION FUCKER.
 function love.keypressed(key)
     if key == "escape" then
         love.event.quit()

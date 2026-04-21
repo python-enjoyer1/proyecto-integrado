@@ -2,7 +2,7 @@ local love = require("love")
 local utils = require("utils")
 local consts = require("constants")
 
-local player_sprite = utils.Animation:new({speed = 0.1})
+local player_sprite = utils.Animation:new({speed = 0.1}) -- Tweak the speed a bit and see if you can find a better number.
 player_sprite:manage_spritesheet("stuff/assets/characters/consumer.png", consts.CHARACTER_SIZE, 7, 3)
 
 local mouse_x, mouse_y
@@ -29,7 +29,8 @@ local Player = {
         ammo_boost = 1 -- How much your ammo is multiplied by. By default it's nothing (1), but the Reichmann Relic changes it to 2, duplicating ammo.
     },
     states = {
-        idle = true
+        idle = true,
+        paused = false -- For the pause menu, we'll manage it later when we get an idle sprite.
     },
     angle = 0
 }
