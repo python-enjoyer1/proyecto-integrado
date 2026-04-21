@@ -1,4 +1,5 @@
 local love = require("love")
+local consts = require("constants")
 local Main = {}
 
 -- Yoooooooo. I implemented the vector class. If there's any shit you feel ain't right then change it.
@@ -52,7 +53,7 @@ end
 -- Basically, we have to add the quad thingy.
 function Main.Animation:manage_spritesheet(image, sprite_size, sprite_number, columns) -- Don't call this on update, call on load.
     self.image = love.graphics.newImage(image)
-    self.image:setFilter("nearest", "nearest")
+    self.image:setFilter(consts.DEFAULT_FILTER, consts.DEFAULT_FILTER)
     self.frames = {}
     self.sprite_size = sprite_size
     for i=0, sprite_number-1 do

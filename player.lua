@@ -3,7 +3,7 @@ local utils = require("utils")
 local consts = require("constants")
 
 local player_sprite = utils.Animation:new({speed = 0.1}) -- Tweak the speed a bit and see if you can find a better number.
-player_sprite:manage_spritesheet("stuff/assets/characters/consumer.png", consts.CHARACTER_SIZE, 7, 3)
+player_sprite:manage_spritesheet(consts.ASSETS_PATH .. "characters/consumer/consumer.png", consts.CHARACTER_SIZE, 7, 3)
 
 local mouse_x, mouse_y
 
@@ -38,7 +38,7 @@ local Player = {
 -- Just so you know, you normalize EXCLUSIVELY the vector.
 -- Also, sometime we should make a vector class/table.
 function Player:update(dt, scale_x, scale_y)
-    local movement_vector = utils.Vector:new() -- We should maybe move this line outside the update so it doesn't always create a new vector.
+    local movement_vector = utils.Vector:new()
 
     if love.keyboard.isDown("w") then
         movement_vector.y = movement_vector.y - 1
