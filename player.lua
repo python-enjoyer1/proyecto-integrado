@@ -28,13 +28,16 @@ local Player = {
         weight = 20, --R How much knockback player takes.
         ammo_boost = 1 -- How much your ammo is multiplied by. By default it's nothing (1), but the Reichmann Relic changes it to 2, duplicating ammo.
     },
-    angle = 0 -- Make it look at cursor.
+    states = {
+        idle = true
+    },
+    angle = 0
 }
 
 -- Just so you know, you normalize EXCLUSIVELY the vector.
 -- Also, sometime we should make a vector class/table.
 function Player:update(dt, scale_x, scale_y)
-    local movement_vector = utils.Vector:new()
+    local movement_vector = utils.Vector:new() -- We should maybe move this line outside the update so it doesn't always create a new vector.
 
     if love.keyboard.isDown("w") then
         movement_vector.y = movement_vector.y - 1
@@ -54,6 +57,12 @@ function Player:update(dt, scale_x, scale_y)
 
     movement_vector:normalize()
 
+    if movement_vector.x == 0 and movement_vector.y == 0 then
+        self.states.idle = true
+    else
+        self.states.idle = false
+    end
+
     self.position.x = self.position.x + (movement_vector.x * dt * self.stats.speed)
     self.position.y = self.position.y + (movement_vector.y * dt * self.stats.speed)
 
@@ -62,7 +71,7 @@ function Player:update(dt, scale_x, scale_y)
     mouse_y = mouse_y / scale_y
     self.angle = math.atan2(mouse_y - self.position.y, mouse_x - self.position.x) -- RADIANS ALL THE FUCKING TIME.
 
-    player_sprite:update(dt)
+    player_sprite:update(dt, self.states.idle)
 end
 
 function Player:draw()
