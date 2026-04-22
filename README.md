@@ -10,3 +10,4 @@ Things to add:
  - Hitboxes.
  - Player states. (Idle, Walking, Paused/Menu, Invulnerable?)
  - Menu.
+ - Recoil to weapons on impact. (Hitting someone with a blunt weapon or shooting a gun)
