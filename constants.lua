@@ -6,5 +6,6 @@ Main.DEFAULT_FILTER = "nearest"
 Main.CHARACTER_SIZE = 32
 Main.ITEM_SIZE = 16
 Main.ASSETS_PATH = "stuff/assets/"
+Main.DEBUG = true
 
 return Main

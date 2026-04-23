@@ -3,7 +3,7 @@ local utils = require("utils")
 local consts = require("constants")
 
 local player_walk = utils.Animation:new({speed = 0.1})
-local player_punch = utils.Animation:new({speed = 0.1})
+local player_punch = utils.Animation:new({speed = 0.07})
 
 player_walk:manage_spritesheet(consts.ASSETS_PATH .. "characters/consumer/consumer_walk.png", consts.CHARACTER_SIZE, 7, 3)
 player_punch:manage_spritesheet(consts.ASSETS_PATH .. "characters/consumer/consumer_punch.png", consts.CHARACTER_SIZE, 10, 3)
@@ -18,7 +18,7 @@ local Player = {
         speed = 100,
         attack_damage = 1, --R We should prolly replace this with "dmg bonus" since stuff will have predetermined dmg
         attack_speed = 5,
-        crit_chance = 1, --R You did mention something about adding critical hits to the game didn't you? No, but it's a good idea.
+        crit_chance = 1, --R You did mention something about adding critical hits to the game didn't you? -- No, but it's a good idea.
         knockback = 3,
         souls = 30, --R In seconds perhaps?
         soul_gain = 4, -- We could possibly add some randomness.
@@ -36,7 +36,8 @@ local Player = {
         punch = false
     },
     angle = 0,
-    player_animation = player_walk
+    player_animation = player_walk,
+    player_hitbox = utils.Hitbox:new({width = consts.CHARACTER_SIZE / 2, height = consts.CHARACTER_SIZE / 2})
 }
 
 -- Just so you know, you normalize EXCLUSIVELY the vector.
@@ -66,9 +67,9 @@ function Player:update(dt, scale_x, scale_y)
 
     self.states.idle = not is_moving and not self.states.punch]]
 
-    --R The lines above should be a better alt, but you decide.
+    --R The lines above should be a better alt, but you decide. -- Brother, if you see a better way, then add it yourself, I cannnot read minds yet.
 
-    if movement_vector.x == 0 and movement_vector.y == 0 and self.states.punch == false then
+    if movement_vector.x == 0 and movement_vector.y == 0 and not self.states.punch then
         self.states.idle = true
     else
         self.states.idle = false
@@ -90,19 +91,19 @@ function Player:update(dt, scale_x, scale_y)
     if self.states.punch then
         if player_punch.current_frame >= #player_punch.frames then
             self.states.punch = false
-            print("ex2")
             self.player_animation = player_walk
         end
     end
 
+    self.player_hitbox:update()
     self.player_animation:update(dt, self.states.idle)
     --self.player_animation:update(dt, not is_moving or self.states.punch)
-    --R add this above if u think the other code is good ig
+    --R add this above if u think the other code is good ig -- ADD IT YOURSELF BROTHER, YOU ALREADY WROTE THE CODE. IF YOU DON'T ABBREVIATE (too much) THEN IT GOOD.
 end
 
 function Player:draw()
-    -- Replace with an actual sprite later on.
     self.player_animation:draw(self.position.x, self.position.y, self.angle)
+    self.player_hitbox:draw(self.position.x, self.position.y, consts.DEBUG)
 end
 
 function Player:punch()

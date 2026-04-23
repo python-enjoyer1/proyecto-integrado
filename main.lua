@@ -22,7 +22,9 @@ function love.update(dt)
 end
 
 function love.mousepressed(x, y, button)
-    Player:punch()
+    if button == 1 then
+        Player:punch()
+    end
 end
 
 function love.draw()

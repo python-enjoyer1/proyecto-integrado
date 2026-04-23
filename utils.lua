@@ -8,6 +8,7 @@ local Main = {}
 Main.Timer = {stored_times = {}} --R basically a wait() then does a callback
 Main.Vector = {x = 0, y = 0}
 Main.Animation = {speed = 1, current_frame = 1}
+Main.Hitbox = {width = 0, height = 0}
 
 function Main.Vector:new(o)
     o = o or {}
@@ -87,6 +88,33 @@ function Main.Animation:draw(x, y, rotate, size)
     size = size or 1
     local origin_x, origin_y = self.sprite_size / 2, self.sprite_size / 2
     love.graphics.draw(self.image, self.frames[self.current_frame], x, y, rotate, size, size, origin_x, origin_y)
+end
+
+function Main.Hitbox:new(o)
+    o = o or {}
+    setmetatable(o, self)
+    self.__index = self
+    return o
+end
+
+function Main.Hitbox:update() -- Will add functionality later.
+end
+
+function Main.Hitbox:draw(x, y, debug)
+    debug = debug or false
+
+    love.graphics.push()
+    if debug then
+        love.graphics.setColor(0, 0, 255)
+    else
+        love.graphics.setColor(0, 0, 0, 0)
+    end
+
+    love.graphics.translate(-self.width / 2, -self.height / 2)
+    love.graphics.rectangle("line", x, y, self.width, self.height)
+
+    love.graphics.setColor(255, 255, 255)
+    love.graphics.pop()
 end
 
 return Main
