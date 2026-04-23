@@ -8,7 +8,7 @@ local Main = {}
 Main.Timer = {stored_times = {}} --R basically a wait() then does a callback
 Main.Vector = {x = 0, y = 0}
 Main.Animation = {speed = 1, current_frame = 1}
-Main.Hitbox = {width = 0, height = 0}
+Main.CollisionBox = {x  = 0, y = 0, width = 0, height = 0, hurtbox = false}
 
 function Main.Vector:new(o)
     o = o or {}
@@ -90,17 +90,29 @@ function Main.Animation:draw(x, y, rotate, size)
     love.graphics.draw(self.image, self.frames[self.current_frame], x, y, rotate, size, size, origin_x, origin_y)
 end
 
-function Main.Hitbox:new(o)
+function Main.CollisionBox:new(o)
     o = o or {}
     setmetatable(o, self)
     self.__index = self
     return o
 end
 
-function Main.Hitbox:update() -- Will add functionality later.
+function Main.CollisionBox:update(x, y, width, height) -- Add priority property and type.
+    x = x or 0
+    y = y or 0
+    width = width or 0
+    height = height or 0
+    if self.hurtbox then
+        if self.x < x + width and x < self.x - self.width and self.y < y + height and y < self.y + self.height then
+            print("a")
+            return true
+        else
+            return false
+        end
+    end
 end
 
-function Main.Hitbox:draw(x, y, debug)
+function Main.CollisionBox:draw(x, y, debug)
     debug = debug or false
 
     love.graphics.push()

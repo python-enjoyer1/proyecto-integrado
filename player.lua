@@ -3,7 +3,7 @@ local utils = require("utils")
 local consts = require("constants")
 
 local player_walk = utils.Animation:new({speed = 0.1})
-local player_punch = utils.Animation:new({speed = 0.07})
+local player_punch = utils.Animation:new({speed = 0.05})
 
 player_walk:manage_spritesheet(consts.ASSETS_PATH .. "characters/consumer/consumer_walk.png", consts.CHARACTER_SIZE, 7, 3)
 player_punch:manage_spritesheet(consts.ASSETS_PATH .. "characters/consumer/consumer_punch.png", consts.CHARACTER_SIZE, 10, 3)
@@ -37,7 +37,7 @@ local Player = {
     },
     angle = 0,
     player_animation = player_walk,
-    player_hitbox = utils.Hitbox:new({width = consts.CHARACTER_SIZE / 2, height = consts.CHARACTER_SIZE / 2})
+    player_hitbox = utils.CollisionBox:new({width = consts.CHARACTER_SIZE / 2, height = consts.CHARACTER_SIZE / 2})
 }
 
 -- Just so you know, you normalize EXCLUSIVELY the vector.
