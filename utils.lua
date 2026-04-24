@@ -103,12 +103,14 @@ function Main.CollisionBox:update(x, y, width, height) -- Add priority property 
     width = width or 0
     height = height or 0
     if self.hurtbox then
-        if self.x < x + width and x < self.x - self.width and self.y < y + height and y < self.y + self.height then
-            print("a")
+        if self.x < x + width and x < self.x + self.width and self.y < y + height and y < self.y + self.height then
             return true
         else
             return false
         end
+    else
+        return  x, y, width, height
+        --return the x y with height, so when smth isnt a hurtbox and is a hitbox it gives arg to give to the hurtbox instantly
     end
 end
 
@@ -117,7 +119,11 @@ function Main.CollisionBox:draw(x, y, debug)
 
     love.graphics.push()
     if debug then
-        love.graphics.setColor(0, 0, 255)
+        if self.hurtbox then
+            love.graphics.setColor(255,0,0)
+        else
+            love.graphics.setColor(0, 0, 255)
+        end
     else
         love.graphics.setColor(0, 0, 0, 0)
     end

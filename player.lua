@@ -40,6 +40,8 @@ local Player = {
     player_hitbox = utils.CollisionBox:new({width = consts.CHARACTER_SIZE / 2, height = consts.CHARACTER_SIZE / 2})
 }
 
+local randoasfhurtbox = utils.CollisionBox:new({hurtbox = true,width = 50, height = 50})
+
 -- Just so you know, you normalize EXCLUSIVELY the vector.
 -- Also, sometime we should make a vector class/table.
 function Player:update(dt, scale_x, scale_y)
@@ -96,6 +98,7 @@ function Player:update(dt, scale_x, scale_y)
     end
 
     self.player_hitbox:update()
+    print(randoasfhurtbox:update(self.player_hitbox.x, self.player_hitbox.y, self.player_hitbox.width, self.player_hitbox.height))
     self.player_animation:update(dt, self.states.idle)
     --self.player_animation:update(dt, not is_moving or self.states.punch)
     --R add this above if u think the other code is good ig -- ADD IT YOURSELF BROTHER, YOU ALREADY WROTE THE CODE. IF YOU DON'T ABBREVIATE (too much) THEN IT GOOD.
@@ -104,6 +107,7 @@ end
 function Player:draw()
     self.player_animation:draw(self.position.x, self.position.y, self.angle)
     self.player_hitbox:draw(self.position.x, self.position.y, consts.DEBUG)
+    randoasfhurtbox:draw(100,100,consts.DEBUG)
 end
 
 function Player:punch()
