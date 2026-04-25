@@ -52,17 +52,18 @@ function Main.Animation:new(o)
 end
 
 -- Basically, we have to add the quad thingy.
-function Main.Animation:manage_spritesheet(image, sprite_size, sprite_number, columns) -- Don't call this on update, call on load.
+function Main.Animation:manage_spritesheet(image, width, height, sprite_number, columns) -- Don't call this on update, call on load.
     self.image = love.graphics.newImage(image)
     self.image:setFilter(consts.DEFAULT_FILTER, consts.DEFAULT_FILTER)
     self.frames = {}
-    self.sprite_size = sprite_size
+    self.sprite_width = width
+    self.sprite_height = height
     for i=0, sprite_number-1 do
-        local x = (i % columns) * sprite_size
-        local y = math.floor(i / columns) * sprite_size
+        local x = (i % columns) * self.sprite_width
+        local y = math.floor(i / columns) * self.sprite_height
         table.insert(
             self.frames,
-            love.graphics.newQuad(x, y, sprite_size, sprite_size, self.image)
+            love.graphics.newQuad(x, y, self.sprite_width, self.sprite_height, self.image)
         )
     end
 end
@@ -86,7 +87,7 @@ end
 function Main.Animation:draw(x, y, rotate, size)
     rotate = rotate or 0
     size = size or 1
-    local origin_x, origin_y = self.sprite_size / 2, self.sprite_size / 2
+    local origin_x, origin_y = self.sprite_width / 2, self.sprite_height / 2
     love.graphics.draw(self.image, self.frames[self.current_frame], x, y, rotate, size, size, origin_x, origin_y)
 end
 

@@ -5,15 +5,20 @@ local consts = require("constants")
 local player_walk = utils.Animation:new({speed = 0.1})
 local player_punch = utils.Animation:new({speed = 0.05})
 
-player_walk:manage_spritesheet(consts.ASSETS_PATH .. "characters/consumer/consumer_walk.png", consts.CHARACTER_SIZE, 7, 3)
-player_punch:manage_spritesheet(consts.ASSETS_PATH .. "characters/consumer/consumer_punch.png", consts.CHARACTER_SIZE, 10, 3)
+player_walk:manage_spritesheet(consts.ASSETS_PATH .. "characters/consumer/consumer_walk.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 7, 3)
+player_punch:manage_spritesheet(consts.ASSETS_PATH .. "characters/consumer/consumer_punch.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 10, 3)
+
+-- HUD elements here.
+local soul_bar = utils.Animation:new({speed = 0.5})
+
+soul_bar:manage_spritesheet(consts.ASSETS_PATH .. "hud/soul_bar.png", 128, 32, 21, 10)
 
 local mouse_x, mouse_y
 
 -- If you feel the screenshake isn't quite well timed, you're completely free to change it.
 -- Also, later we should make it so the screenshake only applies when punching an enemy.
 local screenshake = false
-local screenshake_duration = 0.05 -- For the punching. Also, making the screenshake into a function is difficult and unnecessary.
+local screenshake_duration = 0.1 -- For the punching. Also, making the screenshake into a function is difficult and unnecessary.
 local screenshake_magnitude = 3 --   ^^
 local screenshake_timer = 0
 
@@ -97,10 +102,6 @@ function Player:update(dt, scale_x, scale_y)
 
     if self.states.punch then
         if player_punch.current_frame >= #player_punch.frames then
-            screenshake = true
-            if screenshake_timer < screenshake_duration then
-                screenshake_timer = screenshake_timer + dt
-            end
             self.states.punch = false
             self.player_animation = player_walk
         end
@@ -108,23 +109,21 @@ function Player:update(dt, scale_x, scale_y)
 
     local collision = utils.check_collision(self.position.x, self.position.y, self.player_hitbox.width, self.player_hitbox.height, 100, 100, 50, 50)
     print(collision) -- Remove the collision update and drawing when you get tired of testing.
+
     self.player_animation:update(dt, self.states.idle)
+    soul_bar:update(dt)
     --self.player_animation:update(dt, not is_moving or self.states.punch)
 end
 
 function Player:draw()
-    if screenshake then
-        local movement_x = love.math.random(-screenshake_magnitude, screenshake_magnitude)
-        local movement_y = love.math.random(-screenshake_magnitude, screenshake_magnitude)
-        love.graphics.translate(movement_x, movement_y)
-    end
-    screenshake = false
-
     self.player_animation:draw(self.position.x, self.position.y, self.angle)
 
     if consts.DEBUG then
         utils.draw_collision(self.position.x, self.position.y, self.player_hitbox.width, self.player_hitbox.height, 100, 100, 50, 50)
     end
+
+    -- HUD elements here
+    soul_bar:draw(65, 20)
 end
 
 function Player:punch()
