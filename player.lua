@@ -116,4 +116,10 @@ function Player:punch()
     --R put ur shit inside main.lua
 end
 
+function love.mousepressed(x, y, button)
+    if button == 1 then
+        Player:punch()
+    end
+end
+
 return Player

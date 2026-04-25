@@ -21,21 +21,11 @@ function love.update(dt)
     Player:update(dt, scale_x, scale_y)
 end
 
-function love.mousepressed(x, y, button)
-    if button == 1 then
-        Player:punch()
-    end
-end
-
 function love.draw()
     love.graphics.scale(scale_x, scale_y)
     Player:draw()
 end
 
--- Jokes on you, it's still here.
---R what the fuck
--- READ THE DOCUMENTATION FUCKER.
---R I AM BRO IT SAID THAT IT WAS REMOVED I SWEAR
 function love.keypressed(key)
     if key == "escape" then
         love.event.quit()
