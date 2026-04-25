@@ -97,23 +97,20 @@ function Main.check_collision(x1, y1, width1, height1, x2, y2, width2, height2)
          y2 < y1+height1
 end
 
-function Main.draw_collision(x1, y1, width1, height1, x2, y2, width2, height2, debug)
-    debug = debug or false
-    if debug then
-        love.graphics.push()
-        love.graphics.setColor(0, 0, 255)
-        love.graphics.translate(-width1 / 2, -height1 / 2)
-        love.graphics.rectangle("line", x1, y1, width1, height1)
-        love.graphics.pop()
+function Main.draw_collision(x1, y1, width1, height1, x2, y2, width2, height2)
+    love.graphics.push()
+    love.graphics.setColor(0, 0, 255)
+    love.graphics.translate(-width1 / 2, -height1 / 2)
+    love.graphics.rectangle("line", x1, y1, width1, height1)
+    love.graphics.pop()
 
-        love.graphics.push()
-        love.graphics.setColor(255, 0, 0)
-        love.graphics.translate(-width2 / 2, -height2 / 2)
-        love.graphics.rectangle("line", x2, y2, width2, height2)
-        love.graphics.pop()
+    love.graphics.push()
+    love.graphics.setColor(255, 0, 0)
+    love.graphics.translate(-width2 / 2, -height2 / 2)
+    love.graphics.rectangle("line", x2, y2, width2, height2)
+    love.graphics.pop()
 
-        love.graphics.setColor(255, 255, 255)
-    end
+    love.graphics.setColor(255, 255, 255)
 end
 
 return Main

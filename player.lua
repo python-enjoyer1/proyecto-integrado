@@ -10,6 +10,12 @@ player_punch:manage_spritesheet(consts.ASSETS_PATH .. "characters/consumer/consu
 
 local mouse_x, mouse_y
 
+-- If you feel the screenshake isn't quite well timed, you're completely free to change it.
+local screenshake = false
+local screenshake_duration = 0.05 -- For the punching. Also, making the screenshake into a function is difficult and unnecessary.
+local screenshake_magnitude = 3 --   ^^
+local screenshake_timer = 0
+
 -- If you can think of more stats, then, fucking add them already.
 --R Remove the stats that you think wouldn't work, aight?
 local Player = {
@@ -90,21 +96,34 @@ function Player:update(dt, scale_x, scale_y)
 
     if self.states.punch then
         if player_punch.current_frame >= #player_punch.frames then
+            screenshake = true
+            if screenshake_timer < screenshake_duration then
+                screenshake_timer = screenshake_timer + dt
+            end
             self.states.punch = false
             self.player_animation = player_walk
         end
     end
 
     local collision = utils.check_collision(self.position.x, self.position.y, self.player_hitbox.width, self.player_hitbox.height, 100, 100, 50, 50)
-    print(collision)
+    print(collision) -- Remove the collision update and drawing when you get tired of testing.
     self.player_animation:update(dt, self.states.idle)
     --self.player_animation:update(dt, not is_moving or self.states.punch)
-    --R add this above if u think the other code is good ig -- ADD IT YOURSELF BROTHER, YOU ALREADY WROTE THE CODE. IF YOU DON'T ABBREVIATE (too much) THEN IT GOOD.
 end
 
 function Player:draw()
+    if screenshake then
+        local movement_x = love.math.random(-screenshake_magnitude, screenshake_magnitude)
+        local movement_y = love.math.random(-screenshake_magnitude, screenshake_magnitude)
+        love.graphics.translate(movement_x, movement_y)
+    end
+    screenshake = false
+
     self.player_animation:draw(self.position.x, self.position.y, self.angle)
-    utils.draw_collision(self.position.x, self.position.y, self.player_hitbox.width, self.player_hitbox.height, 100, 100, 50, 50, consts.DEBUG)
+
+    if consts.DEBUG then
+        utils.draw_collision(self.position.x, self.position.y, self.player_hitbox.width, self.player_hitbox.height, 100, 100, 50, 50)
+    end
 end
 
 function Player:punch()
@@ -113,7 +132,6 @@ function Player:punch()
         self.player_animation = player_punch
         player_punch.current_frame = 1
     end
-    --R put ur shit inside main.lua
 end
 
 function love.mousepressed(x, y, button)

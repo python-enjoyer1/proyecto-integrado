@@ -1,13 +1,10 @@
 local love = require("love")
 local Player = require("player")
-local utils = require("utils")
 local consts = require("constants")
 
 -- Declare variables here, local please. We could move the render_width and height to a constants.lua.
 local desktop_width, desktop_height
 local scale_x, scale_y
-
-local mouse_x, mouse_y
 
 -- For pre-loading. Loads stuff after loading modules.
 function love.load()
