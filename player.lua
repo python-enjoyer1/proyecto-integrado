@@ -11,6 +11,7 @@ player_punch:manage_spritesheet(consts.ASSETS_PATH .. "characters/consumer/consu
 local mouse_x, mouse_y
 
 -- If you feel the screenshake isn't quite well timed, you're completely free to change it.
+-- Also, later we should make it so the screenshake only applies when punching an enemy.
 local screenshake = false
 local screenshake_duration = 0.05 -- For the punching. Also, making the screenshake into a function is difficult and unnecessary.
 local screenshake_magnitude = 3 --   ^^
