@@ -90,49 +90,30 @@ function Main.Animation:draw(x, y, rotate, size)
     love.graphics.draw(self.image, self.frames[self.current_frame], x, y, rotate, size, size, origin_x, origin_y)
 end
 
-function Main.CollisionBox:new(o)
-    o = o or {}
-    setmetatable(o, self)
-    self.__index = self
-    return o
+function Main.check_collision(x1, y1, width1, height1, x2, y2, width2, height2)
+    return x1 < x2+width2 and
+         x2 < x1+width1 and
+         y1 < y2+height2 and
+         y2 < y1+height1
 end
 
-function Main.CollisionBox:update(x, y, width, height) -- Add priority property and type.
-    x = x or 0
-    y = y or 0
-    width = width or 0
-    height = height or 0
-    if self.hurtbox then
-        if self.x < x + width and x < self.x + self.width and self.y < y + height and y < self.y + self.height then
-            return true
-        else
-            return false
-        end
-    else
-        return  x, y, width, height
-        --return the x y with height, so when smth isnt a hurtbox and is a hitbox it gives arg to give to the hurtbox instantly
-    end
-end
-
-function Main.CollisionBox:draw(x, y, debug)
+function Main.draw_collision(x1, y1, width1, height1, x2, y2, width2, height2, debug)
     debug = debug or false
-
-    love.graphics.push()
     if debug then
-        if self.hurtbox then
-            love.graphics.setColor(255,0,0)
-        else
-            love.graphics.setColor(0, 0, 255)
-        end
-    else
-        love.graphics.setColor(0, 0, 0, 0)
+        love.graphics.push()
+        love.graphics.setColor(0, 0, 255)
+        love.graphics.translate(-width1 / 2, -height1 / 2)
+        love.graphics.rectangle("line", x1, y1, width1, height1)
+        love.graphics.pop()
+
+        love.graphics.push()
+        love.graphics.setColor(255, 0, 0)
+        love.graphics.translate(-width2 / 2, -height2 / 2)
+        love.graphics.rectangle("line", x2, y2, width2, height2)
+        love.graphics.pop()
+
+        love.graphics.setColor(255, 255, 255)
     end
-
-    love.graphics.translate(-self.width / 2, -self.height / 2)
-    love.graphics.rectangle("line", x, y, self.width, self.height)
-
-    love.graphics.setColor(255, 255, 255)
-    love.graphics.pop()
 end
 
 return Main
