@@ -111,10 +111,10 @@ function Player:update(dt, scale_x, scale_y)
 end
 
 function Player:draw()
-    self.player_animation:draw(self.position.x, self.position.y, self.angle, 1, consts.SHADING, 3)
+    self.player_animation:draw(self.position.x, self.position.y, self.angle, 1, consts.SHADING, 0, 3)
 
     -- HUD elements here
-    soul_bar:draw(65, 20, 0, 1, consts.SHADING, 3)
+    soul_bar:draw(65, 20, 0, 1, consts.SHADING, 0, 3)
 end
 
 function Player:punch()
