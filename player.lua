@@ -9,9 +9,9 @@ player_walk:manage_spritesheet(consts.ASSETS_PATH .. "characters/consumer/consum
 player_punch:manage_spritesheet(consts.ASSETS_PATH .. "characters/consumer/consumer_punch.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 10, 3)
 
 -- HUD elements here.
-local soul_bar = utils.Animation:new({speed = 0.5}) -- Jarvis, fix this shit.
+local soul_bar = utils.Animation:new({speed = 0.07}) -- Jarvis, fix this shit.
 
-soul_bar:manage_spritesheet(consts.ASSETS_PATH .. "hud/soul_bar.png", 128, 32, 21, 10)
+soul_bar:manage_spritesheet(consts.ASSETS_PATH .. "hud/soul_bar.png", 128, 32, 21, 2)
 
 local mouse_x, mouse_y
 
