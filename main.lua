@@ -19,6 +19,7 @@ function love.update(dt)
 end
 
 function love.draw()
+    love.graphics.setBackgroundColor(0.3, 0.3, 0.3)
     love.graphics.scale(scale_x, scale_y)
     Player:draw()
 end

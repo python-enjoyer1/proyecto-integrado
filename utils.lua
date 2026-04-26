@@ -84,10 +84,18 @@ function Main.Animation:update(dt, paused)
     end
 end
 
-function Main.Animation:draw(x, y, rotate, size)
+function Main.Animation:draw(x, y, rotate, size, shade, shade_offset)
     rotate = rotate or 0
     size = size or 1
+    shade = shade or false
+    shade_offset = shade_offset or 0
     local origin_x, origin_y = self.sprite_width / 2, self.sprite_height / 2
+    if shade then
+        love.graphics.setColor(0, 0, 0)
+        love.graphics.draw(self.image, self.frames[self.current_frame], x, y + shade_offset, rotate, size, size, origin_x, origin_y)
+        love.graphics.setColor(1, 1, 1)
+    end
+
     love.graphics.draw(self.image, self.frames[self.current_frame], x, y, rotate, size, size, origin_x, origin_y)
 end
 
@@ -100,18 +108,18 @@ end
 
 function Main.draw_collision(x1, y1, width1, height1, x2, y2, width2, height2)
     love.graphics.push()
-    love.graphics.setColor(0, 0, 255)
+    love.graphics.setColor(0, 0, 1)
     love.graphics.translate(-width1 / 2, -height1 / 2)
     love.graphics.rectangle("line", x1, y1, width1, height1)
     love.graphics.pop()
 
     love.graphics.push()
-    love.graphics.setColor(255, 0, 0)
+    love.graphics.setColor(1, 0, 0)
     love.graphics.translate(-width2 / 2, -height2 / 2)
     love.graphics.rectangle("line", x2, y2, width2, height2)
     love.graphics.pop()
 
-    love.graphics.setColor(255, 255, 255)
+    love.graphics.setColor(1, 1, 1)
 end
 
 return Main
