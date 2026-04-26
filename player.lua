@@ -8,11 +8,6 @@ local player_punch = utils.Animation:new({speed = 0.05})
 player_walk:manage_spritesheet(consts.ASSETS_PATH .. "characters/consumer/consumer_walk.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 7, 3)
 player_punch:manage_spritesheet(consts.ASSETS_PATH .. "characters/consumer/consumer_punch.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 10, 3)
 
--- HUD elements here.
-local soul_bar = utils.Animation:new({speed = 0.07})
-
-soul_bar:manage_spritesheet(consts.ASSETS_PATH .. "hud/soul_bar.png", 128, 32, 21, 2)
-
 local mouse_x, mouse_y
 
 -- We should make it so the screenshake only applies when punching an enemy.
@@ -47,8 +42,8 @@ local Player = {
         punch = false
     },
     angle = 0,
-    player_animation = player_walk,
-    player_hitbox = {width = consts.CHARACTER_SIZE / 2, height = consts.CHARACTER_SIZE / 2}
+    animation = player_walk,
+    hitbox = {width = consts.CHARACTER_SIZE / 2, height = consts.CHARACTER_SIZE / 2}
 }
 
 -- Just so you know, you normalize EXCLUSIVELY the vector.
@@ -85,9 +80,9 @@ function Player:update(dt, scale_x, scale_y)
     else
         self.states.idle = false
         if self.states.punch == true then
-            self.player_animation = player_punch
+            self.animation = player_punch
         else
-            self.player_animation = player_walk
+            self.animation = player_walk
         end
     end
 
@@ -102,25 +97,21 @@ function Player:update(dt, scale_x, scale_y)
     if self.states.punch then
         if player_punch.current_frame >= #player_punch.frames then
             self.states.punch = false
-            self.player_animation = player_walk
+            self.animation = player_walk
         end
     end
-    self.player_animation:update(dt, self.states.idle)
-    soul_bar:update(dt)
+    self.animation:update(dt, self.states.idle)
     --self.player_animation:update(dt, not is_moving or self.states.punch)
 end
 
 function Player:draw()
-    self.player_animation:draw(self.position.x, self.position.y, self.angle, 1, consts.SHADING, 0, 3)
-
-    -- HUD elements here
-    soul_bar:draw(65, 20, 0, 1, consts.SHADING, 0, 3)
+    self.animation:draw(self.position.x, self.position.y, self.angle, 1, consts.SHADING, 0, 3)
 end
 
 function Player:punch()
     if not self.states.punch then
         self.states.punch = true
-        self.player_animation = player_punch
+        self.animation = player_punch
         player_punch.current_frame = 1
     end
 end
