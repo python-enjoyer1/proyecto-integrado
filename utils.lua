@@ -134,7 +134,8 @@ function Main.Tilemap:generate(tile_number)
 
     local tiles = {}
     for i = 1, tile_number do
-        local tile = love.graphics.newImage(consts.TILE_PATH .. "floor/" .. self.type .. "/" .. self.type .. "_floor" .. i .. ".png")
+        local tile = love.graphics.newImage(consts.TILE_PATH .. "floor/" .. self.type .. "/" .. self.type .. i .. ".png")
+        tile:setFilter(consts.DEFAULT_FILTER, consts.DEFAULT_FILTER)
         table.insert(tiles, tile)
     end
 
@@ -142,14 +143,17 @@ function Main.Tilemap:generate(tile_number)
     local x = 0
     local y = 0
     for i = 1, self.width do
-        table.insert({tile = tiles[love.math.random(#tiles)], position = {x, y}}, self.tilemap)
+        table.insert(self.tilemap,{tile = tiles[love.math.random(1, #tiles)], position = {x = x, y}})
         x = x + consts.TILE_SIZE
     end
 end
 
 function Main.Tilemap:load()
     for i = 1, #self.tilemap do
+        love.graphics.push()
+        love.graphics.scale(consts.TILE_SCALE, consts.TILE_SCALE)
         love.graphics.draw(self.tilemap[i].tile, self.tilemap[i].position.x, self.tilemap[i].position.y)
+        love.graphics.pop()
     end
 end
 
