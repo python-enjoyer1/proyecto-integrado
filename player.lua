@@ -48,7 +48,7 @@ local Player = {
 
 -- Just so you know, you normalize EXCLUSIVELY the vector.
 -- Also, sometime we should make a vector class/table.
-function Player:update(dt, scale_x, scale_y)
+function Player:update(dt, scale_x, scale_y, offset_x, offset_y)
     local movement_vector = utils.Vector:new()
 
     if love.keyboard.isDown("w") then
@@ -92,7 +92,7 @@ function Player:update(dt, scale_x, scale_y)
     mouse_x, mouse_y = love.mouse.getPosition()
     mouse_x = mouse_x / scale_x
     mouse_y = mouse_y / scale_y
-    self.angle = math.atan2(mouse_y - self.position.y, mouse_x - self.position.x) -- RADIANS ALL THE FUCKING TIME.
+    self.angle = math.atan2(mouse_y - self.position.y - offset_y, mouse_x - self.position.x - offset_x) -- RADIANS ALL THE FUCKING TIME.
 
     if self.states.punch then
         if player_punch.current_frame >= #player_punch.frames then

@@ -44,7 +44,7 @@ function love.update(dt)
     mouse_x = (mouse_x / scale_x)
     mouse_y = (mouse_y / scale_y)
 
-    Player:update(dt, scale_x, scale_y)
+    Player:update(dt, scale_x, scale_y, global_offset_x, global_offset_y)
 
     -- HUD/GUI goes here.
     soul_bar:update(dt)
