@@ -121,17 +121,36 @@ function Main.draw_collision(x1, y1, width1, height1, x2, y2, width2, height2)
     love.graphics.setColor(1, 1, 1)
 end
 
+function Main.Tilemap:new(o)
+    o = o or {}
+    setmetatable(o, self)
+    self.__index = self
+    return o
+end
+
 function Main.Tilemap:generate(tile_number)
     self.width = self.width * consts.RENDER_WIDTH
     self.height = self.height * consts.RENDER_HEIGHT
 
     local tiles = {}
     for i = 1, tile_number do
-        local tile = love.graphics.newImage(consts.TILE_PATH .. "floor/" .. self.type .. "_floor" .. i .. ".png")
+        local tile = love.graphics.newImage(consts.TILE_PATH .. "floor/" .. self.type .. "/" .. self.type .. "_floor" .. i .. ".png")
         table.insert(tiles, tile)
     end
 
-    local tilemap = {}
+    self.tilemap = {}
+    local x = 0
+    local y = 0
+    for i = 1, self.width do
+        table.insert({tile = tiles[love.math.random(#tiles)], position = {x, y}}, self.tilemap)
+        x = x + consts.TILE_SIZE
+    end
+end
+
+function Main.Tilemap:load()
+    for i = 1, #self.tilemap do
+        love.graphics.draw(self.tilemap[i].tile, self.tilemap[i].position.x, self.tilemap[i].position.y)
+    end
 end
 
 return Main
