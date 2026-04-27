@@ -2,13 +2,10 @@ local love = require("love")
 local consts = require("constants")
 local Main = {}
 
--- Yoooooooo. I implemented the vector class. If there's any shit you feel ain't right then change it.
---R I approve of this.
-
 Main.Timer = {stored_times = {}} --R basically a wait() then does a callback
 Main.Vector = {x = 0, y = 0}
 Main.Animation = {speed = 1, current_frame = 1}
-Main.CollisionBox = {x  = 0, y = 0, width = 0, height = 0, hurtbox = false}
+Main.Tilemap = {type = "high", width = 1, height = 1} -- Higher floors refer to earlier floors, since you descend in this game.
 
 function Main.Vector:new(o)
     o = o or {}
@@ -122,6 +119,19 @@ function Main.draw_collision(x1, y1, width1, height1, x2, y2, width2, height2)
     love.graphics.pop()
 
     love.graphics.setColor(1, 1, 1)
+end
+
+function Main.Tilemap:generate(tile_number)
+    self.width = self.width * consts.RENDER_WIDTH
+    self.height = self.height * consts.RENDER_HEIGHT
+
+    local tiles = {}
+    for i = 1, tile_number do
+        local tile = love.graphics.newImage(consts.TILE_PATH .. "floor/" .. self.type .. "_floor" .. i .. ".png")
+        table.insert(tiles, tile)
+    end
+
+    local tilemap = {}
 end
 
 return Main
