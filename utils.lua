@@ -148,7 +148,7 @@ function Main.Tilemap:generate(tile_number)
     end
 end
 
-function Main.Tilemap:load()
+function Main.Tilemap:draw()
     for i = 1, #self.tilemap do
         love.graphics.push()
         love.graphics.scale(consts.TILE_SCALE, consts.TILE_SCALE)
