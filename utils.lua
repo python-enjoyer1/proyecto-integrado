@@ -129,8 +129,8 @@ function Main.Tilemap:new(o)
 end
 
 function Main.Tilemap:generate(tile_number)
-    self.width = self.width * consts.RENDER_WIDTH
-    self.height = self.height * consts.RENDER_HEIGHT
+    self.width = self.width * love.math.random(15, 25)
+    self.height = self.height * love.math.random(15, 30)
 
     local tiles = {}
     for i = 1, tile_number do
@@ -143,7 +143,7 @@ function Main.Tilemap:generate(tile_number)
     local x = 0
     local y = 0
     for i = 1, self.width do
-        table.insert(self.tilemap,{tile = tiles[love.math.random(1, #tiles)], position = {x = x, y}})
+        table.insert(self.tilemap,{tile = tiles[love.math.random(1, #tiles)], position = {x = x, y = y}})
         x = x + consts.TILE_SIZE
     end
 end
