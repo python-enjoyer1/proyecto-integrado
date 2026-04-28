@@ -129,8 +129,8 @@ function Main.Tilemap:new(o)
 end
 
 function Main.Tilemap:generate(tile_number)
-    self.width = self.width * love.math.random(15, 25)
-    self.height = self.height * love.math.random(15, 30)
+    self.width = self.width * love.math.random(consts.MIN_TILEMAP, consts.MAX_TILEMAP)
+    self.height = self.height * love.math.random(consts.MIN_TILEMAP, consts.MAX_TILEMAP)
 
     local tiles = {}
     for i = 1, tile_number do
