@@ -44,6 +44,10 @@ function love.update(dt)
     mouse_x = (mouse_x / scale_x)
     mouse_y = (mouse_y / scale_y)
 
+    if love.keyboard.isDown("lctrl") then
+        -- I am not sure if we should add something similar to the shift thingy in Hotline Miami.
+    end
+
     Player:update(dt, scale_x, scale_y, global_offset_x, global_offset_y)
 
     -- HUD/GUI goes here.

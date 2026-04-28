@@ -130,7 +130,7 @@ end
 
 function Main.Tilemap:generate(tile_number, premade) --R keeping premade js in case we do make premade maps
     self.width = self.width * love.math.random(consts.MIN_TILEMAP, consts.MAX_TILEMAP)
-    self.height = self.height * love.math.random(consts.MIN_TILEMAP, consts.MAX_TILEMAP)
+    self.height = self.height * love.math.randomNormal(consts.MIN_TILEMAP, consts.MAX_TILEMAP)
 
     local tiles = {}
     for i = 1, tile_number do
@@ -141,6 +141,7 @@ function Main.Tilemap:generate(tile_number, premade) --R keeping premade js in c
 
     self.tilemap = {}
     local y = 0
+<<<<<<< HEAD
     for row = 1, self.height do
         local x = 0
         for col = 1, self.width do
@@ -151,6 +152,11 @@ function Main.Tilemap:generate(tile_number, premade) --R keeping premade js in c
             x = x + consts.TILE_SIZE
         end
         y = y + consts.TILE_SIZE
+=======
+    for i = 1, self.width do
+        table.insert(self.tilemap,{tile = tiles[love.math.random(1, #tiles)], position = {x = x, y = y}}) -- Add normalized radomization
+        x = x + consts.TILE_SIZE
+>>>>>>> d0adbcf2c8c6d7a9b747c39b88651ded17e6d0ce
     end
     --R remove the random bs if u want
 end
