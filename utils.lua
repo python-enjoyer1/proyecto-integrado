@@ -128,7 +128,7 @@ function Main.Tilemap:new(o)
     return o
 end
 
-function Main.Tilemap:generate(tile_number)
+function Main.Tilemap:generate(tile_number, premade) --R keeping premade js in case we do make premade maps
     self.width = self.width * love.math.random(consts.MIN_TILEMAP, consts.MAX_TILEMAP)
     self.height = self.height * love.math.random(consts.MIN_TILEMAP, consts.MAX_TILEMAP)
 
@@ -140,12 +140,19 @@ function Main.Tilemap:generate(tile_number)
     end
 
     self.tilemap = {}
-    local x = 0
     local y = 0
-    for i = 1, self.width do
-        table.insert(self.tilemap,{tile = tiles[love.math.random(1, #tiles)], position = {x = x, y = y}})
-        x = x + consts.TILE_SIZE
+    for row = 1, self.height do
+        local x = 0
+        for col = 1, self.width do
+            table.insert(self.tilemap, {
+                tile = tiles[love.math.random(1, #tiles)],
+                position = { x = x, y = y }
+            })
+            x = x + consts.TILE_SIZE
+        end
+        y = y + consts.TILE_SIZE
     end
+    --R remove the random bs if u want
 end
 
 function Main.Tilemap:draw()
