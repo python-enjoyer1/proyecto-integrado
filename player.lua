@@ -73,7 +73,7 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y)
 
     self.states.idle = not is_moving and not self.states.punch]]
 
-    --R The lines above should be a better alt, but you decide. -- Brother, if you see a better way, then add it yourself, I cannnot read minds yet.
+    --R The lines above should be a better alt, but you decide. -- Brother, if you see a better way, then just add it.
 
     if movement_vector.x == 0 and movement_vector.y == 0 and not self.states.punch then
         self.states.idle = true
