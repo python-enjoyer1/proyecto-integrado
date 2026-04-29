@@ -132,7 +132,7 @@ function Main.Tilemap:generate(tile_number, premade) --R keeping premade js in c
     premade = premade or nil
 
     self.width = self.width * love.math.random(consts.MIN_WIDTH_TILEMAP, consts.MAX_WIDTH_TILEMAP)
-    self.height = self.height * love.math.randomNormal(consts.MIN_HEIGHT_TILEMAP, consts.MAX_HEIGHT_TILEMAP)
+    self.height = self.height * love.math.random(consts.MIN_HEIGHT_TILEMAP, consts.MAX_HEIGHT_TILEMAP)
 
     local tiles = {}
     for i = 1, tile_number do
