@@ -130,7 +130,7 @@ end
 
 function Main.Tilemap:generate(tile_number)
     self.width = self.width * love.math.random(consts.MIN_TILEMAP, consts.MAX_TILEMAP)
-    self.height = self.height * love.math.random(consts.MIN_TILEMAP, consts.MAX_TILEMAP)
+    self.height = self.height * love.math.randomNormal(consts.MIN_TILEMAP, consts.MAX_TILEMAP)
 
     local tiles = {}
     for i = 1, tile_number do
@@ -143,7 +143,7 @@ function Main.Tilemap:generate(tile_number)
     local x = 0
     local y = 0
     for i = 1, self.width do
-        table.insert(self.tilemap,{tile = tiles[love.math.random(1, #tiles)], position = {x = x, y = y}})
+        table.insert(self.tilemap,{tile = tiles[love.math.random(1, #tiles)], position = {x = x, y = y}}) -- Add normalized radomization
         x = x + consts.TILE_SIZE
     end
 end
