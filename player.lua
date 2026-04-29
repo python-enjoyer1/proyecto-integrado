@@ -19,7 +19,7 @@ local screenshake_timer = 0
 -- If you can think of more stats, then, fucking add them already.
 --R Remove the stats that you think wouldn't work, aight?
 local Player = {
-    position = {x = 320, y = 180},
+    position = {x = 0, y = 0},
     stats = {
         speed = 100,
         attack_damage = 1, --R We should prolly replace this with "dmg bonus" since stuff will have predetermined dmg

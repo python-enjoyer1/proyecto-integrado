@@ -1,5 +1,5 @@
 local love = require("love")
-local Player = require("player")
+local player = require("player")
 local utils = require("utils")
 local consts = require("constants")
 
@@ -29,6 +29,9 @@ function love.load()
     tilemap = utils.Tilemap:new({type = "high", width = 1, height = 1})
     tilemap:generate(3)
 
+    player.position.x = (tilemap.width * consts.TILE_SIZE) / 2
+    player.position.y = (tilemap.height * consts.TILE_SIZE) / 2
+
     soul_bar = utils.Animation:new({speed = 0.07})
     cursor = utils.Animation:new({speed = 0.1})
 
@@ -37,8 +40,8 @@ function love.load()
 end
 
 function love.update(dt)
-    global_offset_x = -Player.position.x + (consts.RENDER_WIDTH / 2)
-    global_offset_y = -Player.position.y + (consts.RENDER_HEIGHT / 2)
+    global_offset_x = -player.position.x + (consts.RENDER_WIDTH / 2)
+    global_offset_y = -player.position.y + (consts.RENDER_HEIGHT / 2)
 
     mouse_x, mouse_y = love.mouse.getPosition()
     mouse_x = (mouse_x / scale_x)
@@ -48,7 +51,7 @@ function love.update(dt)
         -- I am not sure if we should add something similar to the shift thingy in Hotline Miami.
     end
 
-    Player:update(dt, scale_x, scale_y, global_offset_x, global_offset_y)
+    player:update(dt, scale_x, scale_y, global_offset_x, global_offset_y)
 
     -- HUD/GUI goes here.
     soul_bar:update(dt)
@@ -64,7 +67,7 @@ function love.draw()
 
     tilemap:draw()
 
-    Player:draw()
+    player:draw()
     love.graphics.pop()
 
     -- HUD/GUI goes here.
