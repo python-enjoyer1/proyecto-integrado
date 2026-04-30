@@ -154,7 +154,6 @@ function Main.Tilemap:generate(tile_number, premade) --R keeping premade js in c
         end
         y = y + consts.TILE_SIZE
     end
-    --R remove the random bs if u want
 end
 
 function Main.Tilemap:draw()
