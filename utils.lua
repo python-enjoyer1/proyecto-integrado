@@ -5,7 +5,9 @@ local Main = {}
 Main.Timer = {stored_times = {}} --R basically a wait() then does a callback
 Main.Vector = {x = 0, y = 0}
 Main.Animation = {speed = 1, current_frame = 1}
-Main.Tilemap = {type = "high", width = 1, height = 1} -- Higher floors refer to earlier floors, since you descend in this game.
+Main.Tilemap = {type = "high", width = 1, height = 1, walls = {}} -- Higher floors refer to earlier floors, since you descend in this game.
+
+local collision_list = {}
 
 function Main.Vector:new(o)
     o = o or {}
@@ -49,6 +51,7 @@ function Main.Animation:new(o)
 end
 
 -- Basically, we have to add the quad thingy.
+
 function Main.Animation:manage_spritesheet(image, width, height, sprite_number, columns) -- Don't call this on update, call on load.
     self.image = love.graphics.newImage(image)
     self.image:setFilter(consts.DEFAULT_FILTER, consts.DEFAULT_FILTER)
@@ -98,27 +101,31 @@ function Main.Animation:draw(x, y, rotate, size, shade, shade_offset_x, shade_of
     love.graphics.draw(self.image, self.frames[self.current_frame], x, y, rotate, size, size, origin_x, origin_y)
 end
 
-function Main.check_collision(x1, y1, width1, height1, x2, y2, width2, height2)
-    return x1 < x2+width2 and
-         x2 < x1+width1 and
-         y1 < y2+height2 and
-         y2 < y1+height1
+function Main.register_collision(x, y, width, height, type)
+    local new_collision = {x = x, y = y, width = width, height = height, type = type}
+    table.insert(collision_list, new_collision)
 end
 
-function Main.draw_collision(x1, y1, width1, height1, x2, y2, width2, height2)
-    love.graphics.push()
+function Main.check_collision(collision1, collision2)
+    return collision1.x < collision2.x+collision2.width and
+        collision2.x < collision1.x+collision1.width and
+         collision1.y < collision2.y+collision2.height and
+         collision2.y < collision1.y+collision1.height
+end
+
+function Main.draw_collision(collision)
     love.graphics.setColor(0, 0, 1)
-    love.graphics.translate(-width1 / 2, -height1 / 2)
-    love.graphics.rectangle("line", x1, y1, width1, height1)
-    love.graphics.pop()
+    collision.x = collision.x - collision.width / 2
+    collision.y = collision.y - collision.height / 2
+    love.graphics.rectangle("line", collision.x, collision.y, collision.width, collision.height)
 
-    love.graphics.push()
-    love.graphics.setColor(1, 0, 0)
-    love.graphics.translate(-width2 / 2, -height2 / 2)
-    love.graphics.rectangle("line", x2, y2, width2, height2)
-    love.graphics.pop()
-
-    love.graphics.setColor(1, 1, 1)
+    if collision.type == "Hitbox" then
+        love.graphics.setColor(0,0,1)
+    elseif collision.type == "Hurtbox" then
+        love.graphics.setColor(1,0,0)
+    elseif collision.type == "Collisionbox" then
+        love.graphics.setColor(1,1,1)
+    end
 end
 
 function Main.Tilemap:new(o)

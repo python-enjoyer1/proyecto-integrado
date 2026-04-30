@@ -2,7 +2,7 @@ local love = require("love")
 local utils = require("utils")
 local consts = require("constants")
 
-local player_walk = utils.Animation:new({speed = 0.1})
+local player_walk = utils.Animation:new({speed = 0.08})
 local player_punch = utils.Animation:new({speed = 0.05})
 
 player_walk:manage_spritesheet(consts.ASSETS_PATH .. "characters/consumer/consumer_walk.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 7, 3)
@@ -16,12 +16,15 @@ local screenshake_duration = 0.1 -- For the punching. Also, making the screensha
 local screenshake_magnitude = 3 --   ^^
 local screenshake_timer = 0
 
+local randomasfwall = {x = 200, y = 200, width = 100, height = 200, type = "Collisionbox"}
+
 -- If you can think of more stats, then, fucking add them already.
 --R Remove the stats that you think wouldn't work, aight?
 local Player = {
-    position = {x = 0, y = 0},
+    position = {x = 320, y = 180},
     stats = {
         speed = 100,
+        friction = 1, --R Floor friction
         attack_damage = 1, --R We should prolly replace this with "dmg bonus" since stuff will have predetermined dmg
         attack_speed = 5,
         crit_chance = 1, --R You did mention something about adding critical hits to the game didn't you? -- No, but it's a good idea.
@@ -43,7 +46,7 @@ local Player = {
     },
     angle = 0,
     animation = player_walk,
-    hitbox = {width = consts.CHARACTER_SIZE / 2, height = consts.CHARACTER_SIZE / 2}
+    hitbox = {x = 320, y = 180, width = consts.CHARACTER_SIZE / 2, height = consts.CHARACTER_SIZE / 2}
 }
 
 -- Just so you know, you normalize EXCLUSIVELY the vector.
@@ -73,7 +76,7 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y)
 
     self.states.idle = not is_moving and not self.states.punch]]
 
-    --R The lines above should be a better alt, but you decide. -- Brother, if you see a better way, then just add it.
+    --R The lines above should be a better alt, but you decide. -- Brother, if you see a better way, then add it yourself, I cannnot read minds yet.
 
     if movement_vector.x == 0 and movement_vector.y == 0 and not self.states.punch then
         self.states.idle = true
@@ -88,6 +91,11 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y)
 
     self.position.x = self.position.x + (movement_vector.x * dt * self.stats.speed)
     self.position.y = self.position.y + (movement_vector.y * dt * self.stats.speed)
+    self.hitbox.x = self.position.x
+    self.hitbox.y = self.position.y
+
+    randomasfwall.x = 200
+    randomasfwall.y = 200
 
     mouse_x, mouse_y = love.mouse.getPosition()
     mouse_x = mouse_x / scale_x
@@ -101,11 +109,14 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y)
         end
     end
     self.animation:update(dt, self.states.idle)
+    print(utils.check_collision(randomasfwall, self.hitbox))
     --self.player_animation:update(dt, not is_moving or self.states.punch)
 end
 
 function Player:draw()
     self.animation:draw(self.position.x, self.position.y, self.angle, 1, consts.SHADING, 0, 3)
+    utils.draw_collision(self.hitbox)
+    utils.draw_collision(randomasfwall)
 end
 
 function Player:punch()
