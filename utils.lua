@@ -7,8 +7,6 @@ Main.Vector = {x = 0, y = 0}
 Main.Animation = {speed = 1, current_frame = 1}
 Main.Tilemap = {type = "high", width = 1, height = 1, walls = {}} -- Higher floors refer to earlier floors, since you descend in this game.
 
-local collision_list = {}
-
 function Main.Vector:new(o)
     o = o or {}
     setmetatable(o, self)
@@ -101,31 +99,27 @@ function Main.Animation:draw(x, y, rotate, size, shade, shade_offset_x, shade_of
     love.graphics.draw(self.image, self.frames[self.current_frame], x, y, rotate, size, size, origin_x, origin_y)
 end
 
-function Main.register_collision(x, y, width, height, type)
-    local new_collision = {x = x, y = y, width = width, height = height, type = type}
-    table.insert(collision_list, new_collision)
-end
-
 function Main.check_collision(collision1, collision2)
-    return collision1.x < collision2.x+collision2.width and
-        collision2.x < collision1.x+collision1.width and
-         collision1.y < collision2.y+collision2.height and
-         collision2.y < collision1.y+collision1.height
+    return collision1.x < collision2.x + collision2.width and
+        collision2.x < collision1.x + collision1.width and
+         collision1.y < collision2.y + collision2.height and
+         collision2.y < collision1.y + collision1.height
 end
 
 function Main.draw_collision(collision)
-    love.graphics.setColor(0, 0, 1)
+    if collision.type == "hitbox" then
+        love.graphics.setColor(0, 0, 1)
+    elseif collision.type == "hurtbox" then
+        love.graphics.setColor(1, 0, 0)
+    elseif collision.type == "collisionbox" then
+        love.graphics.setColor(1, 1, 1)
+    end
+
     collision.x = collision.x - collision.width / 2
     collision.y = collision.y - collision.height / 2
     love.graphics.rectangle("line", collision.x, collision.y, collision.width, collision.height)
 
-    if collision.type == "Hitbox" then
-        love.graphics.setColor(0,0,1)
-    elseif collision.type == "Hurtbox" then
-        love.graphics.setColor(1,0,0)
-    elseif collision.type == "Collisionbox" then
-        love.graphics.setColor(1,1,1)
-    end
+    love.graphics.setColor(1, 1, 1)
 end
 
 function Main.Tilemap:new(o)

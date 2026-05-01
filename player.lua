@@ -16,7 +16,7 @@ local screenshake_duration = 0.1 -- For the punching. Also, making the screensha
 local screenshake_magnitude = 3 --   ^^
 local screenshake_timer = 0
 
-local randomasfwall = {x = 200, y = 200, width = 100, height = 200, type = "Collisionbox"}
+local randomasfwall = {x = 200, y = 200, width = 100, height = 200, type = "hitbox"}
 
 -- If you can think of more stats, then, fucking add them already.
 --R Remove the stats that you think wouldn't work, aight?
@@ -46,7 +46,7 @@ local Player = {
     },
     angle = 0,
     animation = player_walk,
-    hitbox = {x = 320, y = 180, width = consts.CHARACTER_SIZE / 2, height = consts.CHARACTER_SIZE / 2}
+    hitbox = {x = 320, y = 180, width = consts.CHARACTER_SIZE / 2, height = consts.CHARACTER_SIZE / 2, type = "hitbox"}
 }
 
 -- Just so you know, you normalize EXCLUSIVELY the vector.

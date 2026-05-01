@@ -16,6 +16,9 @@ local tilemap
 
 -- HUD elements here.
 local soul_bar
+local soul_bar_bg
+local soul_bar_frame
+
 local cursor
 
 -- For pre-loading. Loads stuff after loading modules.
@@ -33,9 +36,15 @@ function love.load()
     player.position.y = (tilemap.height * consts.TILE_SIZE) / 2
 
     soul_bar = utils.Animation:new({speed = 0.07})
-    cursor = utils.Animation:new({speed = 0.1})
-
     soul_bar:manage_spritesheet(consts.ASSETS_PATH .. "hud/soul_bar.png", 128, 32, 21, 2)
+
+    soul_bar_bg = utils.Animation:new({speed = 0.07})
+    soul_bar_bg:manage_spritesheet(consts.ASSETS_PATH .. "hud/soul_bar_bg.png", 128, 32, 21, 2)
+
+    soul_bar_frame = utils.Animation:new({speed = 0.07})
+    soul_bar_frame:manage_spritesheet(consts.ASSETS_PATH .. "hud/soul_bar_frame.png", 128, 32, 21, 2)
+
+    cursor = utils.Animation:new({speed = 0.1})
     cursor:manage_spritesheet(consts.ASSETS_PATH .. "hud/cursor.png", 8, 8, 4, 2)
 end
 
@@ -66,7 +75,10 @@ function love.draw()
     love.graphics.pop()
 
     -- HUD/GUI goes here.
-    soul_bar:draw(65, 20, 0, 1, consts.SHADING, 0, 3)
+    soul_bar_bg:draw(65, 20)
+    soul_bar:draw(65, 20, 0, 1, consts.SHADING, 0, 4)
+    soul_bar_frame:draw(65, 20)
+
     cursor:draw(mouse_x, mouse_y, 0, 1, consts.SHADING, 0, 2)
 
 end
