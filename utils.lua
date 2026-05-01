@@ -134,6 +134,7 @@ end
 
 function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keeping premade js in case we do make premade maps
     premade = premade or nil
+    wall_tile_number = wall_tile_number or 0
 
     self.width = self.width * love.math.random(consts.MIN_WIDTH_TILEMAP, consts.MAX_WIDTH_TILEMAP)
     self.height = self.height * love.math.random(consts.MIN_HEIGHT_TILEMAP, consts.MAX_HEIGHT_TILEMAP)
