@@ -100,6 +100,11 @@ function Main.Animation:draw(x, y, rotate, size, shade, shade_offset_x, shade_of
 end
 
 function Main.check_collision(collision1, collision2)
+    collision1.x = collision1.x - collision1.width / 2
+    collision1.y = collision1.y - collision1.height / 2
+    collision2.x = collision2.x - collision2.width / 2
+    collision2.y = collision2.y - collision2.height / 2
+
     return collision1.x < collision2.x + collision2.width and
         collision2.x < collision1.x + collision1.width and
          collision1.y < collision2.y + collision2.height and
@@ -115,8 +120,6 @@ function Main.draw_collision(collision)
         love.graphics.setColor(1, 1, 1)
     end
 
-    collision.x = collision.x - collision.width / 2
-    collision.y = collision.y - collision.height / 2
     love.graphics.rectangle("line", collision.x, collision.y, collision.width, collision.height)
 
     love.graphics.setColor(1, 1, 1)
@@ -129,7 +132,7 @@ function Main.Tilemap:new(o)
     return o
 end
 
-function Main.Tilemap:generate(tile_number, premade) --R keeping premade js in case we do make premade maps
+function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keeping premade js in case we do make premade maps
     premade = premade or nil
 
     self.width = self.width * love.math.random(consts.MIN_WIDTH_TILEMAP, consts.MAX_WIDTH_TILEMAP)
@@ -137,9 +140,16 @@ function Main.Tilemap:generate(tile_number, premade) --R keeping premade js in c
 
     local tiles = {}
     for i = 1, tile_number do
-        local tile = love.graphics.newImage(consts.TILE_PATH .. "floor/" .. self.type .. "/" .. self.type .. i .. ".png")
+        local tile = love.graphics.newImage(consts.TILE_PATH .. "/" .. self.type .. "/" .. self.type .. i .. ".png")
         tile:setFilter(consts.DEFAULT_FILTER, consts.DEFAULT_FILTER)
         table.insert(tiles, tile)
+    end
+
+    local wall_tiles = {}
+    for i = 1, wall_tile_number do
+        local wall_tile = love.graphics.newImage(consts.TILE_PATH .. "/" .. self.type .. "_walls/" .. self.type .. "_wall" .. i .. ".png")
+        wall_tile:setFilter(consts.DEFAULT_FILTER, consts.DEFAULT_FILTER)
+        table.insert(wall_tiles, wall_tile)
     end
 
     self.tilemap = {}
@@ -164,6 +174,11 @@ function Main.Tilemap:draw()
         love.graphics.draw(self.tilemap[i].tile, self.tilemap[i].position.x, self.tilemap[i].position.y)
         love.graphics.pop()
     end
+end
+
+function Main.lerp(a, b, x, dt)
+    local t = (1.0 - math.exp(-x * dt))
+    return a * (1.0 - t) + b * t
 end
 
 return Main

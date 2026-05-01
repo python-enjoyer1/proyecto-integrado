@@ -16,8 +16,6 @@ local screenshake_duration = 0.1 -- For the punching. Also, making the screensha
 local screenshake_magnitude = 3 --   ^^
 local screenshake_timer = 0
 
-local randomasfwall = {x = 200, y = 200, width = 100, height = 200, type = "hitbox"}
-
 -- If you can think of more stats, then, fucking add them already.
 --R Remove the stats that you think wouldn't work, aight?
 local Player = {
@@ -49,8 +47,6 @@ local Player = {
     hitbox = {x = 320, y = 180, width = consts.CHARACTER_SIZE / 2, height = consts.CHARACTER_SIZE / 2, type = "hitbox"}
 }
 
--- Just so you know, you normalize EXCLUSIVELY the vector.
--- Also, sometime we should make a vector class/table.
 function Player:update(dt, scale_x, scale_y, offset_x, offset_y)
     local movement_vector = utils.Vector:new()
 
@@ -72,12 +68,6 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y)
 
     movement_vector:normalize()
 
-    --[[local is_moving = movement_vector.x ~= 0 and movement_vector.y ~= 0
-
-    self.states.idle = not is_moving and not self.states.punch]]
-
-    --R The lines above should be a better alt, but you decide. -- Brother, if you see a better way, then add it yourself, I cannnot read minds yet.
-
     if movement_vector.x == 0 and movement_vector.y == 0 and not self.states.punch then
         self.states.idle = true
     else
@@ -94,9 +84,6 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y)
     self.hitbox.x = self.position.x
     self.hitbox.y = self.position.y
 
-    randomasfwall.x = 200
-    randomasfwall.y = 200
-
     mouse_x, mouse_y = love.mouse.getPosition()
     mouse_x = mouse_x / scale_x
     mouse_y = mouse_y / scale_y
@@ -109,14 +96,10 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y)
         end
     end
     self.animation:update(dt, self.states.idle)
-    print(utils.check_collision(randomasfwall, self.hitbox))
-    --self.player_animation:update(dt, not is_moving or self.states.punch)
 end
 
 function Player:draw()
     self.animation:draw(self.position.x, self.position.y, self.angle, 1, consts.SHADING, 0, 3)
-    utils.draw_collision(self.hitbox)
-    utils.draw_collision(randomasfwall)
 end
 
 function Player:punch()

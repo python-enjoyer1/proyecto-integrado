@@ -25,12 +25,15 @@ local cursor
 function love.load()
     love.mouse.setVisible(false)
 
+    global_offset_x = 0
+    global_offset_y = 0
+
     desktop_width, desktop_height = love.window.getDesktopDimensions()
     scale_x = math.floor(desktop_width / consts.RENDER_WIDTH)
     scale_y = math.floor(desktop_height / consts.RENDER_HEIGHT)
 
     tilemap = utils.Tilemap:new({type = "high", width = 1, height = 1})
-    tilemap:generate(3)
+    tilemap:generate(3, 3) -- Wall types: 1 = corner, 2 = connector, 3 = edge.
 
     player.position.x = (tilemap.width * consts.TILE_SIZE) / 2
     player.position.y = (tilemap.height * consts.TILE_SIZE) / 2
@@ -49,8 +52,10 @@ function love.load()
 end
 
 function love.update(dt)
-    global_offset_x = -player.position.x + (consts.RENDER_WIDTH / 2)
-    global_offset_y = -player.position.y + (consts.RENDER_HEIGHT / 2)
+    global_offset_x = utils.lerp(global_offset_x, (-player.position.x + consts.RENDER_WIDTH / 2), consts.CAMERA_MOVEMENT, dt)
+    global_offset_y = utils.lerp(global_offset_y, (-player.position.y + consts.RENDER_HEIGHT / 2), consts.CAMERA_MOVEMENT, dt)
+    --global_offset_x = -player.position.x + (consts.RENDER_WIDTH / 2)
+    --global_offset_y = -player.position.y + (consts.RENDER_HEIGHT / 2)
 
     mouse_x, mouse_y = love.mouse.getPosition()
     mouse_x = (mouse_x / scale_x)
@@ -59,11 +64,15 @@ function love.update(dt)
     player:update(dt, scale_x, scale_y, global_offset_x, global_offset_y)
 
     -- HUD/GUI goes here.
+    soul_bar_bg:update(dt)
     soul_bar:update(dt)
+    soul_bar_frame:update(dt)
     cursor:update(dt)
 end
 
 function love.draw()
+    love.graphics.setBackgroundColor(consts.BACKGROUND_COLOR)
+
     love.graphics.scale(scale_x, scale_y)
 
     love.graphics.push()
