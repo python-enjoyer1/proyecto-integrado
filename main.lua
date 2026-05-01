@@ -33,7 +33,7 @@ function love.load()
     scale_y = math.floor(desktop_height / consts.RENDER_HEIGHT)
 
     tilemap = utils.Tilemap:new({type = "high", width = 1, height = 1})
-    tilemap:generate(3, 3) -- Wall types: 1 = corner, 2 = connector, 3 = edge.
+    tilemap:generate(3, 1)
 
     player.position.x = (tilemap.width * consts.TILE_SIZE) / 2
     player.position.y = (tilemap.height * consts.TILE_SIZE) / 2

@@ -154,14 +154,23 @@ function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keepi
 
     self.tilemap = {}
     local y = 0
+    local wall_y = 0
     for row = 1, self.height do
         local x = 0
+        local wall_x = 0
         for col = 1, self.width do
             table.insert(self.tilemap, {
                 tile = tiles[love.math.random(1, #tiles)],
                 position = {x = x, y = y}
             })
+
+            table.insert(self.tilemap, {
+                tile = wall_tiles[1],
+                position = {x = wall_x, y = -consts.TILE_SIZE} -- Prototipic code.
+            })
+
             x = x + consts.TILE_SIZE
+            wall_x = wall_x + consts.WALL_TILE_SIZE
         end
         y = y + consts.TILE_SIZE
     end
