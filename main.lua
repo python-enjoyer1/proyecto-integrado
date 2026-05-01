@@ -58,8 +58,6 @@ function love.update(dt)
 
     global_offset_x = utils.lerp(global_offset_x, (-player.position.x + consts.RENDER_WIDTH / 2), camera_movement, dt)
     global_offset_y = utils.lerp(global_offset_y, (-player.position.y + consts.RENDER_HEIGHT / 2), camera_movement, dt)
-    --global_offset_x = -player.position.x + (consts.RENDER_WIDTH / 2)
-    --global_offset_y = -player.position.y + (consts.RENDER_HEIGHT / 2)
 
     mouse_x, mouse_y = love.mouse.getPosition()
     mouse_x = (mouse_x / scale_x)

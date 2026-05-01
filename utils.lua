@@ -22,25 +22,6 @@ function Main.Vector:normalize()
     end
 end
 
---R Timer Functions. Only use if it's for delayed triggers, else use coroutines.
-
-function Main.Timer:new(duration, on_complete) --R Set amount of time u want to wait then runs code.
-    table.insert(self.stored_times, {time = duration, callback = on_complete})
-end
-
--- Good shit, but remember to only capitalize if making a class, not a variable.
---R Got it.
-function Main.Timer:update(dt) --R just put this into love.update()
-    for i=#self.stored_times, 1,-1 do --R this prevents other indexes to fill in gaps after deletion.
-        local stored = self.stored_times[i]
-        stored.time = stored.time - dt
-        if stored.time <= 0 then
-            stored.callback()
-            table.remove(self.stored_times, i)
-        end
-    end
-end
-
 function Main.Animation:new(o)
     o = o or {}
     setmetatable(o, self)

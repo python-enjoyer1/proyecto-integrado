@@ -16,7 +16,7 @@ local screenshake_duration = 0.1 -- For the punching. Also, making the screensha
 local screenshake_magnitude = 3 --   ^^
 local screenshake_timer = 0
 
--- If you can think of more stats, then, fucking add them already.
+-- If you can think of more stats, then, add them.
 --R Remove the stats that you think wouldn't work, aight?
 local Player = {
     position = {x = 320, y = 180},
