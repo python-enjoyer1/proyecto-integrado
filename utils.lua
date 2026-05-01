@@ -167,7 +167,7 @@ function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keepi
 
             table.insert(self.tilemap, {
                 tile = wall_tiles[1],
-                position = {x = wall_x, y = -consts.TILE_SIZE} -- Prototipic code.
+                position = {x = wall_x, y = -consts.TILE_SIZE} -- Prototypical code.
             })
 
             x = x + consts.TILE_SIZE
