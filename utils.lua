@@ -155,7 +155,7 @@ function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keepi
 
     self.tilemap = {}
     local y = 0
-    local wall_y = 0
+    local wall_y = consts.WALL_TILE_SIZE - consts.TILE_SIZE
     for row = 1, self.height do
         local x = 0
         local wall_x = 0
@@ -167,7 +167,7 @@ function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keepi
 
             table.insert(self.tilemap, {
                 tile = wall_tiles[1],
-                position = {x = wall_x, y = -consts.TILE_SIZE} -- Prototypical code.
+                position = {x = wall_x, y = wall_y} -- Prototypical code.
             })
 
             x = x + consts.TILE_SIZE

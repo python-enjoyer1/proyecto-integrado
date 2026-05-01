@@ -21,7 +21,7 @@ local screenshake_timer = 0
 local Player = {
     position = {x = 320, y = 180},
     stats = {
-        speed = 100,
+        speed = 150,
         friction = 1, --R Floor friction
         attack_damage = 1, --R We should prolly replace this with "dmg bonus" since stuff will have predetermined dmg
         attack_speed = 5,

@@ -8,6 +8,7 @@ local desktop_width, desktop_height
 local scale_x, scale_y
 local mouse_x, mouse_y
 
+local camera_movement
 local global_offset_x
 local global_offset_y
 
@@ -25,6 +26,7 @@ local cursor
 function love.load()
     love.mouse.setVisible(false)
 
+    camera_movement = 0
     global_offset_x = 0
     global_offset_y = 0
 
@@ -52,8 +54,10 @@ function love.load()
 end
 
 function love.update(dt)
-    global_offset_x = utils.lerp(global_offset_x, (-player.position.x + consts.RENDER_WIDTH / 2), consts.CAMERA_MOVEMENT, dt)
-    global_offset_y = utils.lerp(global_offset_y, (-player.position.y + consts.RENDER_HEIGHT / 2), consts.CAMERA_MOVEMENT, dt)
+    camera_movement = player.stats.speed / 25 -- So that when the player gets fast it stays on the screen.
+
+    global_offset_x = utils.lerp(global_offset_x, (-player.position.x + consts.RENDER_WIDTH / 2), camera_movement, dt)
+    global_offset_y = utils.lerp(global_offset_y, (-player.position.y + consts.RENDER_HEIGHT / 2), camera_movement, dt)
     --global_offset_x = -player.position.x + (consts.RENDER_WIDTH / 2)
     --global_offset_y = -player.position.y + (consts.RENDER_HEIGHT / 2)
 
