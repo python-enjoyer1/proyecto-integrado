@@ -3,7 +3,7 @@ local Main = {}
 Main.RENDER_WIDTH = 640
 Main.RENDER_HEIGHT = 360
 Main.DEFAULT_FILTER = "nearest"
-Main.CAMERA_MOVEMENT = 0.7
+Main.CAMERA_MOVEMENT = 1
 
 Main.CHARACTER_SIZE = 32
 
