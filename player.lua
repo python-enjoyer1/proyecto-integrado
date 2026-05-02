@@ -20,6 +20,7 @@ local screenshake_timer = 0
 --R Remove the stats that you think wouldn't work, aight?
 local Player = {
     position = {x = 320, y = 180},
+    velocity = {x = 0, y = 0},
     stats = {
         speed = 150,
         friction = 1, --R Floor friction
@@ -79,8 +80,10 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y)
         end
     end
 
-    self.position.x = self.position.x + (movement_vector.x * dt * self.stats.speed)
-    self.position.y = self.position.y + (movement_vector.y * dt * self.stats.speed)
+    self.velocity.x = movement_vector.x * self.stats.speed
+    self.velocity.y = movement_vector.y * self.stats.speed
+    self.position.x = self.position.x + (self.velocity.x * dt)
+    self.position.y = self.position.y + (self.velocity.y * dt)
     self.hitbox.x = self.position.x
     self.hitbox.y = self.position.y
 

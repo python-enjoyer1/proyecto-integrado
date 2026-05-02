@@ -22,6 +22,8 @@ local soul_bar_frame
 
 local cursor
 
+local look_ahead = 40 --R Change to your liking or remove it entirely
+
 -- For pre-loading. Loads stuff after loading modules.
 function love.load()
     love.mouse.setVisible(false)
@@ -54,10 +56,13 @@ function love.load()
 end
 
 function love.update(dt)
-    camera_movement = player.stats.speed / 25 -- So that when the player gets fast it stays on the screen.
+    camera_movement = player.stats.speed / 30 -- So that when the player gets fast it stays on the screen.
 
-    global_offset_x = utils.lerp(global_offset_x, (-player.position.x + consts.RENDER_WIDTH / 2), camera_movement, dt)
-    global_offset_y = utils.lerp(global_offset_y, (-player.position.y + consts.RENDER_HEIGHT / 2), camera_movement, dt)
+    local target_x = -player.position.x + consts.RENDER_WIDTH / 2 - (player.velocity.x / player.stats.speed) * look_ahead
+    local target_y = -player.position.y + consts.RENDER_HEIGHT / 2 - (player.velocity.y / player.stats.speed) * look_ahead
+
+    global_offset_x = utils.lerp(global_offset_x, target_x, camera_movement, dt)
+    global_offset_y = utils.lerp(global_offset_y, target_y, camera_movement, dt)
 
     mouse_x, mouse_y = love.mouse.getPosition()
     mouse_x = (mouse_x / scale_x)
