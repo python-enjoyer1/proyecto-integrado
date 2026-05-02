@@ -136,26 +136,43 @@ function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keepi
 
     self.tilemap = {}
     local y = 0
-    local wall_y = consts.WALL_TILE_SIZE - consts.TILE_SIZE
     for row = 1, self.height do
         local x = 0
-        local wall_x = 0
         for col = 1, self.width do
             table.insert(self.tilemap, {
                 tile = tiles[love.math.random(1, #tiles)],
                 position = {x = x, y = y}
             })
-
-            table.insert(self.tilemap, {
-                tile = wall_tiles[1],
-                position = {x = wall_x, y = wall_y} -- Prototypical code.
-            })
-
             x = x + consts.TILE_SIZE
-            wall_x = wall_x + consts.WALL_TILE_SIZE
         end
         y = y + consts.TILE_SIZE
     end
+
+    local wall_x = -consts.WALL_TILE_SIZE -- So they also fill the corners.
+    local wall_y = -consts.WALL_TILE_SIZE
+
+    for i = 1, (self.height * 2 + -wall_y / consts.WALL_TILE_SIZE) + 1 do -- Since wall_y is already negative it will make it so no tiles are missing at the bottom.
+        table.insert(self.tilemap, { -- Fills the corner of the room.
+            tile = wall_tiles[1], -- Later change to the index that corresponds to the corner.
+            position = {x = wall_x, y = wall_y}
+        })
+        wall_y = wall_y + consts.WALL_TILE_SIZE
+    end
+    wall_x = wall_x + consts.WALL_TILE_SIZE
+    wall_y = consts.WALL_TILE_SIZE - consts.TILE_SIZE
+
+    for i = 1, self.width * (consts.TILE_SIZE / consts.WALL_TILE_SIZE) do
+        table.insert(self.tilemap, {
+                tile = wall_tiles[1],
+                position = {x = wall_x, y = wall_y} -- Prototypical code.
+            })
+        wall_x = wall_x + consts.WALL_TILE_SIZE
+    end
+
+    table.insert(self.tilemap, {
+        tile = wall_tiles[1],
+        position = {x = wall_x, y = wall_y}
+    })
 end
 
 function Main.Tilemap:draw()
