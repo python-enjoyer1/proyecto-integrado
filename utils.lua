@@ -124,9 +124,9 @@ function Main.draw_collision(collision)
 
     for i, v in ipairs(collision.types) do
         if type_colors[v] then
-            r = r + type_colors[t][1]
-            g = g + type_colors[t][2]
-            b = b + type_colors[t][3]
+            r = r + type_colors[v][1]
+            g = g + type_colors[v][2]
+            b = b + type_colors[v][3]
             count = count + 1
         end
     end
@@ -148,6 +148,9 @@ function Main.Tilemap:new(o)
 end
 
 function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keeping premade js in case we do make premade maps
+    self.walls = {}
+    self.tilemap = {}
+
     premade = premade or nil
     wall_tile_number = wall_tile_number or 0
 
@@ -190,6 +193,13 @@ function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keepi
             tile = wall_tiles[1], -- Later change to the index that corresponds to the corner.
             position = {x = wall_x, y = wall_y}
         })
+        table.insert(self.walls, {
+            x = wall_x + consts.WALL_TILE_SIZE / 2,
+            y = wall_y + consts.WALL_TILE_SIZE / 2,
+            width = consts.WALL_TILE_SIZE,
+            height = consts.WALL_TILE_SIZE,
+            types = {"collisionbox"}
+        })
         wall_y = wall_y + consts.WALL_TILE_SIZE
     end
     wall_x = wall_x + consts.WALL_TILE_SIZE
@@ -200,12 +210,30 @@ function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keepi
                 tile = wall_tiles[1],
                 position = {x = wall_x, y = wall_y} -- Prototypical code.
             })
+        table.insert(self.walls, {
+            x = wall_x + consts.WALL_TILE_SIZE / 2,
+            y = wall_y + consts.WALL_TILE_SIZE / 2,
+            width = consts.WALL_TILE_SIZE,
+            height = consts.WALL_TILE_SIZE,
+            types = {"collisionbox"}
+        })
         wall_x = wall_x + consts.WALL_TILE_SIZE
     end
 
     table.insert(self.tilemap, {
         tile = wall_tiles[1],
         position = {x = wall_x, y = wall_y}
+    })
+    table.insert(self.tilemap, {
+        tile = wall_tiles[1],
+        position = {x = wall_x, y = wall_y}
+    })
+    table.insert(self.walls, {
+        x = wall_x + consts.WALL_TILE_SIZE / 2,
+        y = wall_y + consts.WALL_TILE_SIZE / 2,
+        width = consts.WALL_TILE_SIZE,
+        height = consts.WALL_TILE_SIZE,
+        types = {"collisionbox"}
     })
 end
 

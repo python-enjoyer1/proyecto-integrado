@@ -70,6 +70,12 @@ function love.update(dt)
 
     player:update(dt, scale_x, scale_y, global_offset_x, global_offset_y)
 
+    for i = 1, #tilemap.walls do
+        utils.check_collision(player.hitbox, tilemap.walls[i])
+    end
+    player.position.x = player.hitbox.x
+    player.position.y = player.hitbox.y
+
     -- HUD/GUI goes here.
     soul_bar_bg:update(dt)
     soul_bar:update(dt)
@@ -88,9 +94,17 @@ function love.draw()
     tilemap:draw()
 
     player:draw()
+
+    if consts.DEBUG then
+        for i = 1, #tilemap.walls do
+            utils.draw_collision(tilemap.walls[i])
+        end
+    end
+
     love.graphics.pop()
 
     -- HUD/GUI goes here.
+
     soul_bar_bg:draw(65, 20)
     soul_bar:draw(65, 20, 0, 1, consts.SHADING, 0, 4)
     soul_bar_frame:draw(65, 20)
