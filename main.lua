@@ -56,7 +56,7 @@ function love.load()
 end
 
 function love.update(dt)
-    camera_movement = player.stats.speed / 30 -- So that when the player gets fast it stays on the screen.
+    camera_movement = player.stats.speed / 25 -- So that when the player gets fast it stays on the screen.
 
     local target_x = -player.position.x + consts.RENDER_WIDTH / 2 - (player.velocity.x / player.stats.speed) * look_ahead
     local target_y = -player.position.y + consts.RENDER_HEIGHT / 2 - (player.velocity.y / player.stats.speed) * look_ahead
