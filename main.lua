@@ -97,7 +97,7 @@ function love.draw()
 
     if consts.DEBUG then
         for i = 1, #tilemap.walls do
-            utils.draw_collision(tilemap.walls[i])
+            utils.draw_collision(tilemap.walls[i]) -- Great code.
         end
     end
 

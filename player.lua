@@ -16,7 +16,7 @@ local screenshake_duration = 0.1 -- For the punching. Also, making the screensha
 local screenshake_magnitude = 3 --   ^^
 local screenshake_timer = 0
 
-local randomasfwall = {x = 200, y = 180, width = 90, height = 90, types = {"collisionbox"}}
+-- local randomasfwall = {x = 200, y = 180, width = 90, height = 90, types = {"collisionbox"}} Great job, by the way.
 
 -- If you can think of more stats, then, add them.
 --R Remove the stats that you think wouldn't work, aight?
@@ -103,7 +103,7 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y)
         end
     end
     self.animation:update(dt, self.states.idle)
-    utils.check_collision(self.hitbox, randomasfwall)
+    -- utils.check_collision(self.hitbox, randomasfwall)
 
     self.position.x = self.hitbox.x
     self.position.y = self.hitbox.y
@@ -111,8 +111,11 @@ end
 
 function Player:draw()
     self.animation:draw(self.position.x, self.position.y, self.angle, 1, consts.SHADING, 0, 3)
-    utils.draw_collision(self.hitbox)
-    utils.draw_collision(randomasfwall)
+
+    if consts.DEBUG then
+        utils.draw_collision(self.hitbox)
+    end
+    -- utils.draw_collision(randomasfwall)
 end
 
 function Player:punch()

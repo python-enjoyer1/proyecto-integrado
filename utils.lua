@@ -88,7 +88,7 @@ function Main.has_type(collision, type) --R ts makes it easy to check for collis
 end
 
 function Main.check_collision(collision1, collision2)
-    local x = collision1.x - collision1.width / 2
+    local x = collision1.x - collision1.width / 2 -- Centering, I assume.
     local y = collision1.y - collision1.height / 2
     local x2 = collision2.x - collision2.width / 2
     local y2 = collision2.y - collision2.height / 2
@@ -196,7 +196,7 @@ function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keepi
         table.insert(self.walls, {
             x = wall_x + consts.WALL_TILE_SIZE / 2,
             y = wall_y + consts.WALL_TILE_SIZE / 2,
-            width = consts.WALL_TILE_SIZE,
+            width =  consts.WALL_TILE_SIZE,
             height = consts.WALL_TILE_SIZE,
             types = {"collisionbox"}
         })
