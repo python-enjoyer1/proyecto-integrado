@@ -113,7 +113,6 @@ function Main.check_collision(collision1, collision2)
 end
 
 function Main.draw_collision(collision)
-function Main.draw_collision(collision)
     local r, g, b = 0, 0, 0
     local count = 0
 
@@ -139,7 +138,6 @@ function Main.draw_collision(collision)
     love.graphics.setColor(r, g, b)
     love.graphics.rectangle("line", collision.x - collision.width / 2, collision.y - collision.height / 2, collision.width, collision.height)
     love.graphics.setColor(1, 1, 1)
-end
 end
 
 function Main.Tilemap:new(o)
