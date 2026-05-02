@@ -81,7 +81,7 @@ function Main.Animation:draw(x, y, rotate, size, shade, shade_offset_x, shade_of
 end
 
 function Main.has_type(collision, type) --R ts makes it easy to check for collision types
-    for _, v in ipairs(collision.types) do
+    for i, v in ipairs(collision.types) do
         if v == type then return true end
     end
     return false
@@ -113,22 +113,33 @@ function Main.check_collision(collision1, collision2)
 end
 
 function Main.draw_collision(collision)
-    if Main.has_type(collision, "hitbox") then
-        love.graphics.setColor(0, 0, 1)
-    elseif Main.has_type(collision, "hurtbox") then
-        love.graphics.setColor(1, 0, 0)
-    elseif Main.has_type(collision, "collisionbox") then
-        love.graphics.setColor(1, 1, 1)
+function Main.draw_collision(collision)
+    local r, g, b = 0, 0, 0
+    local count = 0
+
+    local type_colors = {
+        hitbox = {0, 0, 1},
+        hurtbox = {1, 0, 0},
+        collisionbox = {1, 1, 1}
+    }
+
+    for i, v in ipairs(collision.types) do
+        if type_colors[t] then
+            r = r + type_colors[t][1]
+            g = g + type_colors[t][2]
+            b = b + type_colors[t][3]
+            count = count + 1
+        end
     end
 
-    love.graphics.rectangle("line", 
-        collision.x - collision.width / 2, 
-        collision.y - collision.height / 2, 
-        collision.width, 
-        collision.height
-    )
+    if count > 0 then
+        r, g, b = r / count, g / count, b / count
+    end
 
+    love.graphics.setColor(r, g, b)
+    love.graphics.rectangle("line", collision.x - collision.width / 2, collision.y - collision.height / 2, collision.width, collision.height)
     love.graphics.setColor(1, 1, 1)
+end
 end
 
 function Main.Tilemap:new(o)
