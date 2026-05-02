@@ -1,8 +1,8 @@
 local love = require("love")
 local consts = require("constants")
+
 local Main = {}
 
-Main.Timer = {stored_times = {}} --R basically a wait() then does a callback
 Main.Vector = {x = 0, y = 0}
 Main.Animation = {speed = 1, current_frame = 1}
 Main.Tilemap = {type = "high", width = 1, height = 1, walls = {}} -- Higher floors refer to earlier floors, since you descend in this game.
@@ -147,6 +147,7 @@ function Main.Tilemap:new(o)
     return o
 end
 
+-- Small note: [1] = corner, [2] = connector, [3] = edge.
 function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keeping premade js in case we do make premade maps
     self.walls = {}
     self.tilemap = {}
@@ -178,7 +179,8 @@ function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keepi
         for col = 1, self.width do
             table.insert(self.tilemap, {
                 tile = tiles[love.math.random(1, #tiles)],
-                position = {x = x, y = y}
+                position = {x = x, y = y},
+                rotation = 0
             })
             x = x + consts.TILE_SIZE
         end
@@ -188,11 +190,29 @@ function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keepi
     local wall_x = -consts.WALL_TILE_SIZE -- So they also fill the corners.
     local wall_y = -consts.WALL_TILE_SIZE
 
-    for i = 1, (self.height * 2 + -wall_y / consts.WALL_TILE_SIZE) + 1 do -- Since wall_y is already negative it will make it so no tiles are missing at the bottom.
-        table.insert(self.tilemap, { -- Fills the corner of the room.
-            tile = wall_tiles[1], -- Later change to the index that corresponds to the corner.
-            position = {x = wall_x, y = wall_y}
+    table.insert(self.tilemap, {
+        tile = wall_tiles[2],
+        position = {x = wall_x, y = wall_y},
+        rotation = 0
+    })
+
+    table.insert(self.walls, {
+        x = wall_x + (consts.WALL_TILE_SIZE / 2),
+        y = wall_y + (consts.WALL_TILE_SIZE / 2),
+        width = consts.WALL_TILE_SIZE,
+        height = consts.WALL_TILE_SIZE,
+        types = {"collisionbox"}
+    })
+
+    wall_y = wall_y + consts.WALL_TILE_SIZE
+
+    for i = 1, self.height * (consts.TILE_SIZE / consts.WALL_TILE_SIZE) do
+        table.insert(self.tilemap, {
+            tile = wall_tiles[3],
+            position = {x = wall_x, y = wall_y},
+            rotation = 0
         })
+
         table.insert(self.walls, {
             x = wall_x + consts.WALL_TILE_SIZE / 2,
             y = wall_y + consts.WALL_TILE_SIZE / 2,
@@ -202,14 +222,17 @@ function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keepi
         })
         wall_y = wall_y + consts.WALL_TILE_SIZE
     end
+
     wall_x = wall_x + consts.WALL_TILE_SIZE
     wall_y = consts.WALL_TILE_SIZE - consts.TILE_SIZE
 
     for i = 1, self.width * (consts.TILE_SIZE / consts.WALL_TILE_SIZE) do
         table.insert(self.tilemap, {
-                tile = wall_tiles[1],
-                position = {x = wall_x, y = wall_y} -- Prototypical code.
-            })
+                tile = wall_tiles[3],
+                position = {x = wall_x, y = wall_y},
+                rotation = 0
+        })
+
         table.insert(self.walls, {
             x = wall_x + consts.WALL_TILE_SIZE / 2,
             y = wall_y + consts.WALL_TILE_SIZE / 2,
@@ -217,13 +240,16 @@ function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keepi
             height = consts.WALL_TILE_SIZE,
             types = {"collisionbox"}
         })
+
         wall_x = wall_x + consts.WALL_TILE_SIZE
     end
-    
+
     table.insert(self.tilemap, {
-        tile = wall_tiles[1],
-        position = {x = wall_x, y = wall_y}
+        tile = wall_tiles[2],
+        position = {x = wall_x, y = wall_y},
+        rotation = 0
     })
+
     table.insert(self.walls, {
         x = wall_x + consts.WALL_TILE_SIZE / 2,
         y = wall_y + consts.WALL_TILE_SIZE / 2,

@@ -3,7 +3,7 @@ local player = require("player")
 local utils = require("utils")
 local consts = require("constants")
 
--- Declare variables here, local please. We could move the render_width and height to a constants.lua.
+-- Declare variables here, local please.
 local desktop_width, desktop_height
 local scale_x, scale_y
 local mouse_x, mouse_y
@@ -37,7 +37,7 @@ function love.load()
     scale_y = math.floor(desktop_height / consts.RENDER_HEIGHT)
 
     tilemap = utils.Tilemap:new({type = "high", width = 1, height = 1})
-    tilemap:generate(3, 1)
+    tilemap:generate(3, 3)
 
     player.position.x = (tilemap.width * consts.TILE_SIZE) / 2
     player.position.y = (tilemap.height * consts.TILE_SIZE) / 2
