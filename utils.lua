@@ -124,7 +124,7 @@ function Main.draw_collision(collision)
     }
 
     for i, v in ipairs(collision.types) do
-        if type_colors[t] then
+        if type_colors[v] then
             r = r + type_colors[t][1]
             g = g + type_colors[t][2]
             b = b + type_colors[t][3]
