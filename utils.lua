@@ -219,11 +219,7 @@ function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keepi
         })
         wall_x = wall_x + consts.WALL_TILE_SIZE
     end
-
-    table.insert(self.tilemap, {
-        tile = wall_tiles[1],
-        position = {x = wall_x, y = wall_y}
-    })
+    
     table.insert(self.tilemap, {
         tile = wall_tiles[1],
         position = {x = wall_x, y = wall_y}
