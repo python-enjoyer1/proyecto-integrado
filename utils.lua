@@ -80,28 +80,53 @@ function Main.Animation:draw(x, y, rotate, size, shade, shade_offset_x, shade_of
     love.graphics.draw(self.image, self.frames[self.current_frame], x, y, rotate, size, size, origin_x, origin_y)
 end
 
+function Main.has_type(collision, type) --R ts makes it easy to check for collision types
+    for _, v in ipairs(collision.types) do
+        if v == type then return true end
+    end
+    return false
+end
+
 function Main.check_collision(collision1, collision2)
     local x = collision1.x - collision1.width / 2
     local y = collision1.y - collision1.height / 2
     local x2 = collision2.x - collision2.width / 2
     local y2 = collision2.y - collision2.height / 2
 
-    return x < x2 + collision2.width and
+    local hit = x < x2 + collision2.width and
         x2 < x + collision1.width and
         y < y2 + collision2.height and
         y2 < y + collision1.height
+
+    if hit and (Main.has_type(collision1, "collisionbox") or Main.has_type(collision2, "collisionbox")) then
+        local dx = collision1.x - collision2.x
+        local dy = collision1.y - collision2.y
+
+        if math.abs(dx) > math.abs(dy) then
+            collision1.x = collision2.x + (dx > 0 and collision2.width / 2 + collision1.width / 2 or -(collision2.width / 2 + collision1.width / 2))
+        else
+            collision1.y = collision2.y + (dy > 0 and collision2.height / 2 + collision1.height / 2 or -(collision2.height / 2 + collision1.height / 2))
+        end
+    end
+
+    return hit
 end
 
 function Main.draw_collision(collision)
-    if collision.type == "hitbox" then
+    if Main.has_type(collision, "hitbox") then
         love.graphics.setColor(0, 0, 1)
-    elseif collision.type == "hurtbox" then
+    elseif Main.has_type(collision, "hurtbox") then
         love.graphics.setColor(1, 0, 0)
-    elseif collision.type == "collisionbox" then
+    elseif Main.has_type(collision, "collisionbox") then
         love.graphics.setColor(1, 1, 1)
     end
 
-    love.graphics.rectangle("line", collision.x, collision.y, collision.width, collision.height)
+    love.graphics.rectangle("line", 
+        collision.x - collision.width / 2, 
+        collision.y - collision.height / 2, 
+        collision.width, 
+        collision.height
+    )
 
     love.graphics.setColor(1, 1, 1)
 end
