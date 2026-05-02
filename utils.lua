@@ -81,15 +81,15 @@ function Main.Animation:draw(x, y, rotate, size, shade, shade_offset_x, shade_of
 end
 
 function Main.check_collision(collision1, collision2)
-    collision1.x = collision1.x - collision1.width / 2
-    collision1.y = collision1.y - collision1.height / 2
-    collision2.x = collision2.x - collision2.width / 2
-    collision2.y = collision2.y - collision2.height / 2
+    local x = collision1.x - collision1.width / 2
+    local y = collision1.y - collision1.height / 2
+    local x2 = collision2.x - collision2.width / 2
+    local y2 = collision2.y - collision2.height / 2
 
-    return collision1.x < collision2.x + collision2.width and
-        collision2.x < collision1.x + collision1.width and
-         collision1.y < collision2.y + collision2.height and
-         collision2.y < collision1.y + collision1.height
+    return x < x2 + collision2.width and
+        x2 < x + collision1.width and
+        y < y2 + collision2.height and
+        y2 < y + collision1.height
 end
 
 function Main.draw_collision(collision)
