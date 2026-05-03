@@ -13,6 +13,7 @@ Main.MIN_WIDTH_TILEMAP = 15
 Main.MAX_WIDTH_TILEMAP = 20
 Main.MIN_HEIGHT_TILEMAP = 10
 Main.MAX_HEIGHT_TILEMAP = 15
+Main.WALL_SHADOW_OFFSET = 5
 
 Main.ASSETS_PATH = "stuff/assets/"
 Main.TILE_PATH = "stuff/assets/tiles/"
@@ -21,5 +22,6 @@ Main.DEBUG = false
 Main.SHADING = true -- Maybe make it an option for performance?
 
 Main.BACKGROUND_COLOR = {0, 0, 0}
+Main.SHADOW_COLOR = {0, 0, 0, 0.5}
 
 return Main

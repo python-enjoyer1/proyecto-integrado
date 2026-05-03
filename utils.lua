@@ -69,7 +69,7 @@ function Main.Animation:draw(x, y, rotate, size, shade, shade_offset_x, shade_of
     shade = shade or false
     shade_offset_x = shade_offset_x or 0
     shade_offset_y = shade_offset_y or 0
-    shade_color = shade_color or {0, 0, 0}
+    shade_color = shade_color or consts.SHADOW_COLOR
     local origin_x, origin_y = self.sprite_width / 2, self.sprite_height / 2
     if shade then
         love.graphics.setColor(shade_color)
@@ -152,6 +152,10 @@ function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keepi
     self.walls = {}
     self.tilemap = {}
 
+    local corner_index = 1
+    local connector_index = 2
+    local edge_index = 3
+
     premade = premade or nil
     wall_tile_number = wall_tile_number or 0
 
@@ -190,13 +194,14 @@ function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keepi
     local wall_x = -consts.WALL_TILE_SIZE / 2-- So they also fill the corners.
     local wall_y = -consts.WALL_TILE_SIZE / 2
 
-    for i = 1, (self.height * 2 + -wall_y / consts.WALL_TILE_SIZE) + 1 do -- Since wall_y is already negative it will make it so no tiles are missing at the bottom.
-        table.insert(self.tilemap, { -- Fills the corner of the room.
-            tile = wall_tiles[1], -- Later change to the index that corresponds to the corner.
+    for i = 1, (self.height * 2 + -wall_y / consts.WALL_TILE_SIZE) + 1 do
+        table.insert(self.tilemap, {
+            tile = wall_tiles[edge_index],
             position = {x = wall_x, y = wall_y},
-            rotation = math.pi / 2,
+            rotation = math.rad(90),
             origin_x = consts.WALL_TILE_SIZE / 2,
-            origin_y = consts.WALL_TILE_SIZE / 2
+            origin_y = consts.WALL_TILE_SIZE / 2,
+            tile_type = "left"
         })
 
         table.insert(self.walls, {
@@ -208,14 +213,15 @@ function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keepi
         })
         wall_y = wall_y + consts.WALL_TILE_SIZE
     end
+
     wall_x = 0
     wall_y = consts.WALL_TILE_SIZE - consts.TILE_SIZE
 
     for i = 1, self.width * (consts.TILE_SIZE / consts.WALL_TILE_SIZE) do
         table.insert(self.tilemap, {
-                tile = wall_tiles[3],
+                tile = wall_tiles[edge_index],
                 position = {x = wall_x, y = wall_y},
-                rotation = 0
+                tile_type = "upper"
         })
 
         table.insert(self.walls, {
@@ -229,31 +235,19 @@ function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keepi
         wall_x = wall_x + consts.WALL_TILE_SIZE
     end
 
-    table.insert(self.tilemap, {
-        tile = wall_tiles[2],
-        position = {x = wall_x, y = wall_y},
-        rotation = 0
-    })
-
-    table.insert(self.walls, {
-        x = wall_x + consts.WALL_TILE_SIZE / 2,
-        y = wall_y + consts.WALL_TILE_SIZE / 2,
-        width = consts.WALL_TILE_SIZE,
-        height = consts.WALL_TILE_SIZE,
-        types = {"collisionbox"}
-    })
-
     local right_x = self.width * consts.TILE_SIZE + consts.WALL_TILE_SIZE / 2
     local right_y = -consts.WALL_TILE_SIZE + consts.WALL_TILE_SIZE / 2
 
     for i = 1, (self.height * 2) + 1 do
         table.insert(self.tilemap, {
-            tile = wall_tiles[3],
-            position = {x = right_x, y = right_y},
-            rotation = math.pi / 2,
+            tile = wall_tiles[edge_index],
+            position = {x = right_x, y = right_y + consts.WALL_TILE_SIZE},
+            rotation = math.rad(90),
             origin_x = consts.WALL_TILE_SIZE / 2,
-            origin_y = consts.WALL_TILE_SIZE / 2
+            origin_y = consts.WALL_TILE_SIZE / 2,
+            tile_type = "right"
         })
+
         table.insert(self.walls, {
             x = right_x + consts.WALL_TILE_SIZE / 2 - consts.WALL_TILE_SIZE / 2,
             y = right_y + consts.WALL_TILE_SIZE / 2 + consts.WALL_TILE_SIZE / 2,
@@ -264,14 +258,16 @@ function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keepi
         right_y = right_y + consts.WALL_TILE_SIZE
     end
 
-    local bottom_x = -consts.WALL_TILE_SIZE
+    local bottom_x = 0
     local bottom_y = self.height * consts.TILE_SIZE
 
-    for i = 1, self.width * (consts.TILE_SIZE / consts.WALL_TILE_SIZE) + 2 do
+    for i = 1, self.width * (consts.TILE_SIZE / consts.WALL_TILE_SIZE) do
         table.insert(self.tilemap, {
-            tile = wall_tiles[1],
-            position = {x = bottom_x, y = bottom_y}
+            tile = wall_tiles[edge_index],
+            position = {x = bottom_x, y = bottom_y},
+            tile_type = "lower"
         })
+
         table.insert(self.walls, {
             x = bottom_x + consts.WALL_TILE_SIZE / 2,
             y = bottom_y + consts.WALL_TILE_SIZE / 2,
@@ -281,16 +277,92 @@ function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keepi
         })
         bottom_x = bottom_x + consts.WALL_TILE_SIZE
     end
+
+    -- Top left corner.
+    table.insert(self.tilemap, {
+        tile = wall_tiles[corner_index],
+        position = {x = -consts.WALL_TILE_SIZE + consts.WALL_TILE_SIZE, y = -consts.WALL_TILE_SIZE},
+        width = consts.WALL_TILE_SIZE,
+        height = consts.WALL_TILE_SIZE,
+        types = {"collisionbox"},
+        rotation = math.rad(90)
+    })
+
+    table.insert(self.walls, {
+        x = -consts.WALL_TILE_SIZE / 2,
+        y = -consts.WALL_TILE_SIZE / 2,
+        width = consts.WALL_TILE_SIZE,
+        height = consts.WALL_TILE_SIZE,
+        types = {"collisionbox"}
+    })
+
+    -- Top right corner.
+    table.insert(self.tilemap, {
+        tile = wall_tiles[corner_index],
+        position = {x = wall_x + consts.WALL_TILE_SIZE, y = wall_y + consts.WALL_TILE_SIZE},
+        width = consts.WALL_TILE_SIZE,
+        height = consts.WALL_TILE_SIZE,
+        types = {"collisionbox"},
+        rotation = math.rad(180)
+    })
+
+    table.insert(self.walls, {
+        x = wall_x + consts.WALL_TILE_SIZE / 2,
+        y = wall_y + consts.WALL_TILE_SIZE / 2,
+        width = consts.WALL_TILE_SIZE,
+        height = consts.WALL_TILE_SIZE,
+        types = {"collisionbox"}
+    })
+
+    -- Bottom left corner.
+    table.insert(self.tilemap, {
+        tile = wall_tiles[corner_index],
+        position = {x = -consts.WALL_TILE_SIZE, y = right_y - consts.WALL_TILE_SIZE / 2},
+        width = consts.WALL_TILE_SIZE,
+        height = consts.WALL_TILE_SIZE,
+        types = {"collisionbox"}
+    })
+
+    -- Right bottom corner.
+    table.insert(self.tilemap, {
+        tile = wall_tiles[corner_index],
+        position = {x = right_x - consts.WALL_TILE_SIZE / 2, y = right_y - consts.WALL_TILE_SIZE / 2 + consts.WALL_TILE_SIZE},
+        width = consts.WALL_TILE_SIZE,
+        height = consts.WALL_TILE_SIZE,
+        types = {"collisionbox"},
+        rotation = math.rad(270)
+    })
 end
 
 function Main.Tilemap:draw()
     for i = 1, #self.tilemap do
         love.graphics.push()
         love.graphics.scale(consts.TILE_SCALE, consts.TILE_SCALE)
+
+        local tile = self.tilemap[i].tile
+        local x = self.tilemap[i].position.x
+        local y = self.tilemap[i].position.y
+
         local r = self.tilemap[i].rotation or 0
         local ox = self.tilemap[i].origin_x or 0
         local oy = self.tilemap[i].origin_y or 0
-        love.graphics.draw(self.tilemap[i].tile, self.tilemap[i].position.x, self.tilemap[i].position.y, r, 1, 1, ox, oy)
+        local tile_type = self.tilemap[i].tile_type or nil
+
+        if consts.SHADING then
+            love.graphics.setColor(consts.SHADOW_COLOR)
+            if tile_type == "upper" then
+                love.graphics.draw(tile, x, y + consts.WALL_SHADOW_OFFSET, r, 1, 1, ox, oy)
+            elseif tile_type == "lower" then
+                love.graphics.draw(tile, x, y - consts.WALL_SHADOW_OFFSET, r, 1, 1, ox, oy)
+            elseif tile_type == "left" then
+                love.graphics.draw(tile, x + consts.WALL_SHADOW_OFFSET, y, r, 1, 1, ox, oy)
+            elseif tile_type == "right" then
+                love.graphics.draw(tile, x - consts.WALL_SHADOW_OFFSET, y, r, 1, 1, ox, oy)
+            end
+        end
+
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.draw(tile, x, y, r, 1, 1, ox, oy)
         love.graphics.pop()
     end
 end
