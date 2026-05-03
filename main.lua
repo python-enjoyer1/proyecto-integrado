@@ -1,5 +1,6 @@
 local love = require("love")
 local player = require("player")
+local enemy = require("enemy")
 local utils = require("utils")
 local consts = require("constants")
 
@@ -22,7 +23,7 @@ local soul_bar_frame
 
 local cursor
 
-local look_ahead = 40 --R Change to your liking or remove it entirely
+local look_ahead = 40
 
 -- For pre-loading. Loads stuff after loading modules.
 function love.load()
@@ -68,11 +69,14 @@ function love.update(dt)
     mouse_x = (mouse_x / scale_x)
     mouse_y = (mouse_y / scale_y)
 
+    enemy:update(dt, player)
+
     player:update(dt, scale_x, scale_y, global_offset_x, global_offset_y)
 
     for i = 1, #tilemap.walls do
         utils.check_collision(player.hitbox, tilemap.walls[i])
     end
+
     player.position.x = player.hitbox.x
     player.position.y = player.hitbox.y
 
@@ -92,6 +96,8 @@ function love.draw()
     love.graphics.translate(global_offset_x, global_offset_y)
 
     tilemap:draw()
+
+    enemy:draw()
 
     player:draw()
 

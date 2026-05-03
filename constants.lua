@@ -19,7 +19,10 @@ Main.ASSETS_PATH = "stuff/assets/"
 Main.TILE_PATH = "stuff/assets/tiles/"
 Main.DEBUG = false
 
-Main.SHADING = true -- Maybe make it an option for performance?
+Main.SHADING = true
+
+Main.MIN_ENEMY_SOUL = 5
+Main.MAX_ENEMY_SOUL = 20
 
 Main.BACKGROUND_COLOR = {0, 0, 0}
 Main.SHADOW_COLOR = {0, 0, 0, 0.5}

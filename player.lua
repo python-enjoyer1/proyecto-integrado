@@ -10,23 +10,17 @@ player_punch:manage_spritesheet(consts.ASSETS_PATH .. "characters/consumer/consu
 
 local mouse_x, mouse_y
 
--- We should make it so the screenshake only applies when punching an enemy.
-local screenshake = false
-local screenshake_duration = 0.1 -- For the punching. Also, making the screenshake into a function is difficult and unnecessary.
-local screenshake_magnitude = 3 --   ^^
-local screenshake_timer = 0
-
 -- local randomasfwall = {x = 200, y = 180, width = 90, height = 90, types = {"collisionbox"}} Great job, by the way.
 
 -- If you can think of more stats, then, add them.
 --R Remove the stats that you think wouldn't work, aight?
 local Player = {
     position = {x = 320, y = 180},
-    velocity = {x = 0, y = 0},
+    velocity = utils.Vector:new(),
     stats = {
         speed = 150,
         friction = 1, --R Floor friction
-        attack_damage = 1, --R We should prolly replace this with "dmg bonus" since stuff will have predetermined dmg
+        attack_damage = 10, --R We should prolly replace this with "dmg bonus" since stuff will have predetermined dmg
         attack_speed = 5,
         crit_chance = 1, --R You did mention something about adding critical hits to the game didn't you? -- No, but it's a good idea.
         knockback = 3,
