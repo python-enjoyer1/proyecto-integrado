@@ -16,7 +16,7 @@ Main.MAX_HEIGHT_TILEMAP = 15
 
 Main.ASSETS_PATH = "stuff/assets/"
 Main.TILE_PATH = "stuff/assets/tiles/"
-Main.DEBUG = true
+Main.DEBUG = false
 
 Main.SHADING = true -- Maybe make it an option for performance?
 
