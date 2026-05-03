@@ -188,31 +188,8 @@ function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keepi
     end
 
     local wall_x = -consts.WALL_TILE_SIZE / 2-- So they also fill the corners.
-    local wall_y = -consts.WALL_TILE_SIZE /2
+    local wall_y = -consts.WALL_TILE_SIZE / 2
 
-<<<<<<< HEAD
-    table.insert(self.tilemap, {
-        tile = wall_tiles[2],
-        position = {x = wall_x, y = wall_y},
-        rotation = 0
-    })
-
-    table.insert(self.walls, {
-        x = wall_x + (consts.WALL_TILE_SIZE / 2),
-        y = wall_y + (consts.WALL_TILE_SIZE / 2),
-        width = consts.WALL_TILE_SIZE,
-        height = consts.WALL_TILE_SIZE,
-        types = {"collisionbox"}
-    })
-
-    wall_y = wall_y + consts.WALL_TILE_SIZE
-
-    for i = 1, self.height * (consts.TILE_SIZE / consts.WALL_TILE_SIZE) do
-        table.insert(self.tilemap, {
-            tile = wall_tiles[3],
-            position = {x = wall_x, y = wall_y},
-            rotation = 0
-=======
     for i = 1, (self.height * 2 + -wall_y / consts.WALL_TILE_SIZE) + 1 do -- Since wall_y is already negative it will make it so no tiles are missing at the bottom.
         table.insert(self.tilemap, { -- Fills the corner of the room.
             tile = wall_tiles[1], -- Later change to the index that corresponds to the corner.
@@ -220,24 +197,18 @@ function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keepi
             rotation = math.pi / 2,
             origin_x = consts.WALL_TILE_SIZE / 2,
             origin_y = consts.WALL_TILE_SIZE / 2
->>>>>>> e4756ae6f862f7da09bab4e2be7dfbaff36bf852
         })
 
         table.insert(self.walls, {
-            x = wall_x + consts.WALL_TILE_SIZE / 2,
-            y = wall_y + consts.WALL_TILE_SIZE / 2,
+            x = wall_x + consts.WALL_TILE_SIZE / 2 - consts.WALL_TILE_SIZE / 2,
+            y = wall_y + consts.WALL_TILE_SIZE / 2 + consts.WALL_TILE_SIZE / 2,
             width =  consts.WALL_TILE_SIZE,
             height = consts.WALL_TILE_SIZE,
             types = {"collisionbox"}
         })
         wall_y = wall_y + consts.WALL_TILE_SIZE
     end
-<<<<<<< HEAD
-
-    wall_x = wall_x + consts.WALL_TILE_SIZE
-=======
     wall_x = 0
->>>>>>> e4756ae6f862f7da09bab4e2be7dfbaff36bf852
     wall_y = consts.WALL_TILE_SIZE - consts.TILE_SIZE
 
     for i = 1, self.width * (consts.TILE_SIZE / consts.WALL_TILE_SIZE) do
@@ -272,20 +243,20 @@ function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keepi
         types = {"collisionbox"}
     })
 
-    local right_x = self.width * consts.TILE_SIZE + 8
-    local right_y = -consts.WALL_TILE_SIZE + 8
+    local right_x = self.width * consts.TILE_SIZE + consts.WALL_TILE_SIZE / 2
+    local right_y = -consts.WALL_TILE_SIZE + consts.WALL_TILE_SIZE / 2
 
-    for i = 1, (self.height * 2 + 1) + 1 do
+    for i = 1, (self.height * 2) + 1 do
         table.insert(self.tilemap, {
-            tile = wall_tiles[1],
+            tile = wall_tiles[3],
             position = {x = right_x, y = right_y},
             rotation = math.pi / 2,
             origin_x = consts.WALL_TILE_SIZE / 2,
             origin_y = consts.WALL_TILE_SIZE / 2
         })
         table.insert(self.walls, {
-            x = right_x + consts.WALL_TILE_SIZE / 2,
-            y = right_y + consts.WALL_TILE_SIZE / 2,
+            x = right_x + consts.WALL_TILE_SIZE / 2 - consts.WALL_TILE_SIZE / 2,
+            y = right_y + consts.WALL_TILE_SIZE / 2 + consts.WALL_TILE_SIZE / 2,
             width = consts.WALL_TILE_SIZE,
             height = consts.WALL_TILE_SIZE,
             types = {"collisionbox"}
