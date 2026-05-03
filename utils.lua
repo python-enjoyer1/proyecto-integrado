@@ -98,7 +98,7 @@ function Main.check_collision(collision1, collision2)
         y < y2 + collision2.height and
         y2 < y + collision1.height
 
-    if hit and (Main.has_type(collision1, "collisionbox") or Main.has_type(collision2, "collisionbox")) then
+    if hit and (Main.has_type(collision1, "collisionbox") and Main.has_type(collision2, "collisionbox")) then
         local dx = collision1.x - collision2.x
         local dy = collision1.y - collision2.y
 

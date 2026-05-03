@@ -15,9 +15,14 @@ local Enemy = {
         soul_amount = love.math.random(consts.MIN_ENEMY_SOUL, consts.MAX_ENEMY_SOUL),
         essence_amount = love.math.random(consts.MIN_ENEMY_ESSENCE, consts.MAX_ENEMY_ESSENCE)
     },
-    states = {},
+    states = {
+        idle = false,
+        punch = false
+    },
+    animation = enemy_walk,
     angle = 0,
-    min_distance = 30
+    min_distance = 30,
+    hitbox = {x = 100, y = 100, width = consts.CHARACTER_SIZE / 2, height = consts.CHARACTER_SIZE / 2, types = {"hitbox"}}
 }
 
 function Enemy:update(dt, target)
@@ -36,15 +41,29 @@ function Enemy:update(dt, target)
 
         self.position.x = self.position.x + (self.velocity.x * dt)
         self.position.y = self.position.y + (self.velocity.y * dt)
+
+        self.states.idle = false
+    else
+        self.states.idle = true
+        self.animation.current_frame = 1
     end
+
+    self.hitbox.x = self.position.x
+    self.hitbox.y = self.position.y
+
+    utils.check_collision(self.hitbox, target.hitbox)
 
     self.angle = math.atan2(target.position.y - self.position.y, target.position.x - self.position.x)
 
-    enemy_walk:update(dt)
+    self.animation:update(dt, self.states.idle)
 end
 
 function Enemy:draw()
     enemy_walk:draw(self.position.x, self.position.y, self.angle, 1, consts.SHADING, 0, 3)
+
+    if consts.DEBUG then
+        utils.draw_collision(self.hitbox)
+    end
 end
 
 return Enemy

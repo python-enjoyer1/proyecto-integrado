@@ -4,6 +4,8 @@ local enemy = require("enemy")
 local utils = require("utils")
 local consts = require("constants")
 
+local canvas
+
 -- Declare variables here, local please.
 local desktop_width, desktop_height
 local scale_x, scale_y
@@ -28,14 +30,17 @@ local look_ahead = 40
 -- For pre-loading. Loads stuff after loading modules.
 function love.load()
     love.mouse.setVisible(false)
+    love.graphics.setDefaultFilter(consts.DEFAULT_FILTER, consts.DEFAULT_FILTER)
+
+    canvas = love.graphics.newCanvas(consts.RENDER_WIDTH, consts.RENDER_HEIGHT)
 
     camera_movement = 0
     global_offset_x = 0
     global_offset_y = 0
 
     desktop_width, desktop_height = love.window.getDesktopDimensions()
-    scale_x = math.floor(desktop_width / consts.RENDER_WIDTH)
-    scale_y = math.floor(desktop_height / consts.RENDER_HEIGHT)
+    scale_x = desktop_width / consts.RENDER_WIDTH
+    scale_y = desktop_height / consts.RENDER_HEIGHT
 
     tilemap = utils.Tilemap:new({type = "high", width = 1, height = 1})
     tilemap:generate(3, 3)
@@ -88,9 +93,13 @@ function love.update(dt)
 end
 
 function love.draw()
+    love.graphics.setCanvas(canvas)
+    love.graphics.clear()
+
+
     love.graphics.setBackgroundColor(consts.BACKGROUND_COLOR)
 
-    love.graphics.scale(scale_x, scale_y)
+    --love.graphics.scale(scale_x, scale_y)
 
     love.graphics.push()
     love.graphics.translate(global_offset_x, global_offset_y)
@@ -116,7 +125,9 @@ function love.draw()
     soul_bar_frame:draw(65, 20)
 
     cursor:draw(mouse_x, mouse_y, 0, 1, consts.SHADING, 0, 2)
+    love.graphics.setCanvas()
 
+    love.graphics.draw(canvas, 0, 0, 0, scale_x, scale_y)
 end
 
 function love.keypressed(key)
