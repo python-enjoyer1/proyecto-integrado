@@ -1,3 +1,4 @@
+-- It seems that making the repo private does not change much.
 local love = require("love")
 local player = require("player")
 local enemies = require("enemies")
