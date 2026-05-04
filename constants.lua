@@ -17,8 +17,9 @@ Main.WALL_SHADOW_OFFSET = 5
 
 Main.ASSETS_PATH = "stuff/assets/"
 Main.TILE_PATH = "stuff/assets/tiles/"
-Main.DEBUG = false
+Main.SHADERS_PATH = "stuff/shaders/"
 
+Main.DEBUG = false
 Main.SHADING = true
 
 Main.MIN_ENEMY_SOUL = 5

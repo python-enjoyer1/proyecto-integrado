@@ -3,10 +3,10 @@ local utils = require("utils")
 local consts = require("constants")
 
 local player_walk = utils.Animation:new({speed = 0.08})
-local player_punch = utils.Animation:new({speed = 0.03})
+local player_punch = utils.Animation:new({speed = 0.04})
 
 player_walk:manage_spritesheet(consts.ASSETS_PATH .. "characters/consumer/consumer_walk.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 7, 3)
-player_punch:manage_spritesheet(consts.ASSETS_PATH .. "characters/consumer/consumer_punch.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 10, 3)
+player_punch:manage_spritesheet(consts.ASSETS_PATH .. "characters/consumer/consumer_punch.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 8, 3)
 
 local mouse_x, mouse_y
 

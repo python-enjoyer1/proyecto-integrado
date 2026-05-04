@@ -37,7 +37,7 @@ function Main.Animation:manage_spritesheet(image, width, height, sprite_number, 
     self.frames = {}
     self.sprite_width = width
     self.sprite_height = height
-    for i=0, sprite_number-1 do
+    for i = 0, sprite_number - 1 do
         local x = (i % columns) * self.sprite_width
         local y = math.floor(i / columns) * self.sprite_height
         table.insert(

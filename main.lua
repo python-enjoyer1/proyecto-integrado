@@ -1,8 +1,9 @@
 local love = require("love")
 local player = require("player")
-local enemy = require("enemy")
+local enemies = require("enemies")
 local utils = require("utils")
 local consts = require("constants")
+local shaders = require("shaders")
 
 local canvas
 
@@ -14,6 +15,9 @@ local mouse_x, mouse_y
 local camera_movement
 local global_offset_x
 local global_offset_y
+local look_ahead
+
+local enemy
 
 --R Tilemap shits
 local tilemap
@@ -25,7 +29,6 @@ local soul_bar_frame
 
 local cursor
 
-local look_ahead = 40
 
 -- For pre-loading. Loads stuff after loading modules.
 function love.load()
@@ -37,6 +40,7 @@ function love.load()
     camera_movement = 0
     global_offset_x = 0
     global_offset_y = 0
+    look_ahead = 40
 
     desktop_width, desktop_height = love.window.getDesktopDimensions()
     scale_x = desktop_width / consts.RENDER_WIDTH
@@ -47,6 +51,8 @@ function love.load()
 
     player.position.x = (tilemap.width * consts.TILE_SIZE) / 2
     player.position.y = (tilemap.height * consts.TILE_SIZE) / 2
+
+    enemy = enemies.Enemy:new()
 
     soul_bar = utils.Animation:new({speed = 0.07})
     soul_bar:manage_spritesheet(consts.ASSETS_PATH .. "hud/soul_bar.png", 128, 32, 21, 2)
@@ -96,10 +102,9 @@ function love.draw()
     love.graphics.setCanvas(canvas)
     love.graphics.clear()
 
-
-    love.graphics.setBackgroundColor(consts.BACKGROUND_COLOR)
-
-    --love.graphics.scale(scale_x, scale_y)
+    love.graphics.setShader(shaders.background)
+    love.graphics.rectangle("fill", 0, 0, consts.RENDER_WIDTH, consts.RENDER_HEIGHT)
+    love.graphics.setShader()
 
     love.graphics.push()
     love.graphics.translate(global_offset_x, global_offset_y)

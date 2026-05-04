@@ -2,11 +2,13 @@ local love = require("love")
 local utils = require("utils")
 local consts = require("constants")
 
+local Main = {}
+
 local enemy_walk = utils.Animation:new({speed = 0.1})
 
 enemy_walk:manage_spritesheet(consts.ASSETS_PATH .. "characters/enemies/basic_enemy/enemy_walk.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 8, 3)
 
-local Enemy = {
+Main.Enemy = {
     velocity = utils.Vector:new(),
     position = {x = 100, y = 100},
     stats = {
@@ -25,7 +27,15 @@ local Enemy = {
     hitbox = {x = 100, y = 100, width = consts.CHARACTER_SIZE / 2, height = consts.CHARACTER_SIZE / 2, types = {"hitbox"}}
 }
 
-function Enemy:update(dt, target)
+-- This is just so we can have inheritance between different enemy variations.
+function Main.Enemy:new(o)
+    o = o or {}
+    setmetatable(o, self)
+    self.__index = self
+    return o
+end
+
+function Main.Enemy:update(dt, target)
     local movement_vector = utils.Vector:new()
 
     movement_vector.x = target.position.x - self.position.x
@@ -58,7 +68,7 @@ function Enemy:update(dt, target)
     self.animation:update(dt, self.states.idle)
 end
 
-function Enemy:draw()
+function Main.Enemy:draw()
     enemy_walk:draw(self.position.x, self.position.y, self.angle, 1, consts.SHADING, 0, 3)
 
     if consts.DEBUG then
@@ -66,4 +76,4 @@ function Enemy:draw()
     end
 end
 
-return Enemy
+return Main
