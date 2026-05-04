@@ -204,13 +204,14 @@ function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keepi
             tile_type = "left"
         })
 
-        table.insert(self.walls, {
+        -- left side
+        --[[table.insert(self.walls, {
             x = wall_x + consts.WALL_TILE_SIZE / 2 - consts.WALL_TILE_SIZE / 2,
             y = wall_y + consts.WALL_TILE_SIZE / 2 + consts.WALL_TILE_SIZE / 2,
             width =  consts.WALL_TILE_SIZE,
             height = consts.WALL_TILE_SIZE,
             types = {"collisionbox"}
-        })
+        }) ]]
         wall_y = wall_y + consts.WALL_TILE_SIZE
     end
 
@@ -261,6 +262,7 @@ function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keepi
     local bottom_x = 0
     local bottom_y = self.height * consts.TILE_SIZE
 
+
     for i = 1, self.width * (consts.TILE_SIZE / consts.WALL_TILE_SIZE) do
         table.insert(self.tilemap, {
             tile = wall_tiles[edge_index],
@@ -288,14 +290,6 @@ function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keepi
         rotation = math.rad(90)
     })
 
-    table.insert(self.walls, {
-        x = -consts.WALL_TILE_SIZE / 2,
-        y = -consts.WALL_TILE_SIZE / 2,
-        width = consts.WALL_TILE_SIZE,
-        height = consts.WALL_TILE_SIZE,
-        types = {"collisionbox"}
-    })
-
     -- Top right corner.
     table.insert(self.tilemap, {
         tile = wall_tiles[corner_index],
@@ -304,14 +298,6 @@ function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keepi
         height = consts.WALL_TILE_SIZE,
         types = {"collisionbox"},
         rotation = math.rad(180)
-    })
-
-    table.insert(self.walls, {
-        x = wall_x + consts.WALL_TILE_SIZE / 2,
-        y = wall_y + consts.WALL_TILE_SIZE / 2,
-        width = consts.WALL_TILE_SIZE,
-        height = consts.WALL_TILE_SIZE,
-        types = {"collisionbox"}
     })
 
     -- Bottom left corner.
@@ -331,6 +317,14 @@ function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keepi
         height = consts.WALL_TILE_SIZE,
         types = {"collisionbox"},
         rotation = math.rad(270)
+    })
+
+    table.insert(self.walls, {
+        x = -consts.WALL_TILE_SIZE / 2,
+        y = consts.WALL_TILE_SIZE * self.height,
+        width = consts.WALL_TILE_SIZE,
+        height = (self.height * 2) * consts.WALL_TILE_SIZE,
+        types = {"collisionbox"}
     })
 end
 
