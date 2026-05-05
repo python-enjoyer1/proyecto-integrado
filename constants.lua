@@ -19,7 +19,7 @@ Main.ASSETS_PATH = "stuff/assets/"
 Main.TILE_PATH = "stuff/assets/tiles/"
 Main.SHADERS_PATH = "stuff/shaders/"
 
-Main.DEBUG = false
+Main.DEBUG = true
 Main.SHADING = true
 
 Main.MIN_ENEMY_SOUL = 5

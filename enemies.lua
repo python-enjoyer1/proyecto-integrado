@@ -8,14 +8,19 @@ local enemy_walk = utils.Animation:new({speed = 0.1, looping = true})
 
 enemy_walk:manage_spritesheet(consts.ASSETS_PATH .. "characters/enemies/basic_enemy/enemy_walk.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 8, 3)
 
+local default_stun = 3
+
 Main.Enemy = {
     velocity = utils.Vector:new(),
     position = {x = 100, y = 100},
     stats = {
+        hp = 20,
         speed = 100,
         attack_damage = 5,
         soul_amount = love.math.random(consts.MIN_ENEMY_SOUL, consts.MAX_ENEMY_SOUL),
-        essence_amount = love.math.random(consts.MIN_ENEMY_ESSENCE, consts.MAX_ENEMY_ESSENCE)
+        essence_amount = love.math.random(consts.MIN_ENEMY_ESSENCE, consts.MAX_ENEMY_ESSENCE),
+        weight = 10,
+        stun_duration = 0
     },
     states = {
         idle = false,
@@ -49,8 +54,12 @@ function Main.Enemy:update(dt, target)
         self.velocity.x = movement_vector.x * self.stats.speed
         self.velocity.y = movement_vector.y * self.stats.speed
 
-        self.position.x = self.position.x + (self.velocity.x * dt)
-        self.position.y = self.position.y + (self.velocity.y * dt)
+        if self.stats.stun_duration <= 0 then
+            self.position.x = self.position.x + (self.velocity.x * dt)
+            self.position.y = self.position.y + (self.velocity.y * dt)
+        else
+            self.stats.stun_duration = self.stats.stun_duration - dt
+        end
 
         self.states.idle = false
     else
@@ -65,7 +74,18 @@ function Main.Enemy:update(dt, target)
 
     if target.punch_hurtbox.active then
         if utils.check_collision(self.hitbox, target.punch_hurtbox) then
-            --R damage thing here
+            self.stats.stun_duration = default_stun
+            if target.punch_hurtbox.x - target.hitbox.x < 0 then
+                self.position.x = utils.lerp(self.position.x, self.position.x - target.stats.knockback / self.stats.weight, 2, dt)
+            else
+                self.position.x = utils.lerp(self.position.x, self.position.x + target.stats.knockback / self.stats.weight, 2, dt)
+            end
+
+            if target.punch_hurtbox.y - target.hitbox.y < 0 then
+                self.position.y = utils.lerp(self.position.y, self.position.y - target.stats.knockback / self.stats.weight, 4, dt)
+            else
+                self.position.y = utils.lerp(self.position.y, self.position.y + target.stats.knockback, 4, dt)
+            end
         end
     end
 
