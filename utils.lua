@@ -256,7 +256,7 @@ function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keepi
         bottom_x = bottom_x + consts.WALL_TILE_SIZE
     end
 
-    -- left wall
+    --R left wall
     table.insert(self.walls, {
         x = -consts.WALL_TILE_SIZE / 2,
         y = self.height * consts.TILE_SIZE / 2,
@@ -265,7 +265,7 @@ function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keepi
         types = {"collisionbox"}
     })
 
-    -- right wall
+    --R right wall
     table.insert(self.walls, {
         x = self.width * consts.TILE_SIZE + consts.WALL_TILE_SIZE / 2,
         y = self.height * consts.TILE_SIZE / 2,
@@ -274,7 +274,7 @@ function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keepi
         types = {"collisionbox"}
     })
 
-    -- top wall
+    --R top wall
     table.insert(self.walls, {
         x = self.width * consts.TILE_SIZE / 2,
         y = -consts.WALL_TILE_SIZE / 2,
@@ -283,7 +283,7 @@ function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keepi
         types = {"collisionbox"}
     })
 
-    -- bottom wall
+    --R bottom wall
     table.insert(self.walls, {
         x = self.width * consts.TILE_SIZE / 2,
         y = self.height * consts.TILE_SIZE + consts.WALL_TILE_SIZE / 2,
