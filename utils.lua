@@ -256,6 +256,33 @@ function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keepi
         bottom_x = bottom_x + consts.WALL_TILE_SIZE
     end
 
+    -- Top right corner.
+    table.insert(self.tilemap, {
+        tile = wall_tiles[corner_index],
+        position = {x = wall_x + consts.WALL_TILE_SIZE, y = wall_y + consts.WALL_TILE_SIZE},
+        rotation = math.rad(180)
+    })
+
+    -- Bottom right corner.
+    table.insert(self.tilemap, {
+        tile = wall_tiles[corner_index],
+        position = {x = wall_x, y = consts.WALL_TILE_SIZE * (self.height * 2) + consts.WALL_TILE_SIZE},
+        rotation = math.rad(270)
+    })
+
+    -- Bottom left corner.
+    table.insert(self.tilemap, {
+        tile = wall_tiles[corner_index],
+        position = {x = -consts.WALL_TILE_SIZE, y = consts.WALL_TILE_SIZE * (self.height * 2)}
+    })
+
+    -- Top left corner.
+    table.insert(self.tilemap, {
+        tile = wall_tiles[corner_index],
+        position = {x = 0, y = -consts.WALL_TILE_SIZE},
+        rotation = math.rad(90)
+    })
+
     --R left wall
     table.insert(self.walls, {
         x = -consts.WALL_TILE_SIZE / 2,
