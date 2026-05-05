@@ -2,8 +2,8 @@ local love = require("love")
 local utils = require("utils")
 local consts = require("constants")
 
-local player_walk = utils.Animation:new({speed = 0.08})
-local player_punch = utils.Animation:new({speed = 0.04})
+local player_walk = utils.Animation:new({speed = 0.08, looping = true})
+local player_punch = utils.Animation:new({speed = 0.04, looping = false})
 
 player_walk:manage_spritesheet(consts.ASSETS_PATH .. "characters/consumer/consumer_walk.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 7, 3)
 player_punch:manage_spritesheet(consts.ASSETS_PATH .. "characters/consumer/consumer_punch.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 8, 3)
@@ -41,7 +41,8 @@ local Player = {
     },
     angle = 0,
     animation = player_walk,
-    hitbox = {x = 320, y = 180, width = consts.CHARACTER_SIZE / 2, height = consts.CHARACTER_SIZE / 2, types = {"hitbox", "collisionbox"}}
+    hitbox = {x = 320, y = 180, width = consts.CHARACTER_SIZE / 2, height = consts.CHARACTER_SIZE / 2, types = {"hitbox", "collisionbox"}},
+    punch_hurtbox = {x = 0, y = 0, width = 20, height = 20, types = {"hurtbox"}, active = false}
 }
 
 function Player:update(dt, scale_x, scale_y, offset_x, offset_y)
@@ -90,13 +91,21 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y)
     mouse_y = mouse_y / scale_y
     self.angle = math.atan2(mouse_y - self.position.y - offset_y, mouse_x - self.position.x - offset_x) -- RADIANS ALL THE FUCKING TIME.
 
-    if self.states.punch then
-        if player_punch.current_frame >= #player_punch.frames then
+    self.animation:update(dt, self.states.idle)
+
+    if self.states.punch and player_punch.current_frame >= 5 and player_punch.current_frame <= 7 then
+        self.punch_hurtbox.active = true
+        local reach = 20
+        self.punch_hurtbox.x = self.position.x + math.cos(self.angle) * reach
+        self.punch_hurtbox.y = self.position.y + math.sin(self.angle) * reach
+    else
+        self.punch_hurtbox.active = false
+        if player_punch.finished then
             self.states.punch = false
             self.animation = player_walk
+            player_punch.finished = false
         end
     end
-    self.animation:update(dt, self.states.idle)
     -- utils.check_collision(self.hitbox, randomasfwall)
 
     self.position.x = self.hitbox.x
@@ -108,6 +117,9 @@ function Player:draw()
 
     if consts.DEBUG then
         utils.draw_collision(self.hitbox)
+        if self.punch_hurtbox.active then
+            utils.draw_collision(self.punch_hurtbox)
+        end
     end
     -- utils.draw_collision(randomasfwall)
 end

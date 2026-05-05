@@ -51,13 +51,19 @@ end
 function Main.Animation:update(dt, paused)
     paused = paused or false
     if not paused then
-        self.timer = (self.timer or 0) + dt --R (self.timer or 0) just checks whether self.timer exists, if it doesn't then it uses 0 instead
+        self.timer = (self.timer or 0) + dt
         if self.timer >= self.speed then
             self.timer = self.timer - self.speed
+            if self.finished then return end  -- stay on last frame
             self.current_frame = self.current_frame + 1
 
             if self.current_frame > #self.frames then
-                self.current_frame = 1
+                if self.looping == false then
+                    self.current_frame = #self.frames
+                    self.finished = true
+                else
+                    self.current_frame = 1
+                end
             end
         end
     end
@@ -88,7 +94,7 @@ function Main.has_type(collision, type) --R ts makes it easy to check for collis
 end
 
 function Main.check_collision(collision1, collision2)
-    local x = collision1.x - collision1.width / 2 -- Centering, I assume.
+    local x = collision1.x - collision1.width / 2
     local y = collision1.y - collision1.height / 2
     local x2 = collision2.x - collision2.width / 2
     local y2 = collision2.y - collision2.height / 2
@@ -98,14 +104,17 @@ function Main.check_collision(collision1, collision2)
         y < y2 + collision2.height and
         y2 < y + collision1.height
 
-    if hit and (Main.has_type(collision1, "collisionbox") and Main.has_type(collision2, "collisionbox")) then
+    if hit and (Main.has_type(collision1, "collisionbox") or Main.has_type(collision2, "collisionbox")) then
         local dx = collision1.x - collision2.x
         local dy = collision1.y - collision2.y
 
-        if math.abs(dx) > math.abs(dy) then
-            collision1.x = collision2.x + (dx > 0 and collision2.width / 2 + collision1.width / 2 or -(collision2.width / 2 + collision1.width / 2))
+        local overlap_x = (collision1.width / 2 + collision2.width / 2) - math.abs(dx)
+        local overlap_y = (collision1.height / 2 + collision2.height / 2) - math.abs(dy)
+
+        if overlap_x < overlap_y then
+            collision1.x = collision1.x + (dx > 0 and overlap_x or -overlap_x)
         else
-            collision1.y = collision2.y + (dy > 0 and collision2.height / 2 + collision1.height / 2 or -(collision2.height / 2 + collision1.height / 2))
+            collision1.y = collision1.y + (dy > 0 and overlap_y or -overlap_y)
         end
     end
 
@@ -203,15 +212,6 @@ function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keepi
             origin_y = consts.WALL_TILE_SIZE / 2,
             tile_type = "left"
         })
-
-        -- left side
-        --[[table.insert(self.walls, {
-            x = wall_x + consts.WALL_TILE_SIZE / 2 - consts.WALL_TILE_SIZE / 2,
-            y = wall_y + consts.WALL_TILE_SIZE / 2 + consts.WALL_TILE_SIZE / 2,
-            width =  consts.WALL_TILE_SIZE,
-            height = consts.WALL_TILE_SIZE,
-            types = {"collisionbox"}
-        }) ]]
         wall_y = wall_y + consts.WALL_TILE_SIZE
     end
 
@@ -223,14 +223,6 @@ function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keepi
                 tile = wall_tiles[edge_index],
                 position = {x = wall_x, y = wall_y},
                 tile_type = "upper"
-        })
-
-        table.insert(self.walls, {
-            x = wall_x + consts.WALL_TILE_SIZE / 2,
-            y = wall_y + consts.WALL_TILE_SIZE / 2,
-            width = consts.WALL_TILE_SIZE,
-            height = consts.WALL_TILE_SIZE,
-            types = {"collisionbox"}
         })
 
         wall_x = wall_x + consts.WALL_TILE_SIZE
@@ -248,14 +240,6 @@ function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keepi
             origin_y = consts.WALL_TILE_SIZE / 2,
             tile_type = "right"
         })
-
-        table.insert(self.walls, {
-            x = right_x + consts.WALL_TILE_SIZE / 2 - consts.WALL_TILE_SIZE / 2,
-            y = right_y + consts.WALL_TILE_SIZE / 2 + consts.WALL_TILE_SIZE / 2,
-            width = consts.WALL_TILE_SIZE,
-            height = consts.WALL_TILE_SIZE,
-            types = {"collisionbox"}
-        })
         right_y = right_y + consts.WALL_TILE_SIZE
     end
 
@@ -269,61 +253,42 @@ function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keepi
             position = {x = bottom_x, y = bottom_y},
             tile_type = "lower"
         })
-
-        table.insert(self.walls, {
-            x = bottom_x + consts.WALL_TILE_SIZE / 2,
-            y = bottom_y + consts.WALL_TILE_SIZE / 2,
-            width = consts.WALL_TILE_SIZE,
-            height = consts.WALL_TILE_SIZE,
-            types = {"collisionbox"}
-        })
         bottom_x = bottom_x + consts.WALL_TILE_SIZE
     end
 
-    -- Top left corner.
-    table.insert(self.tilemap, {
-        tile = wall_tiles[corner_index],
-        position = {x = -consts.WALL_TILE_SIZE + consts.WALL_TILE_SIZE, y = -consts.WALL_TILE_SIZE},
+    -- left wall
+    table.insert(self.walls, {
+        x = -consts.WALL_TILE_SIZE / 2,
+        y = self.height * consts.TILE_SIZE / 2,
         width = consts.WALL_TILE_SIZE,
-        height = consts.WALL_TILE_SIZE,
-        types = {"collisionbox"},
-        rotation = math.rad(90)
+        height = self.height * consts.TILE_SIZE + consts.WALL_TILE_SIZE * 2,
+        types = {"collisionbox"}
     })
 
-    -- Top right corner.
-    table.insert(self.tilemap, {
-        tile = wall_tiles[corner_index],
-        position = {x = wall_x + consts.WALL_TILE_SIZE, y = wall_y + consts.WALL_TILE_SIZE},
+    -- right wall
+    table.insert(self.walls, {
+        x = self.width * consts.TILE_SIZE + consts.WALL_TILE_SIZE / 2,
+        y = self.height * consts.TILE_SIZE / 2,
         width = consts.WALL_TILE_SIZE,
-        height = consts.WALL_TILE_SIZE,
-        types = {"collisionbox"},
-        rotation = math.rad(180)
+        height = self.height * consts.TILE_SIZE + consts.WALL_TILE_SIZE * 2,
+        types = {"collisionbox"}
     })
 
-    -- Bottom left corner.
-    table.insert(self.tilemap, {
-        tile = wall_tiles[corner_index],
-        position = {x = -consts.WALL_TILE_SIZE, y = right_y - consts.WALL_TILE_SIZE / 2},
-        width = consts.WALL_TILE_SIZE,
+    -- top wall
+    table.insert(self.walls, {
+        x = self.width * consts.TILE_SIZE / 2,
+        y = -consts.WALL_TILE_SIZE / 2,
+        width = self.width * consts.TILE_SIZE + consts.WALL_TILE_SIZE * 2,
         height = consts.WALL_TILE_SIZE,
         types = {"collisionbox"}
     })
 
-    -- Right bottom corner.
-    table.insert(self.tilemap, {
-        tile = wall_tiles[corner_index],
-        position = {x = right_x - consts.WALL_TILE_SIZE / 2, y = right_y - consts.WALL_TILE_SIZE / 2 + consts.WALL_TILE_SIZE},
-        width = consts.WALL_TILE_SIZE,
-        height = consts.WALL_TILE_SIZE,
-        types = {"collisionbox"},
-        rotation = math.rad(270)
-    })
-
+    -- bottom wall
     table.insert(self.walls, {
-        x = -consts.WALL_TILE_SIZE / 2,
-        y = consts.WALL_TILE_SIZE * self.height,
-        width = consts.WALL_TILE_SIZE,
-        height = (self.height * 2) * consts.WALL_TILE_SIZE,
+        x = self.width * consts.TILE_SIZE / 2,
+        y = self.height * consts.TILE_SIZE + consts.WALL_TILE_SIZE / 2,
+        width = self.width * consts.TILE_SIZE + consts.WALL_TILE_SIZE * 2,
+        height = consts.WALL_TILE_SIZE,
         types = {"collisionbox"}
     })
 end

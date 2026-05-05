@@ -4,7 +4,7 @@ local consts = require("constants")
 
 local Main = {}
 
-local enemy_walk = utils.Animation:new({speed = 0.1})
+local enemy_walk = utils.Animation:new({speed = 0.1, looping = true})
 
 enemy_walk:manage_spritesheet(consts.ASSETS_PATH .. "characters/enemies/basic_enemy/enemy_walk.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 8, 3)
 
@@ -61,7 +61,13 @@ function Main.Enemy:update(dt, target)
     self.hitbox.x = self.position.x
     self.hitbox.y = self.position.y
 
-    utils.check_collision(self.hitbox, target.hitbox)
+    --utils.check_collision(self.hitbox, target.hitbox) R dont do this
+
+    if target.punch_hurtbox.active then
+        if utils.check_collision(self.hitbox, target.punch_hurtbox) then
+            --R damage thing here
+        end
+    end
 
     self.angle = math.atan2(target.position.y - self.position.y, target.position.x - self.position.x)
 
