@@ -76,15 +76,15 @@ function Main.Enemy:update(dt, target)
         if utils.check_collision(self.hitbox, target.punch_hurtbox) then
             self.stats.stun_duration = default_stun
             if target.punch_hurtbox.x - target.hitbox.x < 0 then
-                self.position.x = utils.lerp(self.position.x, self.position.x - target.stats.knockback / self.stats.weight, 2, dt)
+                self.position.x = utils.lerp(self.position.x, self.position.x - target.stats.knockback / self.stats.weight, 4, dt)
             else
-                self.position.x = utils.lerp(self.position.x, self.position.x + target.stats.knockback / self.stats.weight, 2, dt)
+                self.position.x = utils.lerp(self.position.x, self.position.x + target.stats.knockback / self.stats.weight, 4, dt)
             end
 
             if target.punch_hurtbox.y - target.hitbox.y < 0 then
                 self.position.y = utils.lerp(self.position.y, self.position.y - target.stats.knockback / self.stats.weight, 4, dt)
             else
-                self.position.y = utils.lerp(self.position.y, self.position.y + target.stats.knockback, 4, dt)
+                self.position.y = utils.lerp(self.position.y, self.position.y + target.stats.knockback / self.stats.weight, 4, dt)
             end
         end
     end

@@ -104,6 +104,7 @@ function love.draw()
     love.graphics.clear()
 
     love.graphics.setShader(shaders.background)
+    shaders.background:send("screen_size", {consts.RENDER_WIDTH, consts.RENDER_HEIGHT})
     love.graphics.rectangle("fill", 0, 0, consts.RENDER_WIDTH, consts.RENDER_HEIGHT)
     love.graphics.setShader()
 
