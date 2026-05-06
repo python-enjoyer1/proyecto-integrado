@@ -2,7 +2,9 @@ local Main = {}
 
 Main.RENDER_WIDTH = 640
 Main.RENDER_HEIGHT = 360
+
 Main.DEFAULT_FILTER = "nearest"
+Main.DEFAULT_SCREENSHAKE_DURATION = 0.1
 
 Main.CHARACTER_SIZE = 32
 
@@ -21,7 +23,7 @@ Main.SHADERS_PATH = "stuff/shaders/"
 Main.SOUND_PATH = "stuff/assets/sounds/"
 Main.CONSUMER_PATH = "stuff/assets/characters/consumer/"
 
-Main.DEBUG = true
+Main.DEBUG = false
 Main.SHADING = true
 
 Main.MIN_ENEMY_SOUL = 5

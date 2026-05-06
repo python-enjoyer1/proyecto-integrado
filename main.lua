@@ -5,6 +5,7 @@ local enemies = require("enemies")
 local utils = require("utils")
 local consts = require("constants")
 local shaders = require("shaders")
+local events = require("events")
 
 local canvas
 
@@ -29,7 +30,6 @@ local soul_bar_bg
 local soul_bar_frame
 
 local cursor
-
 
 -- For pre-loading. Loads stuff after loading modules.
 function love.load()
@@ -72,6 +72,12 @@ end
 function love.update(dt)
     camera_movement = player.stats.speed / 25 -- So that when the player gets fast it stays on the screen.
 
+    if events.screenshake and events.screenshake_duration > 0 then
+        events.screenshake_duration = events.screenshake_duration - dt
+    elseif events.screenshake_duration <= 0 then
+        events.screenshake = false
+    end
+
     local target_x = -player.position.x + consts.RENDER_WIDTH / 2 - (player.velocity.x / player.stats.speed) * look_ahead
     local target_y = -player.position.y + consts.RENDER_HEIGHT / 2 - (player.velocity.y / player.stats.speed) * look_ahead
 
@@ -99,8 +105,8 @@ function love.update(dt)
         utils.check_collision(enemy.hitbox, tilemap.walls[i])
     end
 
-enemy.position.x = enemy.hitbox.x
-enemy.position.y = enemy.hitbox.y
+    enemy.position.x = enemy.hitbox.x
+    enemy.position.y = enemy.hitbox.y
 
     player.position.x = player.hitbox.x
     player.position.y = player.hitbox.y
@@ -117,14 +123,17 @@ function love.draw()
     love.graphics.clear()
 
     love.graphics.setShader(shaders.background)
-    shaders.background:send("resolution", {consts.RENDER_WIDTH, consts.RENDER_HEIGHT})
-    shaders.background:send("time", love.timer.getTime())
-
     love.graphics.rectangle("fill", 0, 0, consts.RENDER_WIDTH, consts.RENDER_HEIGHT)
     love.graphics.setShader()
 
     love.graphics.push()
     love.graphics.translate(global_offset_x, global_offset_y)
+
+    if events.screenshake then
+        local dx = love.math.random(-events.screenshake_magnitude, events.screenshake_magnitude)
+        local dy = love.math.random(-events.screenshake_magnitude, events.screenshake_magnitude)
+        love.graphics.translate(dx, dy)
+    end
 
     tilemap:draw()
 

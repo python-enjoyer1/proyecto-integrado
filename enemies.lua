@@ -1,14 +1,21 @@
 local love = require("love")
 local utils = require("utils")
 local consts = require("constants")
+local set = require("settings")
+local events = require("events")
 
 local Main = {}
 
 local enemy_walk = utils.Animation:new({speed = 0.1, looping = true})
-
 enemy_walk:manage_spritesheet(consts.ASSETS_PATH .. "characters/enemies/basic_enemy/enemy_walk.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 8, 3)
 
 local default_stun = 3
+
+local player_hit = love.audio.newSource(consts.SOUND_PATH .. "punch_hit.wav", "static")
+player_hit:setVolume(set.sfx_volume * 2)
+
+local player_miss = love.audio.newSource(consts.SOUND_PATH .. "punch_miss.wav", "static")
+player_miss:setVolume(set.sfx_volume)
 
 Main.Enemy = {
     velocity = utils.Vector:new(),
@@ -69,8 +76,6 @@ function Main.Enemy:update(dt, target)
         self.animation.current_frame = 1
     end
 
-    --utils.check_collision(self.hitbox, target.hitbox) R dont do this
-
     if target.punch_hurtbox.active then
         --R so enemy doesnt get fucking comboed in 1 punch
         if not self.hit_this_swing and utils.check_collision(self.hitbox, target.punch_hurtbox) then
@@ -81,6 +86,12 @@ function Main.Enemy:update(dt, target)
             local force = target.stats.knockback / self.stats.weight
             self.stats.knockback_velx = math.cos(angle) * force
             self.stats.knockback_vely = math.sin(angle) * force
+
+            events.screenshake = true
+            events.screenshake_duration = consts.DEFAULT_SCREENSHAKE_DURATION
+            events.screenshake_magnitude = 2
+
+            player_hit:play()
         end
     else
         self.hit_this_swing = false

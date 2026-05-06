@@ -40,7 +40,6 @@ local Player = {
     },
     states = {
         idle = true,
-        walk = false,
         punch = false,
         stunned = false
     },
@@ -76,18 +75,17 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y)
     if movement_vector.x == 0 and movement_vector.y == 0 and not self.states.punch then
         self.states.idle = true
     else
+        if movement_vector.x ~= 0 or movement_vector.y ~= 0 then
+            footstep:setPitch(love.math.random())
+            footstep:play()
+        end
+
         self.states.idle = false
         if self.states.punch == true then
             self.animation = player_punch
         else
-            self.states.walk = true
             self.animation = player_walk
         end
-    end
-
-    if self.states.walk then
-        footstep:setPitch(love.math.random())
-        footstep:play()
     end
 
     self.velocity.x = movement_vector.x * self.stats.speed
@@ -119,7 +117,6 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y)
             player_punch.finished = false
         end
     end
-    -- utils.check_collision(self.hitbox, randomasfwall)
 
     self.position.x = self.hitbox.x
     self.position.y = self.hitbox.y
@@ -134,7 +131,6 @@ function Player:draw()
             utils.draw_collision(self.punch_hurtbox)
         end
     end
-    -- utils.draw_collision(randomasfwall)
 end
 
 function Player:punch()
