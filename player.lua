@@ -1,16 +1,18 @@
 local love = require("love")
 local utils = require("utils")
 local consts = require("constants")
+local set = require("settings")
 
 local player_walk = utils.Animation:new({speed = 0.08, looping = true})
 local player_punch = utils.Animation:new({speed = 0.04, looping = false})
 
-player_walk:manage_spritesheet(consts.ASSETS_PATH .. "characters/consumer/consumer_walk.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 7, 3)
-player_punch:manage_spritesheet(consts.ASSETS_PATH .. "characters/consumer/consumer_punch.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 10, 3)
+player_walk:manage_spritesheet(consts.CONSUMER_PATH .. "consumer_walk.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 7, 3)
+player_punch:manage_spritesheet(consts.CONSUMER_PATH .. "consumer_punch.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 10, 3)
 
 local mouse_x, mouse_y
 
--- local randomasfwall = {x = 200, y = 180, width = 90, height = 90, types = {"collisionbox"}} Great job, by the way.
+local footstep = love.audio.newSource(consts.SOUND_PATH .. "footstep.wav", "static")
+footstep:setVolume(set.sfx_volume)
 
 -- If you can think of more stats, then, add them.
 --R Remove the stats that you think wouldn't work, aight?
@@ -38,6 +40,7 @@ local Player = {
     },
     states = {
         idle = true,
+        walk = false,
         punch = false,
         stunned = false
     },
@@ -68,6 +71,8 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y)
 
     movement_vector:normalize()
 
+    self.states.walk = false
+
     if movement_vector.x == 0 and movement_vector.y == 0 and not self.states.punch then
         self.states.idle = true
     else
@@ -75,8 +80,14 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y)
         if self.states.punch == true then
             self.animation = player_punch
         else
+            self.states.walk = true
             self.animation = player_walk
         end
+    end
+
+    if self.states.walk then
+        footstep:setPitch(love.math.random())
+        footstep:play()
     end
 
     self.velocity.x = movement_vector.x * self.stats.speed

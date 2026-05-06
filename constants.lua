@@ -18,6 +18,8 @@ Main.WALL_SHADOW_OFFSET = 5
 Main.ASSETS_PATH = "stuff/assets/"
 Main.TILE_PATH = "stuff/assets/tiles/"
 Main.SHADERS_PATH = "stuff/shaders/"
+Main.SOUND_PATH = "stuff/assets/sounds/"
+Main.CONSUMER_PATH = "stuff/assets/characters/consumer/"
 
 Main.DEBUG = true
 Main.SHADING = true
