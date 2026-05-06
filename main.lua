@@ -37,6 +37,7 @@ function love.load()
     love.graphics.setDefaultFilter(consts.DEFAULT_FILTER, consts.DEFAULT_FILTER)
 
     canvas = love.graphics.newCanvas(consts.RENDER_WIDTH, consts.RENDER_HEIGHT)
+    canvas:setFilter(consts.DEFAULT_FILTER, consts.DEFAULT_FILTER)
 
     camera_movement = 0
     global_offset_x = 0
@@ -104,7 +105,9 @@ function love.draw()
     love.graphics.clear()
 
     love.graphics.setShader(shaders.background)
-    shaders.background:send("screen_size", {consts.RENDER_WIDTH, consts.RENDER_HEIGHT})
+    shaders.background:send("resolution", {consts.RENDER_WIDTH, consts.RENDER_HEIGHT})
+    shaders.background:send("time", love.timer.getTime())
+
     love.graphics.rectangle("fill", 0, 0, consts.RENDER_WIDTH, consts.RENDER_HEIGHT)
     love.graphics.setShader()
 
