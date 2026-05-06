@@ -104,17 +104,28 @@ function Main.check_collision(collision1, collision2)
         y < y2 + collision2.height and
         y2 < y + collision1.height
 
-    if hit and (Main.has_type(collision1, "collisionbox") or Main.has_type(collision2, "collisionbox")) then
+    if hit then
         local dx = collision1.x - collision2.x
         local dy = collision1.y - collision2.y
-
         local overlap_x = (collision1.width / 2 + collision2.width / 2) - math.abs(dx)
         local overlap_y = (collision1.height / 2 + collision2.height / 2) - math.abs(dy)
 
-        if overlap_x < overlap_y then
-            collision1.x = collision1.x + (dx > 0 and overlap_x or -overlap_x)
-        else
-            collision1.y = collision1.y + (dy > 0 and overlap_y or -overlap_y)
+        --R figure out which one actually gets pushed
+        local c1_moves = Main.has_type(collision1, "playercollisionbox") or Main.has_type(collision1, "enemycollisionbox")
+        local c2_moves = Main.has_type(collision2, "playercollisionbox") or Main.has_type(collision2, "enemycollisionbox")
+        local either_is_main = Main.has_type(collision1, "maincollisionbox") or Main.has_type(collision2, "maincollisionbox")
+
+        if either_is_main and (c1_moves or c2_moves) then
+            local sign = c1_moves and 1 or -1
+            if overlap_x < overlap_y then
+                local push = (dx > 0 and overlap_x or -overlap_x) * sign
+                if c1_moves then collision1.x = collision1.x + push
+                else collision2.x = collision2.x - push end
+            else
+                local push = (dy > 0 and overlap_y or -overlap_y) * sign
+                if c1_moves then collision1.y = collision1.y + push
+                else collision2.y = collision2.y - push end
+            end
         end
     end
 
@@ -128,7 +139,9 @@ function Main.draw_collision(collision)
     local type_colors = {
         hitbox = {0, 0, 1},
         hurtbox = {1, 0, 0},
-        collisionbox = {1, 1, 1}
+        maincollisionbox = {1, 1, 1},
+        playercollisionbox = {0, 1, 1},
+        enemycollisionbox = {1, 0.5, 0}
     }
 
     for i, v in ipairs(collision.types) do
@@ -289,7 +302,7 @@ function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keepi
         y = self.height * consts.TILE_SIZE / 2,
         width = consts.WALL_TILE_SIZE,
         height = self.height * consts.TILE_SIZE + consts.WALL_TILE_SIZE * 2,
-        types = {"collisionbox"}
+        types = {"maincollisionbox"}
     })
 
     --R right wall
@@ -298,7 +311,7 @@ function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keepi
         y = self.height * consts.TILE_SIZE / 2,
         width = consts.WALL_TILE_SIZE,
         height = self.height * consts.TILE_SIZE + consts.WALL_TILE_SIZE * 2,
-        types = {"collisionbox"}
+        types = {"maincollisionbox"}
     })
 
     --R top wall
@@ -307,7 +320,7 @@ function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keepi
         y = -consts.WALL_TILE_SIZE / 2,
         width = self.width * consts.TILE_SIZE + consts.WALL_TILE_SIZE * 2,
         height = consts.WALL_TILE_SIZE,
-        types = {"collisionbox"}
+        types = {"maincollisionbox"}
     })
 
     --R bottom wall
@@ -316,7 +329,7 @@ function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keepi
         y = self.height * consts.TILE_SIZE + consts.WALL_TILE_SIZE / 2,
         width = self.width * consts.TILE_SIZE + consts.WALL_TILE_SIZE * 2,
         height = consts.WALL_TILE_SIZE,
-        types = {"collisionbox"}
+        types = {"maincollisionbox"}
     })
 end
 

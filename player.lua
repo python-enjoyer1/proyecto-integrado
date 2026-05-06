@@ -46,7 +46,7 @@ local Player = {
     },
     angle = 0,
     animation = player_walk,
-    hitbox = {x = 320, y = 180, width = consts.CHARACTER_SIZE / 2, height = consts.CHARACTER_SIZE / 2, types = {"hitbox", "collisionbox"}},
+    hitbox = {x = 320, y = 180, width = consts.CHARACTER_SIZE / 2, height = consts.CHARACTER_SIZE / 2, types = {"hitbox", "playercollisionbox"}},
     punch_hurtbox = {x = 0, y = 0, width = 20, height = 20, types = {"hurtbox"}, active = false}
 }
 
@@ -142,6 +142,7 @@ function Player:punch()
         self.states.punch = true
         self.animation = player_punch
         player_punch.current_frame = 1
+        player_punch.finished = false
     end
 end
 

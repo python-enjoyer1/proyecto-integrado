@@ -90,6 +90,18 @@ function love.update(dt)
         utils.check_collision(player.hitbox, tilemap.walls[i])
     end
 
+    for i = 1, #tilemap.walls do
+        utils.check_collision(player.hitbox, tilemap.walls[i])
+    end
+
+    --R enemy wall stuff
+    for i = 1, #tilemap.walls do
+        utils.check_collision(enemy.hitbox, tilemap.walls[i])
+    end
+
+enemy.position.x = enemy.hitbox.x
+enemy.position.y = enemy.hitbox.y
+
     player.position.x = player.hitbox.x
     player.position.y = player.hitbox.y
 
