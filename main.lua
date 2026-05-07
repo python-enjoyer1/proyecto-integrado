@@ -6,6 +6,7 @@ local utils = require("utils")
 local consts = require("constants")
 local shaders = require("shaders")
 local events = require("events")
+local set = require("settings")
 
 local canvas
 

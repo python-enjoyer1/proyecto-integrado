@@ -6,8 +6,21 @@ local events = require("events")
 
 local Main = {}
 
-local blood_particle = love.graphics.newImage(consts.PARTICLE_PATH .. "red.png")
+local particle
+
+if set.gore then
+    particle = "red.png"
+else
+    particle = "pink.png"
+end
+local blood_particle = love.graphics.newImage(consts.PARTICLE_PATH .. particle)
+
 local particle_system = love.graphics.newParticleSystem(blood_particle)
+
+particle_system:setParticleLifetime(2, 5)
+particle_system:setEmissionRate(5)
+particle_system:setSizeVariation(1)
+particle_system:setColors(1, 1, 1, 1, 1, 1, 1, 0)
 
 local enemy_walk = utils.Animation:new({speed = 0.1, looping = true})
 enemy_walk:manage_spritesheet(consts.ASSETS_PATH .. "characters/enemies/basic_enemy/enemy_walk.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 8, 3)
@@ -17,11 +30,16 @@ enemy_fall:manage_spritesheet(consts.ASSETS_PATH .. "characters/enemies/basic_en
 
 local default_stun = 3
 
+love.audio.setEffect("echo", {type = "reverb"})
+
 local player_hit = love.audio.newSource(consts.SOUND_PATH .. "punch_hit.wav", "static")
-player_hit:setVolume(set.sfx_volume * 2)
+player_hit:setVolume(set.sfx_volume)
+player_hit:setEffect("echo")
 
 local player_miss = love.audio.newSource(consts.SOUND_PATH .. "punch_miss.wav", "static")
 player_miss:setVolume(set.sfx_volume)
+player_miss:setEffect("echo")
+
 
 Main.Enemy = {
     velocity = utils.Vector:new(),
@@ -93,19 +111,24 @@ function Main.Enemy:update(dt, target)
 
     if target.punch_hurtbox.active then
         --R so enemy doesnt get fucking comboed in 1 punch
-        if not self.hit_this_swing and utils.check_collision(self.hitbox, target.punch_hurtbox) and not self.states.fall then
-            self.hit_this_swing = true
-            self.stats.stun_duration = default_stun
+        if not self.hit_this_swing then
+            if utils.check_collision(self.hitbox, target.punch_hurtbox) and not self.states.fall then
+                self.hit_this_swing = true
+                self.stats.stun_duration = default_stun
 
-            local angle = math.atan2(self.position.y - target.position.y, self.position.x - target.position.x)
-            local force = target.stats.knockback / self.stats.weight
-            self.stats.knockback_velx = math.cos(angle) * force
-            self.stats.knockback_vely = math.sin(angle) * force
+                local angle = math.atan2(self.position.y - target.position.y, self.position.x - target.position.x)
+                local force = target.stats.knockback / self.stats.weight
+                self.stats.knockback_velx = math.cos(angle) * force
+                self.stats.knockback_vely = math.sin(angle) * force
 
-            events.screenshake = true
-            events.screenshake_duration = consts.DEFAULT_SCREENSHAKE_DURATION
-            events.screenshake_magnitude = 2
-            player_hit:play()
+                events.screenshake = true
+                events.screenshake_duration = consts.DEFAULT_SCREENSHAKE_DURATION
+                events.screenshake_magnitude = 2
+                player_hit:play()
+            elseif target.animation.finished then
+                player_miss:play()
+                print("nig")
+            end
         end
     else
         self.hit_this_swing = false
@@ -133,6 +156,7 @@ function Main.Enemy:update(dt, target)
 end
 
 function Main.Enemy:draw()
+    love.graphics.draw(particle_system, self.position.x, self.position.y)
     self.animation:draw(self.position.x, self.position.y, self.angle, 1, consts.SHADING, 0, 3)
 
     if consts.DEBUG then

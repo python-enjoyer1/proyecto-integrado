@@ -11,8 +11,11 @@ player_punch:manage_spritesheet(consts.CONSUMER_PATH .. "consumer_punch.png", co
 
 local mouse_x, mouse_y
 
+love.audio.setEffect("echo", {type = "reverb"})
 local footstep = love.audio.newSource(consts.SOUND_PATH .. "footstep.wav", "static")
 footstep:setVolume(set.sfx_volume)
+
+footstep:setEffect("echo")
 
 -- If you can think of more stats, then, add them.
 --R Remove the stats that you think wouldn't work, aight?
