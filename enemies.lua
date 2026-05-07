@@ -73,18 +73,22 @@ function Main.Enemy:update(dt, target)
         if self.stats.stun_duration <= 0 then
             self.position.x = self.position.x + (self.velocity.x * dt)
             self.position.y = self.position.y + (self.velocity.y * dt)
-            self.states.fall = false
-            self.animation = enemy_walk
         else
-            self.stats.stun_duration = self.stats.stun_duration - dt
             self.states.fall = true
-            self.animation = enemy_fall
         end
 
         self.states.idle = false
     else
         self.states.idle = true
         self.animation.current_frame = 1
+    end
+
+    if self.stats.stun_duration <= 0 then
+        self.animation = enemy_walk
+        self.states.fall = false
+    else
+        self.stats.stun_duration = self.stats.stun_duration - dt
+        self.animation = enemy_fall
     end
 
     if target.punch_hurtbox.active then
