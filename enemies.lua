@@ -6,8 +6,14 @@ local events = require("events")
 
 local Main = {}
 
+local blood_particle = love.graphics.newImage(consts.PARTICLE_PATH .. "red.png")
+local particle_system = love.graphics.newParticleSystem(blood_particle)
+
 local enemy_walk = utils.Animation:new({speed = 0.1, looping = true})
 enemy_walk:manage_spritesheet(consts.ASSETS_PATH .. "characters/enemies/basic_enemy/enemy_walk.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 8, 3)
+
+local enemy_fall = utils.Animation:new({speed = 0.1, looping = true})
+enemy_fall:manage_spritesheet(consts.ASSETS_PATH .. "characters/enemies/basic_enemy/enemy_fall.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 1, 1)
 
 local default_stun = 3
 
@@ -33,7 +39,8 @@ Main.Enemy = {
     },
     states = {
         idle = false,
-        punch = false
+        punch = false,
+        fall = false,
     },
     animation = enemy_walk,
     angle = 0,
@@ -66,8 +73,12 @@ function Main.Enemy:update(dt, target)
         if self.stats.stun_duration <= 0 then
             self.position.x = self.position.x + (self.velocity.x * dt)
             self.position.y = self.position.y + (self.velocity.y * dt)
+            self.states.fall = false
+            self.animation = enemy_walk
         else
             self.stats.stun_duration = self.stats.stun_duration - dt
+            self.states.fall = true
+            self.animation = enemy_fall
         end
 
         self.states.idle = false
@@ -78,7 +89,7 @@ function Main.Enemy:update(dt, target)
 
     if target.punch_hurtbox.active then
         --R so enemy doesnt get fucking comboed in 1 punch
-        if not self.hit_this_swing and utils.check_collision(self.hitbox, target.punch_hurtbox) then
+        if not self.hit_this_swing and utils.check_collision(self.hitbox, target.punch_hurtbox) and not self.states.fall then
             self.hit_this_swing = true
             self.stats.stun_duration = default_stun
 
@@ -90,7 +101,6 @@ function Main.Enemy:update(dt, target)
             events.screenshake = true
             events.screenshake_duration = consts.DEFAULT_SCREENSHAKE_DURATION
             events.screenshake_magnitude = 2
-
             player_hit:play()
         end
     else
@@ -105,16 +115,21 @@ function Main.Enemy:update(dt, target)
         self.stats.knockback_vely = self.stats.knockback_vely * (1 - 10 * dt)
     end
 
-    self.angle = math.atan2(target.position.y - self.position.y, target.position.x - self.position.x)
+    if not self.states.fall then
+        self.angle = math.atan2(target.position.y - self.position.y, target.position.x - self.position.x)
+    end
+
 
     self.animation:update(dt, self.states.idle)
 
     self.hitbox.x = self.position.x
     self.hitbox.y = self.position.y
+
+    particle_system:update(dt)
 end
 
 function Main.Enemy:draw()
-    enemy_walk:draw(self.position.x, self.position.y, self.angle, 1, consts.SHADING, 0, 3)
+    self.animation:draw(self.position.x, self.position.y, self.angle, 1, consts.SHADING, 0, 3)
 
     if consts.DEBUG then
         utils.draw_collision(self.hitbox)

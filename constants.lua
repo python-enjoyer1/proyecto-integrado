@@ -22,6 +22,7 @@ Main.TILE_PATH = "stuff/assets/tiles/"
 Main.SHADERS_PATH = "stuff/shaders/"
 Main.SOUND_PATH = "stuff/assets/sounds/"
 Main.CONSUMER_PATH = "stuff/assets/characters/consumer/"
+Main.PARTICLE_PATH = "stuff/assets/particles/"
 
 Main.DEBUG = false
 Main.SHADING = true
