@@ -31,6 +31,7 @@ enemy_fall:manage_spritesheet(consts.ASSETS_PATH .. "characters/enemies/basic_en
 
 local enemy_punch = utils.Animation:new({speed = 0.1, looping = true})
 enemy_punch:manage_spritesheet(consts.ASSETS_PATH .. "characters/enemies/basic_enemy/enemy_punch.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 10, 3)
+local punch_timer = 1
 
 local default_stun = 3
 
@@ -43,7 +44,7 @@ player_hit:setEffect("echo")
 local player_miss = love.audio.newSource(consts.SOUND_PATH .. "punch_miss.wav", "static")
 player_miss:setVolume(set.sfx_volume)
 player_miss:setEffect("echo")
-
+player_miss:setPitch(0.7)
 
 Main.Enemy = {
     velocity = utils.Vector:new(),
@@ -129,7 +130,7 @@ function Main.Enemy:update(dt, target)
                 events.screenshake_duration = consts.DEFAULT_SCREENSHAKE_DURATION
                 events.screenshake_magnitude = 2.5
                 player_hit:play()
-            elseif target.animation.finished then
+            else
                 player_miss:play()
             end
         end
@@ -148,7 +149,6 @@ function Main.Enemy:update(dt, target)
     if not self.states.fall then
         self.angle = math.atan2(target.position.y - self.position.y, target.position.x - self.position.x)
     end
-
 
     self.animation:update(dt, self.states.idle)
 
