@@ -13,20 +13,24 @@ if set.gore then
 else
     particle = "pink.png"
 end
-local blood_particle = love.graphics.newImage(consts.PARTICLE_PATH .. particle)
 
+local blood_particle = love.graphics.newImage(consts.PARTICLE_PATH .. particle)
 local particle_system = love.graphics.newParticleSystem(blood_particle)
 
-particle_system:setParticleLifetime(2, 5)
-particle_system:setEmissionRate(5)
+particle_system:setParticleLifetime(1, 2)
+particle_system:setEmissionRate(32)
 particle_system:setSizeVariation(1)
-particle_system:setColors(1, 1, 1, 1, 1, 1, 1, 0)
+particle_system:setColors(1, 1, 1, 1, 1, 1, 1, 1)
+particle_system:setLinearAcceleration(-20, -20, 20, 20)
 
 local enemy_walk = utils.Animation:new({speed = 0.1, looping = true})
 enemy_walk:manage_spritesheet(consts.ASSETS_PATH .. "characters/enemies/basic_enemy/enemy_walk.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 8, 3)
 
 local enemy_fall = utils.Animation:new({speed = 0.1, looping = true})
 enemy_fall:manage_spritesheet(consts.ASSETS_PATH .. "characters/enemies/basic_enemy/enemy_fall.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 1, 1)
+
+local enemy_punch = utils.Animation:new({speed = 0.1, looping = true})
+enemy_punch:manage_spritesheet(consts.ASSETS_PATH .. "characters/enemies/basic_enemy/enemy_punch.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 10, 3)
 
 local default_stun = 3
 
@@ -127,7 +131,6 @@ function Main.Enemy:update(dt, target)
                 player_hit:play()
             elseif target.animation.finished then
                 player_miss:play()
-                print("nig")
             end
         end
     else
@@ -151,12 +154,9 @@ function Main.Enemy:update(dt, target)
 
     self.hitbox.x = self.position.x
     self.hitbox.y = self.position.y
-
-    particle_system:update(dt)
 end
 
 function Main.Enemy:draw()
-    love.graphics.draw(particle_system, self.position.x, self.position.y)
     self.animation:draw(self.position.x, self.position.y, self.angle, 1, consts.SHADING, 0, 3)
 
     if consts.DEBUG then

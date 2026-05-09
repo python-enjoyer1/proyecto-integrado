@@ -33,6 +33,7 @@ local soul_bar_frame
 local cursor
 
 local chromatic_abr_offset = 0.002
+local background_index
 
 -- For pre-loading. Loads stuff after loading modules.
 function love.load()
@@ -73,6 +74,7 @@ function love.load()
 end
 
 function love.update(dt)
+    print(love.timer.getFPS()) -- Check if the FPS are dogshit.
     camera_movement = player.stats.speed / 25 -- So that when the player gets fast it stays on the screen.
 
     if events.screenshake and events.screenshake_duration > 0 then
@@ -91,7 +93,7 @@ function love.update(dt)
     mouse_x = (mouse_x / scale_x)
     mouse_y = (mouse_y / scale_y)
 
-    enemy:update(dt, player)
+    enemy:update(dt, player)love.graphics.newShader(consts.SHADERS_PATH .. "background1.fs")
 
     player:update(dt, scale_x, scale_y, global_offset_x, global_offset_y)
 
@@ -115,8 +117,9 @@ function love.update(dt)
     player.position.y = player.hitbox.y
 
     -- Shaders.
-    shaders.background1:send("resolution", {consts.RENDER_WIDTH, consts.RENDER_HEIGHT})
-    shaders.background1:send("time", love.timer.getTime())
+    background_index = love.math.random(1, #shaders.backgrounds)
+    shaders.backgrounds[background_index]:send("resolution", {consts.RENDER_WIDTH, consts.RENDER_HEIGHT})
+    shaders.backgrounds[background_index]:send("time", love.timer.getTime())
 
     -- HUD/GUI goes here.
     soul_bar_bg:update(dt)
@@ -129,7 +132,7 @@ function love.draw()
     love.graphics.setCanvas(canvas)
     love.graphics.clear()
 
-    love.graphics.setShader(shaders.background1)
+    love.graphics.setShader(shaders.backgrounds[background_index])
     love.graphics.rectangle("fill", 0, 0, consts.RENDER_WIDTH, consts.RENDER_HEIGHT)
     love.graphics.setShader()
 
