@@ -123,7 +123,7 @@ function Main.Enemy:update(dt, target)
 
                 events.screenshake = true
                 events.screenshake_duration = consts.DEFAULT_SCREENSHAKE_DURATION
-                events.screenshake_magnitude = 2
+                events.screenshake_magnitude = 2.5
                 player_hit:play()
             elseif target.animation.finished then
                 player_miss:play()

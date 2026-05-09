@@ -32,6 +32,8 @@ local soul_bar_frame
 
 local cursor
 
+local chromatic_abr_offset = 0.002
+
 -- For pre-loading. Loads stuff after loading modules.
 function love.load()
     love.mouse.setVisible(false)
@@ -112,6 +114,14 @@ function love.update(dt)
     player.position.x = player.hitbox.x
     player.position.y = player.hitbox.y
 
+    -- Shader sending.
+    shaders.background:send("time", love.timer.getTime())
+    shaders.background:send("window_coords", {consts.RENDER_WIDTH, consts.RENDER_HEIGHT})
+
+    if set.ca_allowed then
+        shaders.chromatic_abr:send("offset", {chromatic_abr_offset, chromatic_abr_offset})
+    end
+
     -- HUD/GUI goes here.
     soul_bar_bg:update(dt)
     soul_bar:update(dt)
@@ -144,7 +154,7 @@ function love.draw()
 
     if consts.DEBUG then
         for i = 1, #tilemap.walls do
-            utils.draw_collision(tilemap.walls[i]) -- Great code.
+            utils.draw_collision(tilemap.walls[i])
         end
     end
 
@@ -159,7 +169,12 @@ function love.draw()
     cursor:draw(mouse_x, mouse_y, 0, 1, consts.SHADING, 0, 2)
     love.graphics.setCanvas()
 
+    -- Only activate when player takes damage.
+    if set.ca_allowed then
+        love.graphics.setShader(shaders.chromatic_abr)
+    end
     love.graphics.draw(canvas, 0, 0, 0, scale_x, scale_y)
+    love.graphics.setShader()
 end
 
 function love.keypressed(key)

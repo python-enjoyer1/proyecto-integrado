@@ -6,5 +6,6 @@ Main.music_volume = 1.0
 Main.screenshake_allowed = true
 Main.smooth_camera = true
 Main.gore = true
+Main.ca_allowed = true
 
 return Main

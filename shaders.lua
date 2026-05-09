@@ -3,7 +3,8 @@ local consts = require("constants")
 
 local shaders = {
     background = love.graphics.newShader(consts.SHADERS_PATH .. "background.fs"),
-    black_white = love.graphics.newShader(consts.SHADERS_PATH .. "black_white.fs")
+    black_white = love.graphics.newShader(consts.SHADERS_PATH .. "black_white.fs"),
+    chromatic_abr = love.graphics.newShader(consts.SHADERS_PATH .. "chromatic_aberration.fs")
 }
 
 return shaders
