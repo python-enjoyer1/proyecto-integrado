@@ -32,7 +32,6 @@ local soul_bar_frame
 
 local cursor
 
-local chromatic_abr_offset = 0.002
 local background_index
 
 -- For pre-loading. Loads stuff after loading modules.
@@ -74,7 +73,6 @@ function love.load()
 end
 
 function love.update(dt)
-    print(love.timer.getFPS()) -- Check if the FPS are dogshit.
     camera_movement = player.stats.speed / 25 -- So that when the player gets fast it stays on the screen.
 
     if events.screenshake and events.screenshake_duration > 0 then
