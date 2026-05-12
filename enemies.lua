@@ -6,22 +6,25 @@ local events = require("events")
 
 local Main = {}
 
-local particle
+local particle_image
 
 if set.gore then
-    particle = "red.png"
+    particle_image = "red.png"
 else
-    particle = "pink.png"
+    particle_image = "pink.png"
 end
+local blood_particle = love.graphics.newImage(consts.PARTICLE_PATH .. particle_image)
 
-local blood_particle = love.graphics.newImage(consts.PARTICLE_PATH .. particle)
 local particle_system = love.graphics.newParticleSystem(blood_particle)
 
-particle_system:setParticleLifetime(1, 2)
-particle_system:setEmissionRate(32)
+local particle_x = 0
+local particle_y = 0
+
+particle_system:setParticleLifetime(99999)
 particle_system:setSizeVariation(1)
 particle_system:setColors(1, 1, 1, 1, 1, 1, 1, 1)
-particle_system:setLinearAcceleration(-20, -20, 20, 20)
+particle_system:setSpeed(0, 3000)
+particle_system:setLinearDamping(0, 1500)
 
 local enemy_walk = utils.Animation:new({speed = 0.1, looping = true})
 enemy_walk:manage_spritesheet(consts.ASSETS_PATH .. "characters/enemies/basic_enemy/enemy_walk.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 8, 3)
@@ -31,7 +34,6 @@ enemy_fall:manage_spritesheet(consts.ASSETS_PATH .. "characters/enemies/basic_en
 
 local enemy_punch = utils.Animation:new({speed = 0.1, looping = true})
 enemy_punch:manage_spritesheet(consts.ASSETS_PATH .. "characters/enemies/basic_enemy/enemy_punch.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 10, 3)
-local punch_timer = 1
 
 local default_stun = 3
 
@@ -112,6 +114,8 @@ function Main.Enemy:update(dt, target)
     else
         self.stats.stun_duration = self.stats.stun_duration - dt
         self.animation = enemy_fall
+        particle_x = self.position.x
+        particle_y = self.position.y
     end
 
     if target.punch_hurtbox.active then
@@ -129,6 +133,12 @@ function Main.Enemy:update(dt, target)
                 events.screenshake = true
                 events.screenshake_duration = consts.DEFAULT_SCREENSHAKE_DURATION
                 events.screenshake_magnitude = 2.5
+
+                -- Blood particles.
+                particle_system:setSpread(math.rad(love.math.random(180, 270)))
+                particle_system:setDirection(angle)
+                particle_system:emit(love.math.random(100, 200))
+
                 player_hit:play()
             else
                 player_miss:play()
@@ -154,9 +164,13 @@ function Main.Enemy:update(dt, target)
 
     self.hitbox.x = self.position.x
     self.hitbox.y = self.position.y
+
+    particle_system:update(dt)
 end
 
 function Main.Enemy:draw()
+    love.graphics.draw(particle_system, particle_x, particle_y)
+
     self.animation:draw(self.position.x, self.position.y, self.angle, 1, consts.SHADING, 0, 3)
 
     if consts.DEBUG then

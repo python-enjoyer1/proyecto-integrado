@@ -39,6 +39,9 @@ function love.load()
     love.mouse.setVisible(false)
     love.graphics.setDefaultFilter(consts.DEFAULT_FILTER, consts.DEFAULT_FILTER)
 
+    background_index = love.math.random(1, #shaders.backgrounds)
+
+
     canvas = love.graphics.newCanvas(consts.RENDER_WIDTH, consts.RENDER_HEIGHT)
     canvas:setFilter(consts.DEFAULT_FILTER, consts.DEFAULT_FILTER)
 
@@ -91,7 +94,7 @@ function love.update(dt)
     mouse_x = (mouse_x / scale_x)
     mouse_y = (mouse_y / scale_y)
 
-    enemy:update(dt, player)love.graphics.newShader(consts.SHADERS_PATH .. "background1.fs")
+    enemy:update(dt, player)
 
     player:update(dt, scale_x, scale_y, global_offset_x, global_offset_y)
 
@@ -115,7 +118,6 @@ function love.update(dt)
     player.position.y = player.hitbox.y
 
     -- Shaders.
-    background_index = love.math.random(1, #shaders.backgrounds)
     shaders.backgrounds[background_index]:send("resolution", {consts.RENDER_WIDTH, consts.RENDER_HEIGHT})
     shaders.backgrounds[background_index]:send("time", love.timer.getTime())
 

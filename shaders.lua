@@ -3,7 +3,8 @@ local consts = require("constants")
 
 local shaders = {
     backgrounds = {
-        love.graphics.newShader(consts.SHADERS_PATH .. "background1.fs"),
+        love.graphics.newShader(consts.SHADERS_PATH .. "backgrounds/background1.fs"),
+        love.graphics.newShader(consts.SHADERS_PATH .. "backgrounds/background2.fs")
     },
     static = love.graphics.newShader(consts.SHADERS_PATH .. "static.fs"),
     black_white = love.graphics.newShader(consts.SHADERS_PATH .. "black_white.fs"),
