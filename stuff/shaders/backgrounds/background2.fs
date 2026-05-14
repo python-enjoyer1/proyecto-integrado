@@ -7,7 +7,7 @@ vec4 effect(vec4 color, Image tex, vec2 texture_coords, vec2 screen_coords) {
     float special_time = cos(time) + 0.1;
 
     float random = fract(sin(dot(uv * special_time, vec2(12.9898, 78.233))) * 43758.5453);
-    random += (uv.x - uv.y) * 1.5;
+    random += (uv.x - uv.y) * 3;
 
     uv.x -= cos(special_time + random);
     uv.y += sin(special_time - random);

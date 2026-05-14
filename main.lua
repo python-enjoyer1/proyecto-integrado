@@ -75,6 +75,7 @@ function love.load()
 end
 
 function love.update(dt)
+    print(love.timer.getFPS())
     camera_movement = player.stats.speed / 25 -- So that when the player gets fast it stays on the screen.
 
     if events.screenshake and events.screenshake_duration > 0 then

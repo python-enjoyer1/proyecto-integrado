@@ -25,7 +25,8 @@ local particle_systems = {
     emitted = false
 }
 
-particle_system:setParticleLifetime(99999)
+particle_system:setEmitterLifetime(-1) -- -1 means it never stops.
+particle_system:setParticleLifetime(1)
 particle_system:setSizeVariation(1)
 particle_system:setColors(1, 1, 1, 1, 1, 1, 1, 1)
 particle_system:setSpeed(0, consts.BLOOD_SPEED)
