@@ -17,13 +17,18 @@ local blood_particle = love.graphics.newImage(consts.PARTICLE_PATH .. particle_i
 
 local particle_system = love.graphics.newParticleSystem(blood_particle)
 
-local particle_x = 0
-local particle_y = 0
+local particle_systems = {
+    particle = particle_system,
+    x = 0,
+    y = 0,
+    start = false,
+    emitted = false
+}
 
 particle_system:setParticleLifetime(99999)
 particle_system:setSizeVariation(1)
 particle_system:setColors(1, 1, 1, 1, 1, 1, 1, 1)
-particle_system:setSpeed(0, 3000)
+particle_system:setSpeed(0, consts.BLOOD_SPEED)
 particle_system:setLinearDamping(0, 1500)
 
 local enemy_walk = utils.Animation:new({speed = 0.1, looping = true})
@@ -114,8 +119,6 @@ function Main.Enemy:update(dt, target)
     else
         self.stats.stun_duration = self.stats.stun_duration - dt
         self.animation = enemy_fall
-        particle_x = self.position.x
-        particle_y = self.position.y
     end
 
     if target.punch_hurtbox.active then
@@ -135,9 +138,31 @@ function Main.Enemy:update(dt, target)
                 events.screenshake_magnitude = 2.5
 
                 -- Blood particles.
-                particle_system:setSpread(math.rad(love.math.random(180, 270)))
-                particle_system:setDirection(angle)
-                particle_system:emit(love.math.random(100, 200))
+                table.insert(particle_systems, {
+                    particle = particle_system:clone(),
+                    x = self.position.x,
+                    y = self.position.y,
+                    start = false,
+                    emitted = false
+                })
+
+                for i = 1, #particle_systems do
+                    if not particle_systems[i].start then
+                        particle_systems[i].particle:start()
+                        particle_systems[i].start = true
+                    end
+
+                    particle_systems[i].particle:setSpread(math.rad(love.math.random(180, 270)))
+                    particle_systems[i].particle:setDirection(angle)
+
+                    if not particle_systems[i].emitted then
+                        particle_systems[i].particle:emit(love.math.random(consts.MIN_BLOOD, consts.MAX_BLOOD))
+                        particle_systems[i].emitted = true
+                        particle_systems[i].particle:update(dt)
+                    end
+
+                    particle_systems[i].particle:setSpeed(0, 0)
+                end
 
                 player_hit:play()
             else
@@ -169,7 +194,9 @@ function Main.Enemy:update(dt, target)
 end
 
 function Main.Enemy:draw()
-    love.graphics.draw(particle_system, particle_x, particle_y)
+    for i = 1, #particle_systems do
+        love.graphics.draw(particle_systems[i].particle, particle_systems[i].x, particle_systems[i].y)
+    end
 
     self.animation:draw(self.position.x, self.position.y, self.angle, 1, consts.SHADING, 0, 3)
 

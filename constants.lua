@@ -33,4 +33,8 @@ Main.MAX_ENEMY_SOUL = 20
 Main.BACKGROUND_COLOR = {0, 0, 0}
 Main.SHADOW_COLOR = {0, 0, 0, 0.5}
 
+Main.MIN_BLOOD = 100
+Main.MAX_BLOOD = 200
+Main.BLOOD_SPEED = 5000
+
 return Main

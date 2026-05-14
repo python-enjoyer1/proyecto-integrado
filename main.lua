@@ -39,8 +39,7 @@ function love.load()
     love.mouse.setVisible(false)
     love.graphics.setDefaultFilter(consts.DEFAULT_FILTER, consts.DEFAULT_FILTER)
 
-    background_index = love.math.random(1, #shaders.backgrounds)
-
+    background_index = love.math.random(1, #shaders.backgrounds) -- Do not touch this line. I'll mess with it later.
 
     canvas = love.graphics.newCanvas(consts.RENDER_WIDTH, consts.RENDER_HEIGHT)
     canvas:setFilter(consts.DEFAULT_FILTER, consts.DEFAULT_FILTER)
