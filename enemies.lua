@@ -43,16 +43,20 @@ enemy_punch:manage_spritesheet(consts.ASSETS_PATH .. "characters/enemies/basic_e
 
 local default_stun = 3
 
-love.audio.setEffect("echo", {type = "reverb"})
+love.audio.setEffect("reverb", {type = "reverb"})
 
-local player_hit = love.audio.newSource(consts.SOUND_PATH .. "punch_hit.wav", "static")
-player_hit:setVolume(set.sfx_volume)
-player_hit:setEffect("echo")
+local player_hit_sound = love.audio.newSource(consts.SOUND_PATH .. "punch_hit.wav", "static")
+player_hit_sound:setVolume(set.sfx_volume)
+player_hit_sound:setEffect("reverb")
 
-local player_miss = love.audio.newSource(consts.SOUND_PATH .. "punch_miss.wav", "static")
-player_miss:setVolume(set.sfx_volume)
-player_miss:setEffect("echo")
-player_miss:setPitch(0.7)
+local player_miss_sound = love.audio.newSource(consts.SOUND_PATH .. "punch_miss.wav", "static")
+player_miss_sound:setVolume(set.sfx_volume)
+player_miss_sound:setEffect("reverb")
+player_miss_sound:setPitch(0.7)
+
+local enemy_walk_sound = love.audio.newSource(consts.SOUND_PATH .. "footstep.wav", "static")
+enemy_walk_sound:setVolume(set.sfx_volume - 0.5)
+enemy_walk_sound:setEffect("reverb")
 
 Main.Enemy = {
     velocity = utils.Vector:new(),
@@ -96,6 +100,11 @@ function Main.Enemy:update(dt, target)
 
 
     if distance > self.min_distance then
+        if self.animation ~= enemy_fall then
+            enemy_walk_sound:setPitch(love.math.random())
+            enemy_walk_sound:play()
+        end
+
         movement_vector:normalize()
 
         self.velocity.x = movement_vector.x * self.stats.speed
@@ -165,9 +174,9 @@ function Main.Enemy:update(dt, target)
                     particle_systems[i].particle:setSpeed(0, 0)
                 end
 
-                player_hit:play()
+                player_hit_sound:play()
             else
-                player_miss:play()
+                player_miss_sound:play()
             end
         end
     else

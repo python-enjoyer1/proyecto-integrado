@@ -11,11 +11,11 @@ player_punch:manage_spritesheet(consts.CONSUMER_PATH .. "consumer_punch.png", co
 
 local mouse_x, mouse_y
 
-love.audio.setEffect("echo", {type = "reverb"})
-local footstep = love.audio.newSource(consts.SOUND_PATH .. "footstep.wav", "static")
-footstep:setVolume(set.sfx_volume)
+love.audio.setEffect("reverb", {type = "reverb"})
+local footstep_sound = love.audio.newSource(consts.SOUND_PATH .. "footstep.wav", "static")
+footstep_sound:setVolume(set.sfx_volume)
 
-footstep:setEffect("echo")
+footstep_sound:setEffect("reverb")
 
 -- If you can think of more stats, then, add them.
 --R Remove the stats that you think wouldn't work, aight?
@@ -79,8 +79,8 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y)
         self.states.idle = true
     else
         if movement_vector.x ~= 0 or movement_vector.y ~= 0 then
-            footstep:setPitch(love.math.random())
-            footstep:play()
+            footstep_sound:setPitch(love.math.random())
+            footstep_sound:play()
         end
 
         self.states.idle = false

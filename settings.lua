@@ -5,7 +5,7 @@ Main.sfx_volume = 1.0
 Main.music_volume = 1.0
 Main.screenshake_allowed = true
 Main.smooth_camera = true
-Main.gore = false
+Main.gore = true
 Main.ca_allowed = true -- CA means Chromatic Aberration, the shader that separates the red, green, and blue colors.
 
 return Main
