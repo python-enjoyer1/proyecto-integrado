@@ -1,13 +1,14 @@
+-- TODO: Re-implement the player miss sound, since I moved the player audio in enemies.lua to player.lua.
 local love = require("love")
 local utils = require("utils")
 local consts = require("constants")
 local set = require("settings")
 
-local player_walk = utils.Animation:new({speed = 0.08, looping = true})
-local player_punch = utils.Animation:new({speed = 0.04, looping = false})
+local walk_animation = utils.Animation:new({speed = 0.08, looping = true})
+local punch_animation = utils.Animation:new({speed = 0.04, looping = false})
 
-player_walk:manage_spritesheet(consts.CONSUMER_PATH .. "consumer_walk.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 7, 3)
-player_punch:manage_spritesheet(consts.CONSUMER_PATH .. "consumer_punch.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 10, 3)
+walk_animation:manage_spritesheet(consts.CONSUMER_PATH .. "consumer_walk.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 7, 3)
+punch_animation:manage_spritesheet(consts.CONSUMER_PATH .. "consumer_punch.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 10, 3)
 
 local mouse_x, mouse_y
 
@@ -16,9 +17,18 @@ love.audio.setEffect("reverb", {type = "reverb"})
 local footstep_sound = love.audio.newSource(consts.SOUND_PATH .. "footstep.wav", "static")
 footstep_sound:setVolume(set.sfx_volume)
 footstep_sound:setEffect("reverb")
+local footstep_sound_table = {} -- Makes it so footsteps can be speeded up.
+local footstep_sound_timer = 0
 
-local footstep_sounds = {}
-local footstep_timer = 0
+local miss_sound = love.audio.newSource(consts.SOUND_PATH .. "punch_miss.wav", "static")
+miss_sound:setVolume(set.sfx_volume)
+miss_sound:setEffect("reverb")
+
+local punch_sound = love.audio.newSource(consts.SOUND_PATH .. "punch_hit.wav", "static")
+punch_sound:setVolume(set.sfx_volume)
+punch_sound:setEffect("reverb")
+local punch_sound_table = {}
+local punch_sound_timer = 0
 
 -- If you can think of more stats, then, add them.
 --R Remove the stats that you think wouldn't work, aight?
@@ -50,12 +60,14 @@ local Player = {
         stunned = false
     },
     angle = 0,
-    animation = player_walk,
+    animation = walk_animation,
     hitbox = {x = 320, y = 180, width = consts.CHARACTER_SIZE / 2, height = consts.CHARACTER_SIZE / 2, types = {"hitbox", "playercollisionbox"}},
     punch_hurtbox = {x = 0, y = 0, width = 20, height = 20, types = {"hurtbox"}, active = false}
 }
 
-function Player:update(dt, scale_x, scale_y, offset_x, offset_y)
+function Player:update(dt, scale_x, scale_y, offset_x, offset_y, target) -- Eventually change target to targets.
+    self.target = target
+
     local movement_vector = utils.Vector:new()
 
     if love.keyboard.isDown("w") then
@@ -82,18 +94,22 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y)
         self.states.idle = true
     else
         if movement_vector.x ~= 0 or movement_vector.y ~= 0 then
-            if footstep_timer <= 0 then
-                table.insert(footstep_sounds, footstep_sound:clone())
+            if footstep_sound_timer <= 0 then
+                table.insert(footstep_sound_table, footstep_sound:clone())
             else
-                footstep_timer = footstep_timer - dt
+                footstep_sound_timer = footstep_sound_timer - dt
             end
         end
 
         self.states.idle = false
         if self.states.punch == true then
-            self.animation = player_punch
+            self.animation = punch_animation
+
+            if punch_sound_timer > 0 then
+                punch_sound_timer = punch_sound_timer - dt
+            end
         else
-            self.animation = player_walk
+            self.animation = walk_animation
         end
     end
 
@@ -113,29 +129,44 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y)
 
     self.animation:update(dt, self.states.idle)
 
-    if self.states.punch and player_punch.current_frame >= 5 and player_punch.current_frame <= 7 then
+    if self.states.punch and punch_animation.current_frame == 6 then
         self.punch_hurtbox.active = true
         local reach = 20
         self.punch_hurtbox.x = self.position.x + math.cos(self.angle) * reach
         self.punch_hurtbox.y = self.position.y + math.sin(self.angle) * reach
+
+        if target.player_hit_flag then
+            table.insert(punch_sound_table, punch_sound:clone())
+        end
     else
         self.punch_hurtbox.active = false
-        if player_punch.finished then
+        if punch_animation.finished then
             self.states.punch = false
-            self.animation = player_walk
-            player_punch.finished = false
+            self.animation = walk_animation
+            punch_animation.finished = false
         end
+    end
+
+    if not self.target.player_hit_flag and punch_animation.current_frame == 6 then
     end
 
     self.position.x = self.hitbox.x
     self.position.y = self.hitbox.y
 
-    for i = 1, #footstep_sounds do
-        if footstep_timer <= 0 then
-            footstep_sounds[i]:setPitch(love.math.random(50, 100) / 100)
-            footstep_sounds[i]:play()
-            table.remove(footstep_sounds, i)
-            footstep_timer = 50.0 / self.stats.speed
+    for i = 1, #footstep_sound_table do
+        if footstep_sound_timer <= 0 then
+            footstep_sound_table[i]:setPitch(love.math.random(50, 100) / 100)
+            footstep_sound_table[i]:play()
+            table.remove(footstep_sound_table, i)
+            footstep_sound_timer = 50.0 / self.stats.speed
+        end
+    end
+
+    for i = 1, #punch_sound_table do
+        if punch_sound_timer <= 0 then
+            punch_sound_table[i]:play()
+            table.remove(punch_sound_table, i)
+            punch_sound_timer = 1.0 / self.stats.attack_speed
         end
     end
 end
@@ -154,9 +185,9 @@ end
 function Player:punch()
     if not self.states.punch then
         self.states.punch = true
-        self.animation = player_punch
-        player_punch.current_frame = 1
-        player_punch.finished = false
+        self.animation = punch_animation
+        punch_animation.current_frame = 1
+        punch_animation.finished = false
     end
 end
 

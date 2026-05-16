@@ -32,31 +32,22 @@ particle_system:setColors(1, 1, 1, 1, 1, 1, 1, 1)
 particle_system:setSpeed(0, consts.BLOOD_SPEED)
 particle_system:setLinearDamping(0, 1500)
 
-local enemy_walk = utils.Animation:new({speed = 0.1, looping = true})
-enemy_walk:manage_spritesheet(consts.ASSETS_PATH .. "characters/enemies/basic_enemy/enemy_walk.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 8, 3)
+local walk_animation = utils.Animation:new({speed = 0.1, looping = true})
+walk_animation:manage_spritesheet(consts.ASSETS_PATH .. "characters/enemies/basic_enemy/enemy_walk.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 8, 3)
 
-local enemy_fall = utils.Animation:new({speed = 0.1, looping = true})
-enemy_fall:manage_spritesheet(consts.ASSETS_PATH .. "characters/enemies/basic_enemy/enemy_fall.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 1, 1)
+local fall_animation = utils.Animation:new({speed = 0.1, looping = true})
+fall_animation:manage_spritesheet(consts.ASSETS_PATH .. "characters/enemies/basic_enemy/enemy_fall.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 1, 1)
 
-local enemy_punch = utils.Animation:new({speed = 0.1, looping = true})
-enemy_punch:manage_spritesheet(consts.ASSETS_PATH .. "characters/enemies/basic_enemy/enemy_punch.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 10, 3)
+local punch_animation = utils.Animation:new({speed = 0.1, looping = true})
+punch_animation:manage_spritesheet(consts.ASSETS_PATH .. "characters/enemies/basic_enemy/enemy_punch.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 10, 3)
 
 local default_stun = 3
 
 love.audio.setEffect("reverb", {type = "reverb"})
 
-local player_hit_sound = love.audio.newSource(consts.SOUND_PATH .. "punch_hit.wav", "static") -- Move player stuff to player.lua eventually.
-player_hit_sound:setVolume(set.sfx_volume)
-player_hit_sound:setEffect("reverb")
-
-local player_miss_sound = love.audio.newSource(consts.SOUND_PATH .. "punch_miss.wav", "static")
-player_miss_sound:setVolume(set.sfx_volume)
-player_miss_sound:setEffect("reverb")
-player_miss_sound:setPitch(0.7)
-
-local enemy_walk_sound = love.audio.newSource(consts.SOUND_PATH .. "footstep.wav", "static")
-enemy_walk_sound:setVolume(set.sfx_volume - 0.5)
-enemy_walk_sound:setEffect("reverb")
+local walk_sound = love.audio.newSource(consts.SOUND_PATH .. "footstep.wav", "static")
+walk_sound:setVolume(set.sfx_volume - 0.5)
+walk_sound:setEffect("reverb")
 
 Main.Enemy = {
     velocity = utils.Vector:new(),
@@ -77,7 +68,7 @@ Main.Enemy = {
         punch = false,
         fall = false,
     },
-    animation = enemy_walk,
+    animation = walk_animation,
     angle = 0,
     min_distance = 30,
     hitbox = {x = 100, y = 100, width = consts.CHARACTER_SIZE / 2, height = consts.CHARACTER_SIZE / 2, types = {"hitbox", "enemycollisionbox"}}
@@ -100,9 +91,9 @@ function Main.Enemy:update(dt, target)
 
 
     if distance > self.min_distance then
-        if self.animation ~= enemy_fall then
-            enemy_walk_sound:setPitch(love.math.random())
-            --enemy_walk_sound:play()
+        if self.animation ~= fall_animation then
+            walk_sound:setPitch(love.math.random())
+            walk_sound:play()
         end
 
         movement_vector:normalize()
@@ -124,13 +115,14 @@ function Main.Enemy:update(dt, target)
     end
 
     if self.stats.stun_duration <= 0 then
-        self.animation = enemy_walk
+        self.animation = walk_animation
         self.states.fall = false
     else
         self.stats.stun_duration = self.stats.stun_duration - dt
-        self.animation = enemy_fall
+        self.animation = fall_animation
     end
 
+    self.player_hit_flag = false -- Flags are basically variables that tell when something should happen and stop.
     if target.punch_hurtbox.active then
         --R so enemy doesnt get fucking comboed in 1 punch
         if not self.hit_this_swing then
@@ -175,15 +167,13 @@ function Main.Enemy:update(dt, target)
 
                     particle_systems[i].particle:setSpeed(0, 0)
                 end
-
-                player_hit_sound:play()
-            else
-                player_miss_sound:play()
+                self.player_hit_flag = true
             end
         end
     else
         self.hit_this_swing = false
     end
+
 
     --R knockback = velocity rn, lerp was tp'ing the enemy
     if math.abs(self.stats.knockback_velx) > 0.1 or math.abs(self.stats.knockback_vely) > 0.1 then

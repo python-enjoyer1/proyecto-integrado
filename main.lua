@@ -110,7 +110,7 @@ function love.update(dt)
 
     enemy:update(dt, player)
 
-    player:update(dt, scale_x, scale_y, global_offset_x, global_offset_y)
+    player:update(dt, scale_x, scale_y, global_offset_x, global_offset_y, enemy)
 
     for i = 1, #tilemap.walls do
         utils.check_collision(player.hitbox, tilemap.walls[i])
