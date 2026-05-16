@@ -23,6 +23,7 @@ Main.SHADERS_PATH = "stuff/shaders/"
 Main.SOUND_PATH = "stuff/assets/sounds/"
 Main.CONSUMER_PATH = "stuff/assets/characters/consumer/"
 Main.PARTICLE_PATH = "stuff/assets/particles/"
+Main.FONT_PATH = "stuff/assets/fonts/"
 
 Main.DEBUG = false
 Main.SHADING = true

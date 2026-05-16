@@ -96,13 +96,13 @@ function Main.Enemy:update(dt, target)
 
     movement_vector.x = target.position.x - self.position.x
     movement_vector.y = target.position.y - self.position.y
-    local distance = math.sqrt(movement_vector.x^2 + movement_vector.y^2)
+    local distance = math.sqrt(movement_vector.x ^ 2 + movement_vector.y ^ 2)
 
 
     if distance > self.min_distance then
         if self.animation ~= enemy_fall then
             enemy_walk_sound:setPitch(love.math.random())
-            enemy_walk_sound:play()
+            --enemy_walk_sound:play()
         end
 
         movement_vector:normalize()
@@ -168,7 +168,9 @@ function Main.Enemy:update(dt, target)
                     if not particle_systems[i].emitted then
                         particle_systems[i].particle:emit(love.math.random(consts.MIN_BLOOD, consts.MAX_BLOOD))
                         particle_systems[i].emitted = true
-                        particle_systems[i].particle:update(dt)
+
+                        local step = 1.0 / 600.0 -- Constant value instead of dt so the position don't change every second.
+                        particle_systems[i].particle:update(step)
                     end
 
                     particle_systems[i].particle:setSpeed(0, 0)

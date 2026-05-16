@@ -34,12 +34,25 @@ local cursor
 
 local background_index
 
+local vcr_osd_mono
+
+local fps
+
 -- For pre-loading. Loads stuff after loading modules.
 function love.load()
     love.mouse.setVisible(false)
     love.graphics.setDefaultFilter(consts.DEFAULT_FILTER, consts.DEFAULT_FILTER)
 
     background_index = love.math.random(1, #shaders.backgrounds) -- Do not touch this line. I'll mess with it later.
+
+    vcr_osd_mono = love.graphics.newFont(consts.FONT_PATH .. "vcr_osd_mono.ttf")
+    vcr_osd_mono:setFilter(consts.DEFAULT_FILTER, consts.DEFAULT_FILTER)
+
+    fps = 0
+
+    if consts.DEBUG then
+        set.show_fps = true
+    end
 
     canvas = love.graphics.newCanvas(consts.RENDER_WIDTH, consts.RENDER_HEIGHT)
     canvas:setFilter(consts.DEFAULT_FILTER, consts.DEFAULT_FILTER)
@@ -75,7 +88,8 @@ function love.load()
 end
 
 function love.update(dt)
-    print(love.timer.getFPS())
+    fps = love.timer.getFPS()
+
     camera_movement = player.stats.speed / 25 -- So that when the player gets fast it stays on the screen.
 
     if events.screenshake and events.screenshake_duration > 0 then
@@ -164,6 +178,18 @@ function love.draw()
     soul_bar_bg:draw(65, 20)
     soul_bar:draw(65, 20, 0, 1, consts.SHADING, 0, 4)
     soul_bar_frame:draw(65, 20)
+
+    if set.show_fps and fps > 0 then -- Unholy math here.
+        local length = #tostring(fps)
+        local x = (1.0 / length) * (consts.RENDER_WIDTH * length * 0.95)
+
+        love.graphics.setColor(0, 0, 0, 0.5)
+        love.graphics.rectangle("fill", x - length, 1, length * 9, 12, 3, 3)
+        love.graphics.setColor(1, 1, 1)
+
+        love.graphics.setFont(vcr_osd_mono)
+        love.graphics.print(fps, x, 0)
+    end
 
     cursor:draw(mouse_x, mouse_y, 0, 1, consts.SHADING, 0, 2)
     love.graphics.setCanvas()

@@ -12,10 +12,13 @@ player_punch:manage_spritesheet(consts.CONSUMER_PATH .. "consumer_punch.png", co
 local mouse_x, mouse_y
 
 love.audio.setEffect("reverb", {type = "reverb"})
+
 local footstep_sound = love.audio.newSource(consts.SOUND_PATH .. "footstep.wav", "static")
 footstep_sound:setVolume(set.sfx_volume)
-
 footstep_sound:setEffect("reverb")
+
+local footstep_sounds = {}
+local footstep_timer = 0
 
 -- If you can think of more stats, then, add them.
 --R Remove the stats that you think wouldn't work, aight?
@@ -79,8 +82,11 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y)
         self.states.idle = true
     else
         if movement_vector.x ~= 0 or movement_vector.y ~= 0 then
-            footstep_sound:setPitch(love.math.random())
-            footstep_sound:play()
+            if footstep_timer <= 0 then
+                table.insert(footstep_sounds, footstep_sound:clone())
+            else
+                footstep_timer = footstep_timer - dt
+            end
         end
 
         self.states.idle = false
@@ -123,6 +129,15 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y)
 
     self.position.x = self.hitbox.x
     self.position.y = self.hitbox.y
+
+    for i = 1, #footstep_sounds do
+        if footstep_timer <= 0 then
+            footstep_sounds[i]:setPitch(love.math.random(50, 100) / 100)
+            footstep_sounds[i]:play()
+            table.remove(footstep_sounds, i)
+            footstep_timer = 50.0 / self.stats.speed
+        end
+    end
 end
 
 function Player:draw()
