@@ -45,7 +45,7 @@ local default_stun = 3
 
 love.audio.setEffect("reverb", {type = "reverb"})
 
-local player_hit_sound = love.audio.newSource(consts.SOUND_PATH .. "punch_hit.wav", "static")
+local player_hit_sound = love.audio.newSource(consts.SOUND_PATH .. "punch_hit.wav", "static") -- Move player stuff to player.lua eventually.
 player_hit_sound:setVolume(set.sfx_volume)
 player_hit_sound:setEffect("reverb")
 
