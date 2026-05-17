@@ -48,6 +48,8 @@ love.audio.setEffect("reverb", {type = "reverb"})
 local walk_sound = love.audio.newSource(consts.SOUND_PATH .. "footstep.wav", "static")
 walk_sound:setVolume(set.sfx_volume - 0.5)
 walk_sound:setEffect("reverb")
+local walk_sound_table = {}
+local walk_sound_timer = 0
 
 Main.Enemy = {
     velocity = utils.Vector:new(),
@@ -122,7 +124,6 @@ function Main.Enemy:update(dt, target)
         self.animation = fall_animation
     end
 
-    self.player_hit_flag = false -- Flags are basically variables that tell when something should happen and stop.
     if target.punch_hurtbox.active then
         --R so enemy doesnt get fucking comboed in 1 punch
         if not self.hit_this_swing then
@@ -167,13 +168,15 @@ function Main.Enemy:update(dt, target)
 
                     particle_systems[i].particle:setSpeed(0, 0)
                 end
-                self.player_hit_flag = true
+                self.hit_flag = true
+            else
+                self.hit_flag = false
             end
         end
     else
         self.hit_this_swing = false
+        self.hit_flag = false
     end
-
 
     --R knockback = velocity rn, lerp was tp'ing the enemy
     if math.abs(self.stats.knockback_velx) > 0.1 or math.abs(self.stats.knockback_vely) > 0.1 then

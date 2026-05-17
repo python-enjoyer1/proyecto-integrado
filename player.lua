@@ -5,30 +5,29 @@ local consts = require("constants")
 local set = require("settings")
 
 local walk_animation = utils.Animation:new({speed = 0.08, looping = true})
-local punch_animation = utils.Animation:new({speed = 0.04, looping = false})
-
 walk_animation:manage_spritesheet(consts.CONSUMER_PATH .. "consumer_walk.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 7, 3)
+
+local punch_animation = utils.Animation:new({speed = 0.04, looping = false})
 punch_animation:manage_spritesheet(consts.CONSUMER_PATH .. "consumer_punch.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 10, 3)
 
 local mouse_x, mouse_y
 
 love.audio.setEffect("reverb", {type = "reverb"})
 
-local footstep_sound = love.audio.newSource(consts.SOUND_PATH .. "footstep.wav", "static")
-footstep_sound:setVolume(set.sfx_volume)
-footstep_sound:setEffect("reverb")
-local footstep_sound_table = {} -- Makes it so footsteps can be speeded up.
-local footstep_sound_timer = 0
+local walk_sound = love.audio.newSource(consts.SOUND_PATH .. "footstep.wav", "static")
+walk_sound:setVolume(set.sfx_volume)
+walk_sound:setEffect("reverb")
+local walk_sound_table = {} -- Makes it so footsteps can be speeded played at different speeds.
+local walk_sound_timer = 0
 
 local miss_sound = love.audio.newSource(consts.SOUND_PATH .. "punch_miss.wav", "static")
 miss_sound:setVolume(set.sfx_volume)
 miss_sound:setEffect("reverb")
+miss_sound:setPitch(0.7)
 
 local punch_sound = love.audio.newSource(consts.SOUND_PATH .. "punch_hit.wav", "static")
 punch_sound:setVolume(set.sfx_volume)
 punch_sound:setEffect("reverb")
-local punch_sound_table = {}
-local punch_sound_timer = 0
 
 -- If you can think of more stats, then, add them.
 --R Remove the stats that you think wouldn't work, aight?
@@ -65,8 +64,11 @@ local Player = {
     punch_hurtbox = {x = 0, y = 0, width = 20, height = 20, types = {"hurtbox"}, active = false}
 }
 
-function Player:update(dt, scale_x, scale_y, offset_x, offset_y, target) -- Eventually change target to targets.
-    self.target = target
+function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets) -- Eventually change target to targets.
+    self.targets = targets
+
+    punch_animation.speed = 1.0 / (self.stats.attack_speed * 5)
+    punch_sound:setPitch(self.stats.attack_speed / 5)
 
     local movement_vector = utils.Vector:new()
 
@@ -94,20 +96,16 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, target) -- Even
         self.states.idle = true
     else
         if movement_vector.x ~= 0 or movement_vector.y ~= 0 then
-            if footstep_sound_timer <= 0 then
-                table.insert(footstep_sound_table, footstep_sound:clone())
+            if walk_sound_timer <= 0 then
+                table.insert(walk_sound_table, walk_sound:clone())
             else
-                footstep_sound_timer = footstep_sound_timer - dt
+                walk_sound_timer = walk_sound_timer - dt
             end
         end
 
         self.states.idle = false
         if self.states.punch == true then
             self.animation = punch_animation
-
-            if punch_sound_timer > 0 then
-                punch_sound_timer = punch_sound_timer - dt
-            end
         else
             self.animation = walk_animation
         end
@@ -129,14 +127,19 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, target) -- Even
 
     self.animation:update(dt, self.states.idle)
 
-    if self.states.punch and punch_animation.current_frame == 6 then
+    if self.states.punch and punch_animation.current_frame >= 5 and punch_animation.current_frame <= 7 then
         self.punch_hurtbox.active = true
         local reach = 20
         self.punch_hurtbox.x = self.position.x + math.cos(self.angle) * reach
         self.punch_hurtbox.y = self.position.y + math.sin(self.angle) * reach
 
-        if target.player_hit_flag then
-            table.insert(punch_sound_table, punch_sound:clone())
+        for i = 1, #targets do
+            local target = targets[i]
+            if target.hit_flag then
+                punch_sound:play()
+            else
+                miss_sound:play()
+            end
         end
     else
         self.punch_hurtbox.active = false
@@ -147,26 +150,15 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, target) -- Even
         end
     end
 
-    if not self.target.player_hit_flag and punch_animation.current_frame == 6 then
-    end
-
     self.position.x = self.hitbox.x
     self.position.y = self.hitbox.y
 
-    for i = 1, #footstep_sound_table do
-        if footstep_sound_timer <= 0 then
-            footstep_sound_table[i]:setPitch(love.math.random(50, 100) / 100)
-            footstep_sound_table[i]:play()
-            table.remove(footstep_sound_table, i)
-            footstep_sound_timer = 50.0 / self.stats.speed
-        end
-    end
-
-    for i = 1, #punch_sound_table do
-        if punch_sound_timer <= 0 then
-            punch_sound_table[i]:play()
-            table.remove(punch_sound_table, i)
-            punch_sound_timer = 1.0 / self.stats.attack_speed
+    for i = 1, #walk_sound_table do
+        if walk_sound_timer <= 0 then
+            walk_sound_table[i]:setPitch(love.math.random(50, 100) / 100)
+            walk_sound_table[i]:play()
+            table.remove(walk_sound_table, i)
+            walk_sound_timer = 50.0 / self.stats.speed
         end
     end
 end

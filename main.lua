@@ -38,6 +38,8 @@ local vcr_osd_mono
 
 local fps
 
+local enemy_table
+
 -- For pre-loading. Loads stuff after loading modules.
 function love.load()
     love.mouse.setVisible(false)
@@ -85,6 +87,9 @@ function love.load()
 
     cursor = utils.Animation:new({speed = 0.1})
     cursor:manage_spritesheet(consts.ASSETS_PATH .. "hud/cursor.png", 8, 8, 4, 2)
+
+    enemy_table = {}
+    table.insert(enemy_table, enemy)
 end
 
 function love.update(dt)
@@ -110,7 +115,7 @@ function love.update(dt)
 
     enemy:update(dt, player)
 
-    player:update(dt, scale_x, scale_y, global_offset_x, global_offset_y, enemy)
+    player:update(dt, scale_x, scale_y, global_offset_x, global_offset_y, enemy_table)
 
     for i = 1, #tilemap.walls do
         utils.check_collision(player.hitbox, tilemap.walls[i])
