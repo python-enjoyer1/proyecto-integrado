@@ -139,6 +139,8 @@ function love.update(dt)
     -- Shaders.
     shaders.backgrounds[background_index]:send("resolution", {consts.RENDER_WIDTH, consts.RENDER_HEIGHT})
     shaders.backgrounds[background_index]:send("time", love.timer.getTime())
+    shaders.game_over:send("resolution", {consts.RENDER_WIDTH, consts.RENDER_HEIGHT})
+    shaders.game_over:send("time", love.timer.getTime())
 
     -- HUD/GUI goes here.
     soul_bar_bg:update(dt)
