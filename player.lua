@@ -64,11 +64,14 @@ local Player = {
     punch_hurtbox = {x = 0, y = 0, width = 20, height = 20, types = {"hurtbox"}, active = false}
 }
 
-function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets) -- Eventually change target to targets.
+function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets)
     self.targets = targets
 
     punch_animation.speed = 1.0 / (self.stats.attack_speed * 5)
     punch_sound:setPitch(self.stats.attack_speed / 5)
+    miss_sound:setPitch(self.stats.attack_speed / 5)
+
+    walk_animation.speed = 55.0 / (self.stats.speed * 5)
 
     local movement_vector = utils.Vector:new()
 

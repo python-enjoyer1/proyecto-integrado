@@ -94,8 +94,11 @@ function Main.Enemy:update(dt, target)
 
     if distance > self.min_distance then
         if self.animation ~= fall_animation then
-            walk_sound:setPitch(love.math.random())
-            walk_sound:play()
+            if walk_sound_timer <= 0 then
+                table.insert(walk_sound_table, walk_sound:clone())
+            else
+                walk_sound_timer = walk_sound_timer - dt
+            end
         end
 
         movement_vector:normalize()
@@ -195,7 +198,14 @@ function Main.Enemy:update(dt, target)
     self.hitbox.x = self.position.x
     self.hitbox.y = self.position.y
 
-    particle_system:update(dt)
+    for i = 1, #walk_sound_table do
+        if walk_sound_timer <= 0 then
+            walk_sound_table[i]:setPitch(love.math.random(50, 100) / 100)
+            walk_sound_table[i]:play()
+            table.remove(walk_sound_table, i)
+            walk_sound_timer = 50.0 / self.stats.speed
+        end
+    end
 end
 
 function Main.Enemy:draw()
