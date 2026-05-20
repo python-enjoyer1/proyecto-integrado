@@ -35,10 +35,10 @@ local Player = {
     position = {x = 320, y = 180},
     velocity = utils.Vector:new(),
     stats = {
-        speed = 150,
+        speed = 1500,
         friction = 1, --R Floor friction
         attack_damage = 10, --R We should prolly replace this with "dmg bonus" since stuff will have predetermined dmg
-        attack_speed = 5,
+        attack_speed = 50,
         crit_chance = 1, --R You did mention something about adding critical hits to the game didn't you? -- No, but it's a good idea.
         knockback = 500,
         souls = 30, --R In seconds perhaps?
