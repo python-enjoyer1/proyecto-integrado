@@ -29,6 +29,9 @@ local punch_sound = love.audio.newSource(consts.SOUND_PATH .. "punch_hit.wav", "
 punch_sound:setVolume(set.sfx_volume)
 punch_sound:setEffect("reverb")
 
+-- add this near the top of player.lua with the other locals
+local punch_sound_played = false
+
 -- If you can think of more stats, then, add them.
 --R Remove the stats that you think wouldn't work, aight?
 local Player = {
@@ -136,13 +139,16 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets)
         self.punch_hurtbox.x = self.position.x + math.cos(self.angle) * reach
         self.punch_hurtbox.y = self.position.y + math.sin(self.angle) * reach
 
-        for i = 1, #targets do
-            local target = targets[i]
-            if target.hit_flag then
-                punch_sound:play()
-            else
-                miss_sound:play()
+        if not punch_sound_played then
+            for i = 1, #targets do
+                local target = targets[i]
+                if target.hit_flag then
+                    punch_sound:play()
+                else
+                    miss_sound:play()
+                end
             end
+            punch_sound_played = true
         end
     else
         self.punch_hurtbox.active = false
@@ -183,6 +189,7 @@ function Player:punch()
         self.animation = punch_animation
         punch_animation.current_frame = 1
         punch_animation.finished = false
+        punch_sound_played = false
     end
 end
 
