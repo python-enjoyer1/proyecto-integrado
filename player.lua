@@ -138,19 +138,22 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets)
         local reach = 20
         self.punch_hurtbox.x = self.position.x + math.cos(self.angle) * reach
         self.punch_hurtbox.y = self.position.y + math.sin(self.angle) * reach
-
-        if not punch_sound_played then
+    else
+        if self.punch_hurtbox.active and not punch_sound_played then
+            local hit_anything = false
             for i = 1, #targets do
-                local target = targets[i]
-                if target.hit_flag then
-                    punch_sound:play()
-                else
-                    miss_sound:play()
+                if targets[i].hit_flag then
+                    hit_anything = true
+                    break
                 end
+            end
+            if hit_anything then
+                punch_sound:play()
+            else
+                miss_sound:play()
             end
             punch_sound_played = true
         end
-    else
         self.punch_hurtbox.active = false
         if punch_animation.finished then
             self.states.punch = false
