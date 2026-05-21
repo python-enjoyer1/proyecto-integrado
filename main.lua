@@ -40,10 +40,16 @@ local fps
 
 local enemy_table
 
+local seed
+
 -- For pre-loading. Loads stuff after loading modules.
 function love.load()
     love.mouse.setVisible(false)
     love.graphics.setDefaultFilter(consts.DEFAULT_FILTER, consts.DEFAULT_FILTER)
+
+    seed = utils.generate_seed()
+
+    love.math.setRandomSeed(seed)
 
     background_index = love.math.random(1, #shaders.backgrounds) -- Do not touch this line. I'll mess with it later.
 

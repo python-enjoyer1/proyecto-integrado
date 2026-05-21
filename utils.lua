@@ -371,4 +371,10 @@ function Main.lerp(a, b, x, dt)
     return a * (1.0 - t) + b * t
 end
 
+-- A bit complex, but basically, multiplying by big prime numbers replicates randomness very well.
+function Main.generate_seed()
+    local seed = math.floor(os.time() + (love.timer.getTime() * 30666738388173)) % 2147483647
+    return seed
+end
+
 return Main

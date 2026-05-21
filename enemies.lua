@@ -46,7 +46,7 @@ local default_stun = 3
 love.audio.setEffect("reverb", {type = "reverb"})
 
 local walk_sound = love.audio.newSource(consts.SOUND_PATH .. "footstep.wav", "static")
-walk_sound:setVolume(set.sfx_volume - 0.5)
+walk_sound:setVolume(set.sfx_volume)
 walk_sound:setEffect("reverb")
 local walk_sound_table = {}
 local walk_sound_timer = 0
