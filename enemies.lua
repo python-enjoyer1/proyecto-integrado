@@ -141,7 +141,7 @@ function Main.Enemy:update(dt, target)
 
                 events.screenshake = true
                 events.screenshake_duration = consts.DEFAULT_SCREENSHAKE_DURATION
-                events.screenshake_magnitude = 2.5
+                events.screenshake_magnitude = 4.0
 
                 -- Blood particles.
                 table.insert(particle_systems, {
