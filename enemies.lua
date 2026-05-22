@@ -26,7 +26,7 @@ local particle_systems = {
 }
 
 particle_system:setEmitterLifetime(-1) -- -1 means it never stops.
-particle_system:setParticleLifetime(1)
+particle_system:setParticleLifetime(999) --R dont mind me
 particle_system:setSizeVariation(1)
 particle_system:setColors(1, 1, 1, 1, 1, 1, 1, 1)
 particle_system:setSpeed(0, consts.BLOOD_SPEED)
@@ -42,6 +42,32 @@ local punch_animation = utils.Animation:new({speed = 0.1, looping = true})
 punch_animation:manage_spritesheet(consts.ASSETS_PATH .. "characters/enemies/basic_enemy/enemy_punch.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 10, 3)
 
 local default_stun = 3
+
+local function death_boom(self)
+    local num_bursts = 5
+    for burst = 1, num_bursts do
+        local ps = particle_system:clone()
+        ps:start()
+        local angle = math.rad(love.math.random(0, 360))
+        ps:setSpread(math.rad(360))
+        ps:setDirection(angle)
+        ps:setSpeed(0, consts.BLOOD_SPEED * 1.5)
+        ps:emit(love.math.random(consts.MIN_BLOOD, consts.MAX_BLOOD))
+        local step = 1.0 / 600.0
+        ps:update(step)
+        ps:setSpeed(0, 0)
+        table.insert(particle_systems, {
+            particle = ps,
+            x = self.position.x,
+            y = self.position.y,
+            start = true,
+            emitted = true
+        })
+    end
+    events.screenshake = true
+    events.screenshake_duration = 0.3
+    events.screenshake_magnitude = 8.0
+end
 
 love.audio.setEffect("reverb", {type = "reverb"})
 
@@ -69,6 +95,7 @@ Main.Enemy = {
         idle = false,
         punch = false,
         fall = false,
+        dead = false,
     },
     animation = walk_animation,
     angle = 0,
@@ -85,6 +112,12 @@ function Main.Enemy:new(o)
 end
 
 function Main.Enemy:update(dt, target)
+    for i = 1, #particle_systems do
+        particle_systems[i].particle:update(dt)
+    end
+
+    if self.states.dead then return end
+
     local movement_vector = utils.Vector:new()
 
     movement_vector.x = target.position.x - self.position.x
@@ -171,6 +204,12 @@ function Main.Enemy:update(dt, target)
 
                     particle_systems[i].particle:setSpeed(0, 0)
                 end
+                self.stats.hp = self.stats.hp - target.stats.attack_damage
+                if self.stats.hp <= 0 then
+                    self.states.dead = true
+                    death_boom(self)
+                end
+
                 self.hit_flag = true
             else
                 self.hit_flag = false
@@ -206,6 +245,10 @@ function Main.Enemy:update(dt, target)
             walk_sound_timer = 50.0 / self.stats.speed
         end
     end
+
+    for i = 1, #particle_systems do
+        particle_systems[i].particle:update(dt)
+    end
 end
 
 function Main.Enemy:draw()
@@ -213,10 +256,11 @@ function Main.Enemy:draw()
         love.graphics.draw(particle_systems[i].particle, particle_systems[i].x, particle_systems[i].y)
     end
 
-    self.animation:draw(self.position.x, self.position.y, self.angle, 1, consts.SHADING, 0, 3)
-
-    if consts.DEBUG then
-        utils.draw_collision(self.hitbox)
+    if not self.states.dead then
+        self.animation:draw(self.position.x, self.position.y, self.angle, 1, consts.SHADING, 0, 3)
+        if consts.DEBUG then
+            utils.draw_collision(self.hitbox)
+        end
     end
 end
 
