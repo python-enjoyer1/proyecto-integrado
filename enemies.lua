@@ -165,7 +165,7 @@ function Main.Enemy:update(dt, target)
                         particle_systems[i].particle:emit(love.math.random(consts.MIN_BLOOD, consts.MAX_BLOOD))
                         particle_systems[i].emitted = true
 
-                        local step = 1.0 / 600.0 -- Constant value instead of dt so the position don't change every second.
+                        local step = 1.0 / 600.0 -- Constant value instead of dt so the position doesn't change every second.
                         particle_systems[i].particle:update(step)
                     end
 
