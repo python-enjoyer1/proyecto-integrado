@@ -344,7 +344,8 @@ function Main.Tilemap:draw(offset_x, offset_y)
         local oy = self.tilemap[i].origin_y or 0
         local tile_type = self.tilemap[i].tile_type or nil
 
-        if x < (consts.RENDER_WIDTH - offset_x) + 10 and y < (consts.RENDER_HEIGHT - offset_y) + 10 then
+        -- Peak optimization done by ME. Basically any tiles that are not in the view of the player, are simply, not rendered. Quite awesome, isn't it?
+        if x < (consts.RENDER_WIDTH - offset_x) + 15 and y < (consts.RENDER_HEIGHT - offset_y) + 15 then
             love.graphics.push()
             love.graphics.scale(consts.TILE_SCALE, consts.TILE_SCALE)
 
