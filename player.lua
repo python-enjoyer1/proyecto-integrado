@@ -32,13 +32,15 @@ punch_sound:setEffect("reverb")
 -- add this near the top of player.lua with the other locals
 local punch_sound_played = false
 
+local DEFAULT_SPEED = 150
+
 -- If you can think of more stats, then, add them.
 --R Remove the stats that you think wouldn't work, aight?
 local Player = {
     position = {x = 320, y = 180},
     velocity = utils.Vector:new(),
     stats = {
-        speed = 150,
+        speed = DEFAULT_SPEED,
         friction = 1, --R Floor friction
         attack_damage = 4, --R We should prolly replace this with "dmg bonus" since stuff will have predetermined dmg
         attack_speed = 5,
@@ -67,14 +69,17 @@ local Player = {
     punch_hurtbox = {x = 0, y = 0, width = 20, height = 20, types = {"hurtbox"}, active = false}
 }
 
-function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets)
+function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_down)
     self.targets = targets
 
-    punch_animation.speed = 1.0 / (self.stats.attack_speed * 5)
-    punch_sound:setPitch(self.stats.attack_speed / 5)
-    miss_sound:setPitch(self.stats.attack_speed / 5)
+    local speed = self.stats.speed * slow_down
+    local attack_speed = self.stats.attack_speed * slow_down
 
-    walk_animation.speed = 55.0 / (self.stats.speed * 5)
+    punch_animation.speed = 1.0 / (attack_speed * 5)
+    punch_sound:setPitch(attack_speed / 5)
+    miss_sound:setPitch(attack_speed / 5)
+
+    walk_animation.speed = 55.0 / (speed * 5)
 
     local movement_vector = utils.Vector:new()
 
@@ -117,8 +122,8 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets)
         end
     end
 
-    self.velocity.x = movement_vector.x * self.stats.speed
-    self.velocity.y = movement_vector.y * self.stats.speed
+    self.velocity.x = movement_vector.x * (speed)
+    self.velocity.y = movement_vector.y * (speed)
 
     self.position.x = self.position.x + (self.velocity.x * dt)
     self.position.y = self.position.y + (self.velocity.y * dt)
@@ -167,10 +172,10 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets)
 
     for i = 1, #walk_sound_table do
         if walk_sound_timer <= 0 then
-            walk_sound_table[i]:setPitch(love.math.random(50, 100) / 100)
+            walk_sound_table[i]:setPitch((love.math.random(50, 100) / 100) * slow_down * speed / DEFAULT_SPEED)
             walk_sound_table[i]:play()
             table.remove(walk_sound_table, i)
-            walk_sound_timer = 50.0 / self.stats.speed
+            walk_sound_timer = 50.0 / speed
         end
     end
 end

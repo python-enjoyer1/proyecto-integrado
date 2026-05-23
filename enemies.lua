@@ -58,12 +58,14 @@ walk_sound:setEffect("reverb")
 local walk_sound_table = {}
 local walk_sound_timer = 0
 
+local DEFAULT_SPEED = 100
+
 Main.Enemy = {
     velocity = utils.Vector:new(),
     position = {x = 100, y = 100},
     stats = {
         hp = 20,
-        speed = 100,
+        speed = DEFAULT_SPEED,
         attack_damage = 5,
         soul_amount = love.math.random(consts.MIN_ENEMY_SOUL, consts.MAX_ENEMY_SOUL),
         essence_amount = love.math.random(consts.MIN_ENEMY_ESSENCE, consts.MAX_ENEMY_ESSENCE),
@@ -92,8 +94,10 @@ function Main.Enemy:new(o)
     return o
 end
 
-function Main.Enemy:update(dt, target)
+function Main.Enemy:update(dt, target, slow_down)
     if not self.states.dead then
+        local speed = self.stats.speed * slow_down
+
         local movement_vector = utils.Vector:new()
 
         movement_vector.x = target.position.x - self.position.x
@@ -112,8 +116,8 @@ function Main.Enemy:update(dt, target)
 
             movement_vector:normalize()
 
-            self.velocity.x = movement_vector.x * self.stats.speed
-            self.velocity.y = movement_vector.y * self.stats.speed
+            self.velocity.x = movement_vector.x * speed
+            self.velocity.y = movement_vector.y * speed
 
             if self.stats.stun_duration <= 0 then
                 self.position.x = self.position.x + (self.velocity.x * dt)
@@ -132,7 +136,7 @@ function Main.Enemy:update(dt, target)
             self.animation = walk_animation
             self.states.fall = false
         else
-            self.stats.stun_duration = self.stats.stun_duration - dt
+            self.stats.stun_duration = self.stats.stun_duration - dt * slow_down
             self.animation = fall_animation
         end
 
@@ -233,10 +237,10 @@ function Main.Enemy:update(dt, target)
 
         for sound = 1, #walk_sound_table do
             if walk_sound_timer <= 0 then
-                walk_sound_table[sound]:setPitch(love.math.random(50, 100) / 100)
+                walk_sound_table[sound]:setPitch((love.math.random(50, 100) / 100) * slow_down * speed / DEFAULT_SPEED)
                 walk_sound_table[sound]:play()
                 table.remove(walk_sound_table, sound)
-                walk_sound_timer = 50.0 / self.stats.speed
+                walk_sound_timer = 50.0 / speed
             end
         end
     else

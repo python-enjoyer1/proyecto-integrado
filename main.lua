@@ -37,6 +37,9 @@ local background_index
 local vcr_osd_mono
 
 local fps
+local time
+
+local slow_down
 
 local enemy_table
 
@@ -57,10 +60,13 @@ function love.load()
     vcr_osd_mono:setFilter(consts.DEFAULT_FILTER, consts.DEFAULT_FILTER)
 
     fps = 0
+    time = love.timer.getTime()
 
     if consts.DEBUG then
         set.show_fps = true
     end
+
+    slow_down = 1.0 -- Might change name later, bigger means faster, smaller means slower.
 
     canvas = love.graphics.newCanvas(consts.RENDER_WIDTH, consts.RENDER_HEIGHT)
     canvas:setFilter(consts.DEFAULT_FILTER, consts.DEFAULT_FILTER)
@@ -100,6 +106,7 @@ end
 
 function love.update(dt)
     fps = love.timer.getFPS()
+    time = love.timer.getTime() * slow_down
 
     camera_movement = player.stats.speed / 25 -- So that when the player gets fast it stays on the screen.
 
@@ -119,9 +126,9 @@ function love.update(dt)
     mouse_x = (mouse_x / scale_x)
     mouse_y = (mouse_y / scale_y)
 
-    enemy:update(dt, player)
+    enemy:update(dt, player, slow_down)
 
-    player:update(dt, scale_x, scale_y, global_offset_x, global_offset_y, enemy_table)
+    player:update(dt, scale_x, scale_y, global_offset_x, global_offset_y, enemy_table, slow_down)
 
     for i = 1, #tilemap.walls do
         utils.check_collision(player.hitbox, tilemap.walls[i])
@@ -151,10 +158,10 @@ function love.update(dt)
 
     -- Shaders.
     shaders.backgrounds[background_index]:send("resolution", {consts.RENDER_WIDTH, consts.RENDER_HEIGHT})
-    shaders.backgrounds[background_index]:send("time", love.timer.getTime())
+    shaders.backgrounds[background_index]:send("time", time)
 
     shaders.game_over:send("resolution", {consts.RENDER_WIDTH, consts.RENDER_HEIGHT})
-    shaders.game_over:send("time", love.timer.getTime())
+    shaders.game_over:send("time", time)
 
     -- HUD/GUI goes here.
     soul_bar_bg:update(dt)
