@@ -6,17 +6,17 @@ local events = require("events")
 
 local Main = {}
 
-local particle_image
+local particle_path
 
 if set.gore then
-    particle_image = "red.png"
+    particle_path = "blood/red.png"
 else
-    particle_image = "pink.png"
+    particle_path = "blood/pink.png"
 end
-local blood_particle = love.graphics.newImage(consts.PARTICLE_PATH .. particle_image)
+local particle_image = love.graphics.newImage(consts.PARTICLE_PATH .. particle_path)
 
-local particle_system_blood = love.graphics.newParticleSystem(blood_particle)
-local particle_system_burst = love.graphics.newParticleSystem(blood_particle)
+local particle_system_blood = love.graphics.newParticleSystem(particle_image)
+local particle_system_burst = love.graphics.newParticleSystem(particle_image)
 
 local particle_systems = {
     particle = particle_system_blood,
@@ -45,7 +45,7 @@ walk_animation:manage_spritesheet(consts.ASSETS_PATH .. "characters/enemies/basi
 local fall_animation = utils.Animation:new({speed = 0.1, looping = true})
 fall_animation:manage_spritesheet(consts.ASSETS_PATH .. "characters/enemies/basic_enemy/enemy_fall.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 1, 1)
 
-local punch_animation = utils.Animation:new({speed = 0.1, looping = true})
+local punch_animation = utils.Animation:new({speed = 0.06, looping = true})
 punch_animation:manage_spritesheet(consts.ASSETS_PATH .. "characters/enemies/basic_enemy/enemy_punch.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 10, 3)
 
 local default_stun = 3
@@ -57,6 +57,13 @@ walk_sound:setVolume(set.sfx_volume)
 walk_sound:setEffect("reverb")
 local walk_sound_table = {}
 local walk_sound_timer = 0
+
+local punch_sound = love.audio.newSource(consts.SOUND_PATH .. "punch_hit.wav", "static")
+punch_sound:setVolume(set.sfx_volume)
+punch_sound:setEffect("reverb")
+
+local PUNCH_COOLDOWN = 0.5
+local punch_timer = PUNCH_COOLDOWN
 
 local DEFAULT_SPEED = 100
 
@@ -83,7 +90,8 @@ Main.Enemy = {
     animation = walk_animation,
     angle = 0,
     min_distance = 30,
-    hitbox = {x = 100, y = 100, width = consts.CHARACTER_SIZE / 2, height = consts.CHARACTER_SIZE / 2, types = {"hitbox", "enemycollisionbox"}}
+    hitbox = {x = 100, y = 100, width = consts.CHARACTER_SIZE / 2, height = consts.CHARACTER_SIZE / 2, types = {"hitbox", "enemycollisionbox"}},
+    punch_hurtbox = {x = 0, y = 0, width = 20, height = 20, types = {"hurtbox"}, active = false}
 }
 
 -- This is just so we can have inheritance between different enemy variations.
@@ -127,14 +135,30 @@ function Main.Enemy:update(dt, target, slow_down)
             end
 
             self.states.idle = false
-        else
+        elseif not self.states.punch then
             self.states.idle = true
             self.animation.current_frame = 1
+            if punch_timer <= 0 then
+                self.states.punch = true
+                punch_timer = PUNCH_COOLDOWN
+            else
+                punch_timer = punch_timer - dt
+            end
+        else
+            self.states.idle = false
         end
 
         if self.stats.stun_duration <= 0 then
-            self.animation = walk_animation
+            if not self.states.punch then
+                self.animation = walk_animation
+            else
+                self.animation = punch_animation
+                if self.animation.current_frame == #self.animation.frames then
+                    self.states.punch = false
+                end
+            end
             self.states.fall = false
+
         else
             self.stats.stun_duration = self.stats.stun_duration - dt * slow_down
             self.animation = fall_animation
@@ -187,9 +211,10 @@ function Main.Enemy:update(dt, target, slow_down)
                             particle_systems[system].particle:setSpeed(-consts.BURST_SPEED, consts.BURST_SPEED)
                             events.screenshake = true
                             events.screenshake_duration = 0.3
-                            events.screenshake_magnitude = 8.0
+                            events.screenshake_magnitude = 10.0
 
                         end
+
                         particle_systems[system].particle:setDirection(angle)
 
 
@@ -237,7 +262,7 @@ function Main.Enemy:update(dt, target, slow_down)
 
         for sound = 1, #walk_sound_table do
             if walk_sound_timer <= 0 then
-                walk_sound_table[sound]:setPitch((love.math.random(50, 100) / 100) * slow_down * speed / DEFAULT_SPEED)
+                walk_sound_table[sound]:setPitch((love.math.random(50, 100) / 100) * slow_down * (speed / DEFAULT_SPEED))
                 walk_sound_table[sound]:play()
                 table.remove(walk_sound_table, sound)
                 walk_sound_timer = 50.0 / speed

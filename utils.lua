@@ -16,7 +16,7 @@ function Main.Vector:new(o)
 end
 
 function Main.Vector:normalize()
-    local length = math.sqrt(self.x^2 + self.y^2)
+    local length = math.sqrt(self.x ^ 2 + self.y ^ 2)
     if length > 0 then
         self.x = self.x / length
         self.y = self.y / length
