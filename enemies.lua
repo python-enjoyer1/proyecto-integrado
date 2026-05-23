@@ -240,7 +240,7 @@ function Main.Enemy:update(dt, target)
             end
         end
     else
-        -- Freeing up memory.
+        -- Freeing up memory. Only release LÖVE2D objects, everything else gets managed by Lua.
         particle_system_blood:release()
         particle_system_burst:release()
         walk_sound:release()
