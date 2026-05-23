@@ -5,6 +5,6 @@ Things to add:
  - Add weapons.
  - Recoil to weapons on impact. (Hitting someone with a blunt weapon or shooting a gun)
  - Soul Bar depletion.
- - Make hurtboxes do stuff.
  - Make enemies smarter.
- - Tutorial. 
+ - Tutorial.
+ - Replace shadows with a shader to improve performance. 
