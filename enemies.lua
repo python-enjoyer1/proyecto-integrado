@@ -60,8 +60,8 @@ local function death_boom(self)
             particle = ps,
             x = self.position.x,
             y = self.position.y,
-            start = true,
-            emitted = true
+            start = false, -- Just so you know, always initialize these as false, they are flags for checking if the particle system was already started and emitted.
+            emitted = false
         })
     end
     events.screenshake = true
@@ -112,12 +112,6 @@ function Main.Enemy:new(o)
 end
 
 function Main.Enemy:update(dt, target)
-    for i = 1, #particle_systems do
-        particle_systems[i].particle:update(dt)
-    end
-
-    if self.states.dead then return end
-
     local movement_vector = utils.Vector:new()
 
     movement_vector.x = target.position.x - self.position.x
@@ -185,21 +179,21 @@ function Main.Enemy:update(dt, target)
                     emitted = false
                 })
 
-                for i = 1, #particle_systems do
-                    if not particle_systems[i].start then
-                        particle_systems[i].particle:start()
-                        particle_systems[i].start = true
+                for system = 1, #particle_systems do
+                    if not particle_systems[system].start then
+                        particle_systems[system].particle:start()
+                        particle_systems[system].start = true
                     end
 
-                    particle_systems[i].particle:setSpread(math.rad(love.math.random(180, 270)))
-                    particle_systems[i].particle:setDirection(angle)
+                    particle_systems[system].particle:setSpread(math.rad(love.math.random(180, 270)))
+                    particle_systems[system].particle:setDirection(angle)
 
-                    if not particle_systems[i].emitted then
-                        particle_systems[i].particle:emit(love.math.random(consts.MIN_BLOOD, consts.MAX_BLOOD))
-                        particle_systems[i].emitted = true
+                    if not particle_systems[system].emitted then
+                        particle_systems[system].particle:emit(love.math.random(consts.MIN_BLOOD, consts.MAX_BLOOD))
+                        particle_systems[system].emitted = true
 
                         local step = 1.0 / 600.0 -- Constant value instead of dt so the position doesn't change every second.
-                        particle_systems[i].particle:update(step)
+                        particle_systems[system].particle:update(step)
                     end
 
                     particle_systems[i].particle:setSpeed(0, 0)
@@ -237,23 +231,19 @@ function Main.Enemy:update(dt, target)
     self.hitbox.x = self.position.x
     self.hitbox.y = self.position.y
 
-    for i = 1, #walk_sound_table do
+    for sound = 1, #walk_sound_table do
         if walk_sound_timer <= 0 then
-            walk_sound_table[i]:setPitch(love.math.random(50, 100) / 100)
-            walk_sound_table[i]:play()
-            table.remove(walk_sound_table, i)
+            walk_sound_table[sound]:setPitch(love.math.random(50, 100) / 100)
+            walk_sound_table[sound]:play()
+            table.remove(walk_sound_table, sound)
             walk_sound_timer = 50.0 / self.stats.speed
         end
-    end
-
-    for i = 1, #particle_systems do
-        particle_systems[i].particle:update(dt)
     end
 end
 
 function Main.Enemy:draw()
-    for i = 1, #particle_systems do
-        love.graphics.draw(particle_systems[i].particle, particle_systems[i].x, particle_systems[i].y)
+    for system = 1, #particle_systems do
+        love.graphics.draw(particle_systems[system].particle, particle_systems[system].x, particle_systems[system].y)
     end
 
     if not self.states.dead then
