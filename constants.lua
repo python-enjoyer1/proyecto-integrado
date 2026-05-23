@@ -26,7 +26,6 @@ Main.PARTICLE_PATH = "stuff/assets/particles/"
 Main.FONT_PATH = "stuff/assets/fonts/"
 
 Main.DEBUG = false
-Main.SHADING = true
 
 Main.MIN_ENEMY_SOUL = 5
 Main.MAX_ENEMY_SOUL = 20

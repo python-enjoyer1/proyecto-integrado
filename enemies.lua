@@ -244,7 +244,7 @@ function Main.Enemy:draw()
     end
 
     if not self.states.dead then
-        self.animation:draw(self.position.x, self.position.y, self.angle, 1, consts.SHADING, 0, 3)
+        self.animation:draw(self.position.x, self.position.y, self.angle, 1, set.shading, 0, 3)
         if consts.DEBUG then
             utils.draw_collision(self.hitbox)
         end

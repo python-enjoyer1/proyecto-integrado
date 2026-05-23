@@ -1,5 +1,6 @@
 local love = require("love")
 local consts = require("constants")
+local set = require("settings")
 
 local Main = {}
 
@@ -349,7 +350,7 @@ function Main.Tilemap:draw(offset_x, offset_y)
             love.graphics.push()
             love.graphics.scale(consts.TILE_SCALE, consts.TILE_SCALE)
 
-            if consts.SHADING then
+            if set.shading then
                 love.graphics.setColor(consts.SHADOW_COLOR)
                 if tile_type == "upper" then
                     love.graphics.draw(tile, x, y + consts.WALL_SHADOW_OFFSET, r, 1, 1, ox, oy)

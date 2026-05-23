@@ -176,7 +176,7 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets)
 end
 
 function Player:draw()
-    self.animation:draw(self.position.x, self.position.y, self.angle, 1, consts.SHADING, 0, 3)
+    self.animation:draw(self.position.x, self.position.y, self.angle, 1, set.shading, 0, 3)
 
     if consts.DEBUG then
         utils.draw_collision(self.hitbox)

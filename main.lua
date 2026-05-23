@@ -189,7 +189,7 @@ function love.draw()
     -- HUD/GUI goes here.
 
     soul_bar_bg:draw(65, 20)
-    soul_bar:draw(65, 20, 0, 1, consts.SHADING, 0, 4)
+    soul_bar:draw(65, 20, 0, 1, set.shading, 0, 4)
     soul_bar_frame:draw(65, 20)
 
     if set.show_fps and fps > 0 then -- Unholy math here.
@@ -204,7 +204,7 @@ function love.draw()
         love.graphics.print(fps, x, 0)
     end
 
-    cursor:draw(mouse_x, mouse_y, 0, 1, consts.SHADING, 0, 2)
+    cursor:draw(mouse_x, mouse_y, 0, 1, set.shading, 0, 2)
     love.graphics.setCanvas()
 
     love.graphics.draw(canvas, 0, 0, 0, scale_x, scale_y)
