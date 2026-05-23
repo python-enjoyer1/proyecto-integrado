@@ -15,22 +15,29 @@ else
 end
 local blood_particle = love.graphics.newImage(consts.PARTICLE_PATH .. particle_image)
 
-local particle_system = love.graphics.newParticleSystem(blood_particle)
+local particle_system_blood = love.graphics.newParticleSystem(blood_particle)
+local particle_system_burst = love.graphics.newParticleSystem(blood_particle)
 
 local particle_systems = {
-    particle = particle_system,
+    particle = particle_system_blood,
     x = 0,
     y = 0,
     start = false,
     emitted = false
 }
 
-particle_system:setEmitterLifetime(-1) -- -1 means it never stops.
-particle_system:setParticleLifetime(1) --R dont mind me -- I absolutely mind.
-particle_system:setSizeVariation(1)
-particle_system:setColors(1, 1, 1, 1, 1, 1, 1, 1)
-particle_system:setSpeed(0, consts.BLOOD_SPEED)
-particle_system:setLinearDamping(0, 1500)
+particle_system_blood:setEmitterLifetime(-1) -- -1 means it never stops.
+particle_system_blood:setParticleLifetime(1) --R dont mind me -- I absolutely mind.
+particle_system_blood:setSizeVariation(1)
+particle_system_blood:setColors(1, 1, 1, 1, 1, 1, 1, 1)
+particle_system_blood:setSpeed(0, consts.BLOOD_SPEED)
+particle_system_blood:setLinearDamping(0, 1500)
+
+particle_system_burst:setEmitterLifetime(-1)
+particle_system_burst:setParticleLifetime(1)
+particle_system_burst:setSizeVariation(1, 2)
+particle_system_burst:setColors(1, 1, 1, 1, 1, 1, 1, 1)
+particle_system_burst:setSpeed(consts.BURST_SPEED)
 
 local walk_animation = utils.Animation:new({speed = 0.1, looping = true})
 walk_animation:manage_spritesheet(consts.ASSETS_PATH .. "characters/enemies/basic_enemy/enemy_walk.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 8, 3)
@@ -42,23 +49,6 @@ local punch_animation = utils.Animation:new({speed = 0.1, looping = true})
 punch_animation:manage_spritesheet(consts.ASSETS_PATH .. "characters/enemies/basic_enemy/enemy_punch.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 10, 3)
 
 local default_stun = 3
-
-local function death_boom(self)
-    local num_bursts = 5
-    for burst = 1, num_bursts do
-        local particle_system_clone = particle_system:clone()
-        table.insert(particle_systems, {
-            particle = particle_system_clone,
-            x = self.position.x,
-            y = self.position.y,
-            started = false, -- Just so you know, always initialize these as false, they are flags for checking if the particle system was already started and emitted.
-            emitted = false
-        })
-    end
-    events.screenshake = true
-    events.screenshake_duration = 0.3
-    events.screenshake_magnitude = 8.0
-end
 
 love.audio.setEffect("reverb", {type = "reverb"})
 
@@ -86,7 +76,7 @@ Main.Enemy = {
         idle = false,
         punch = false,
         fall = false,
-        dead = false,
+        dead = false
     },
     animation = walk_animation,
     angle = 0,
@@ -103,132 +93,157 @@ function Main.Enemy:new(o)
 end
 
 function Main.Enemy:update(dt, target)
-    local movement_vector = utils.Vector:new()
+    if not self.states.dead then
+        local movement_vector = utils.Vector:new()
 
-    movement_vector.x = target.position.x - self.position.x
-    movement_vector.y = target.position.y - self.position.y
-    local distance = math.sqrt(movement_vector.x ^ 2 + movement_vector.y ^ 2)
+        movement_vector.x = target.position.x - self.position.x
+        movement_vector.y = target.position.y - self.position.y
+        local distance = math.sqrt(movement_vector.x ^ 2 + movement_vector.y ^ 2)
 
 
-    if distance > self.min_distance then
-        if self.animation ~= fall_animation then
-            if walk_sound_timer <= 0 then
-                table.insert(walk_sound_table, walk_sound:clone())
-            else
-                walk_sound_timer = walk_sound_timer - dt
+        if distance > self.min_distance then
+            if self.animation ~= fall_animation then
+                if walk_sound_timer <= 0 then
+                    table.insert(walk_sound_table, walk_sound:clone())
+                else
+                    walk_sound_timer = walk_sound_timer - dt
+                end
             end
+
+            movement_vector:normalize()
+
+            self.velocity.x = movement_vector.x * self.stats.speed
+            self.velocity.y = movement_vector.y * self.stats.speed
+
+            if self.stats.stun_duration <= 0 then
+                self.position.x = self.position.x + (self.velocity.x * dt)
+                self.position.y = self.position.y + (self.velocity.y * dt)
+            else
+                self.states.fall = true
+            end
+
+            self.states.idle = false
+        else
+            self.states.idle = true
+            self.animation.current_frame = 1
         end
-
-        movement_vector:normalize()
-
-        self.velocity.x = movement_vector.x * self.stats.speed
-        self.velocity.y = movement_vector.y * self.stats.speed
 
         if self.stats.stun_duration <= 0 then
-            self.position.x = self.position.x + (self.velocity.x * dt)
-            self.position.y = self.position.y + (self.velocity.y * dt)
+            self.animation = walk_animation
+            self.states.fall = false
         else
-            self.states.fall = true
+            self.stats.stun_duration = self.stats.stun_duration - dt
+            self.animation = fall_animation
         end
 
-        self.states.idle = false
-    else
-        self.states.idle = true
-        self.animation.current_frame = 1
-    end
+        if target.punch_hurtbox.active then
+            --R so enemy doesnt get fucking comboed in 1 punch
+            if not self.hit_this_swing then
+                if utils.check_collision(self.hitbox, target.punch_hurtbox) and not self.states.fall then
+                    self.hit_this_swing = true
+                    self.stats.stun_duration = default_stun
 
-    if self.stats.stun_duration <= 0 then
-        self.animation = walk_animation
-        self.states.fall = false
-    else
-        self.stats.stun_duration = self.stats.stun_duration - dt
-        self.animation = fall_animation
-    end
+                    local angle = math.atan2(self.position.y - target.position.y, self.position.x - target.position.x)
+                    local force = target.stats.knockback / self.stats.weight
+                    self.stats.knockback_velx = math.cos(angle) * force
+                    self.stats.knockback_vely = math.sin(angle) * force
 
-    if target.punch_hurtbox.active then
-        --R so enemy doesnt get fucking comboed in 1 punch
-        if not self.hit_this_swing then
-            if utils.check_collision(self.hitbox, target.punch_hurtbox) and not self.states.fall then
-                self.hit_this_swing = true
-                self.stats.stun_duration = default_stun
+                    events.screenshake = true
+                    events.screenshake_duration = consts.DEFAULT_SCREENSHAKE_DURATION
+                    events.screenshake_magnitude = 4.0
 
-                local angle = math.atan2(self.position.y - target.position.y, self.position.x - target.position.x)
-                local force = target.stats.knockback / self.stats.weight
-                self.stats.knockback_velx = math.cos(angle) * force
-                self.stats.knockback_vely = math.sin(angle) * force
+                    -- Blood particles.
+                    table.insert(particle_systems, {
+                        particle = particle_system_blood:clone(),
+                        x = self.position.x,
+                        y = self.position.y,
+                        started = false,
+                        emitted = false
+                    })
 
-                events.screenshake = true
-                events.screenshake_duration = consts.DEFAULT_SCREENSHAKE_DURATION
-                events.screenshake_magnitude = 4.0
-
-                -- Blood particles.
-                table.insert(particle_systems, {
-                    particle = particle_system:clone(),
-                    x = self.position.x,
-                    y = self.position.y,
-                    started = false,
-                    emitted = false
-                })
-
-                for system = 1, #particle_systems do
-                    if not particle_systems[system].started then
-                        particle_systems[system].particle:start()
-                        particle_systems[system].started = true
+                    self.stats.hp = self.stats.hp - target.stats.attack_damage
+                    if self.stats.hp <= 0 then
+                        self.states.dead = true
                     end
 
-                    particle_systems[system].particle:setSpread(math.rad(love.math.random(180, 360)))
-                    particle_systems[system].particle:setDirection(angle)
+                    for system = 1, #particle_systems do
+                        if not particle_systems[system].started then
+                            particle_systems[system].particle:start()
+                            particle_systems[system].started = true
+                        end
 
-                    if not particle_systems[system].emitted then
-                        particle_systems[system].particle:emit(love.math.random(consts.MIN_BLOOD, consts.MAX_BLOOD))
-                        particle_systems[system].emitted = true
+                        if self.states.dead then
+                            particle_systems[system].burst = true
+                        end
 
-                        local step = 1.0 / 600.0
-                        particle_systems[system].particle:update(step)
+                        if not particle_systems[system].burst then
+                            particle_systems[system].particle:setSpread(math.rad(love.math.random(180, 360)))
+                        else
+                            particle_systems[system].particle:setSpread(360)
+                            particle_systems[system].particle:setSpeed(-consts.BURST_SPEED, consts.BURST_SPEED)
+                            events.screenshake = true
+                            events.screenshake_duration = 0.3
+                            events.screenshake_magnitude = 8.0
+
+                        end
+                        particle_systems[system].particle:setDirection(angle)
+
+
+                        if not particle_systems[system].emitted then
+                            if not particle_systems[system].burst then
+                                particle_systems[system].particle:emit(love.math.random(consts.MIN_BLOOD, consts.MAX_BLOOD))
+                            else
+                                particle_systems[system].particle:emit(love.math.random(consts.MIN_BURST, consts.MAX_BURST))
+                            end
+
+                            particle_systems[system].emitted = true
+
+                            local step = 1.0 / 600.0
+                            particle_systems[system].particle:update(step)
+                        end
+
+                        particle_systems[system].particle:setSpeed(0, 0)
                     end
-
-                    particle_systems[system].particle:setSpeed(0, 0)
+                    self.hit_flag = true
+                else
+                    self.hit_flag = false
                 end
-                self.stats.hp = self.stats.hp - target.stats.attack_damage
-                if self.stats.hp <= 0 then
-                    self.states.dead = true
-                    death_boom(self)
-                end
+            end
+        else
+            self.hit_this_swing = false
+            self.hit_flag = false
+        end
 
-                self.hit_flag = true
-            else
-                self.hit_flag = false
+        --R knockback = velocity rn, lerp was tp'ing the enemy
+        if math.abs(self.stats.knockback_velx) > 0.1 or math.abs(self.stats.knockback_vely) > 0.1 then
+            self.position.x = self.position.x + self.stats.knockback_velx * dt
+            self.position.y = self.position.y + self.stats.knockback_vely * dt
+            self.stats.knockback_velx = self.stats.knockback_velx * (1 - 10 * dt)
+            self.stats.knockback_vely = self.stats.knockback_vely * (1 - 10 * dt)
+        end
+
+        if not self.states.fall then
+            self.angle = math.atan2(target.position.y - self.position.y, target.position.x - self.position.x)
+        end
+
+        self.animation:update(dt, self.states.idle)
+
+        self.hitbox.x = self.position.x
+        self.hitbox.y = self.position.y
+
+        for sound = 1, #walk_sound_table do
+            if walk_sound_timer <= 0 then
+                walk_sound_table[sound]:setPitch(love.math.random(50, 100) / 100)
+                walk_sound_table[sound]:play()
+                table.remove(walk_sound_table, sound)
+                walk_sound_timer = 50.0 / self.stats.speed
             end
         end
     else
-        self.hit_this_swing = false
-        self.hit_flag = false
-    end
-
-    --R knockback = velocity rn, lerp was tp'ing the enemy
-    if math.abs(self.stats.knockback_velx) > 0.1 or math.abs(self.stats.knockback_vely) > 0.1 then
-        self.position.x = self.position.x + self.stats.knockback_velx * dt
-        self.position.y = self.position.y + self.stats.knockback_vely * dt
-        self.stats.knockback_velx = self.stats.knockback_velx * (1 - 10 * dt)
-        self.stats.knockback_vely = self.stats.knockback_vely * (1 - 10 * dt)
-    end
-
-    if not self.states.fall then
-        self.angle = math.atan2(target.position.y - self.position.y, target.position.x - self.position.x)
-    end
-
-    self.animation:update(dt, self.states.idle)
-
-    self.hitbox.x = self.position.x
-    self.hitbox.y = self.position.y
-
-    for sound = 1, #walk_sound_table do
-        if walk_sound_timer <= 0 then
-            walk_sound_table[sound]:setPitch(love.math.random(50, 100) / 100)
-            walk_sound_table[sound]:play()
-            table.remove(walk_sound_table, sound)
-            walk_sound_timer = 50.0 / self.stats.speed
-        end
+        -- Freeing up memory.
+        particle_system_blood:release()
+        particle_system_burst:release()
+        walk_sound:release()
     end
 end
 

@@ -39,4 +39,8 @@ Main.MIN_BLOOD = 100
 Main.MAX_BLOOD = 200
 Main.BLOOD_SPEED = 5000
 
+Main.MIN_BURST = 200
+Main.MAX_BURST = 400
+Main.BURST_SPEED = 10000
+
 return Main

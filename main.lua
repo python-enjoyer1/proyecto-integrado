@@ -142,9 +142,17 @@ function love.update(dt)
     player.position.x = player.hitbox.x
     player.position.y = player.hitbox.y
 
+    -- Enemy management.
+    for i = 1, #enemy_table do
+        if enemy_table[i].states.dead and not player.states.punch then
+            table.remove(enemy_table, i)
+        end
+    end
+
     -- Shaders.
     shaders.backgrounds[background_index]:send("resolution", {consts.RENDER_WIDTH, consts.RENDER_HEIGHT})
     shaders.backgrounds[background_index]:send("time", love.timer.getTime())
+
     shaders.game_over:send("resolution", {consts.RENDER_WIDTH, consts.RENDER_HEIGHT})
     shaders.game_over:send("time", love.timer.getTime())
 
@@ -187,7 +195,6 @@ function love.draw()
     love.graphics.pop()
 
     -- HUD/GUI goes here.
-
     soul_bar_bg:draw(65, 20)
     soul_bar:draw(65, 20, 0, 1, set.shading, 0, 4)
     soul_bar_frame:draw(65, 20)
