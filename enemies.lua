@@ -196,7 +196,7 @@ function Main.Enemy:update(dt, target)
                         particle_systems[system].particle:update(step)
                     end
 
-                    particle_systems[i].particle:setSpeed(0, 0)
+                    particle_systems[system].particle:setSpeed(0, 0)
                 end
                 self.stats.hp = self.stats.hp - target.stats.attack_damage
                 if self.stats.hp <= 0 then
