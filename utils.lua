@@ -333,11 +333,8 @@ function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keepi
     })
 end
 
-function Main.Tilemap:draw()
+function Main.Tilemap:draw(offset_x, offset_y)
     for i = 1, #self.tilemap do
-        love.graphics.push()
-        love.graphics.scale(consts.TILE_SCALE, consts.TILE_SCALE)
-
         local tile = self.tilemap[i].tile
         local x = self.tilemap[i].position.x
         local y = self.tilemap[i].position.y
@@ -347,22 +344,27 @@ function Main.Tilemap:draw()
         local oy = self.tilemap[i].origin_y or 0
         local tile_type = self.tilemap[i].tile_type or nil
 
-        if consts.SHADING then
-            love.graphics.setColor(consts.SHADOW_COLOR)
-            if tile_type == "upper" then
-                love.graphics.draw(tile, x, y + consts.WALL_SHADOW_OFFSET, r, 1, 1, ox, oy)
-            elseif tile_type == "lower" then
-                love.graphics.draw(tile, x, y - consts.WALL_SHADOW_OFFSET, r, 1, 1, ox, oy)
-            elseif tile_type == "left" then
-                love.graphics.draw(tile, x + consts.WALL_SHADOW_OFFSET, y, r, 1, 1, ox, oy)
-            elseif tile_type == "right" then
-                love.graphics.draw(tile, x - consts.WALL_SHADOW_OFFSET, y, r, 1, 1, ox, oy)
-            end
-        end
+        if x < (consts.RENDER_WIDTH - offset_x) + 10 and y < (consts.RENDER_HEIGHT - offset_y) + 10 then
+            love.graphics.push()
+            love.graphics.scale(consts.TILE_SCALE, consts.TILE_SCALE)
 
-        love.graphics.setColor(1, 1, 1)
-        love.graphics.draw(tile, x, y, r, 1, 1, ox, oy)
-        love.graphics.pop()
+            if consts.SHADING then
+                love.graphics.setColor(consts.SHADOW_COLOR)
+                if tile_type == "upper" then
+                    love.graphics.draw(tile, x, y + consts.WALL_SHADOW_OFFSET, r, 1, 1, ox, oy)
+                elseif tile_type == "lower" then
+                    love.graphics.draw(tile, x, y - consts.WALL_SHADOW_OFFSET, r, 1, 1, ox, oy)
+                elseif tile_type == "left" then
+                    love.graphics.draw(tile, x + consts.WALL_SHADOW_OFFSET, y, r, 1, 1, ox, oy)
+                elseif tile_type == "right" then
+                    love.graphics.draw(tile, x - consts.WALL_SHADOW_OFFSET, y, r, 1, 1, ox, oy)
+                end
+            end
+
+            love.graphics.setColor(1, 1, 1)
+            love.graphics.draw(tile, x, y, r, 1, 1, ox, oy)
+            love.graphics.pop()
+        end
     end
 end
 

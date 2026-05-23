@@ -46,22 +46,14 @@ local default_stun = 3
 local function death_boom(self)
     local num_bursts = 5
     for burst = 1, num_bursts do
-        local ps = particle_system:clone()
-        ps:start()
-        local angle = math.rad(love.math.random(0, 360))
-        ps:setSpread(math.rad(360))
-        ps:setDirection(angle)
-        ps:setSpeed(0, consts.BLOOD_SPEED * 1.5)
-        ps:emit(love.math.random(consts.MIN_BLOOD, consts.MAX_BLOOD))
-        local step = 1.0 / 600.0
-        ps:update(step)
-        ps:setSpeed(0, 0)
+        local particle_system_clone = particle_system:clone()
         table.insert(particle_systems, {
-            particle = ps,
+            particle = particle_system_clone,
             x = self.position.x,
             y = self.position.y,
             start = false, -- Just so you know, always initialize these as false, they are flags for checking if the particle system was already started and emitted.
-            emitted = false
+            emitted = false,
+            boom = true
         })
     end
     events.screenshake = true
@@ -185,8 +177,13 @@ function Main.Enemy:update(dt, target)
                         particle_systems[system].start = true
                     end
 
-                    particle_systems[system].particle:setSpread(math.rad(love.math.random(180, 270)))
-                    particle_systems[system].particle:setDirection(angle)
+                    if not particle_systems[system].boom then
+                        particle_systems[system].particle:setSpread(math.rad(love.math.random(180, 270)))
+                        particle_systems[system].particle:setDirection(angle)
+                    else
+                        particle_systems[system].particle:setSpread(0, 360)
+                        particle_systems[system].particle:setDirection(angle)
+                    end
 
                     if not particle_systems[system].emitted then
                         particle_systems[system].particle:emit(love.math.random(consts.MIN_BLOOD, consts.MAX_BLOOD))

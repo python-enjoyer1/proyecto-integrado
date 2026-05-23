@@ -172,7 +172,7 @@ function love.draw()
         love.graphics.translate(dx, dy)
     end
 
-    tilemap:draw()
+    tilemap:draw(global_offset_x, global_offset_y)
 
     enemy:draw()
 
