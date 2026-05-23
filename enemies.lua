@@ -26,7 +26,7 @@ local particle_systems = {
 }
 
 particle_system:setEmitterLifetime(-1) -- -1 means it never stops.
-particle_system:setParticleLifetime(999) --R dont mind me
+particle_system:setParticleLifetime(1) --R dont mind me -- I absolutely mind.
 particle_system:setSizeVariation(1)
 particle_system:setColors(1, 1, 1, 1, 1, 1, 1, 1)
 particle_system:setSpeed(0, consts.BLOOD_SPEED)
@@ -51,9 +51,8 @@ local function death_boom(self)
             particle = particle_system_clone,
             x = self.position.x,
             y = self.position.y,
-            start = false, -- Just so you know, always initialize these as false, they are flags for checking if the particle system was already started and emitted.
-            emitted = false,
-            boom = true
+            started = false, -- Just so you know, always initialize these as false, they are flags for checking if the particle system was already started and emitted.
+            emitted = false
         })
     end
     events.screenshake = true
@@ -167,29 +166,24 @@ function Main.Enemy:update(dt, target)
                     particle = particle_system:clone(),
                     x = self.position.x,
                     y = self.position.y,
-                    start = false,
+                    started = false,
                     emitted = false
                 })
 
                 for system = 1, #particle_systems do
-                    if not particle_systems[system].start then
+                    if not particle_systems[system].started then
                         particle_systems[system].particle:start()
-                        particle_systems[system].start = true
+                        particle_systems[system].started = true
                     end
 
-                    if not particle_systems[system].boom then
-                        particle_systems[system].particle:setSpread(math.rad(love.math.random(180, 270)))
-                        particle_systems[system].particle:setDirection(angle)
-                    else
-                        particle_systems[system].particle:setSpread(0, 360)
-                        particle_systems[system].particle:setDirection(angle)
-                    end
+                    particle_systems[system].particle:setSpread(math.rad(love.math.random(180, 360)))
+                    particle_systems[system].particle:setDirection(angle)
 
                     if not particle_systems[system].emitted then
                         particle_systems[system].particle:emit(love.math.random(consts.MIN_BLOOD, consts.MAX_BLOOD))
                         particle_systems[system].emitted = true
 
-                        local step = 1.0 / 600.0 -- Constant value instead of dt so the position doesn't change every second.
+                        local step = 1.0 / 600.0
                         particle_systems[system].particle:update(step)
                     end
 
