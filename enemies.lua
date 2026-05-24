@@ -45,7 +45,7 @@ walk_animation:manage_spritesheet(consts.ASSETS_PATH .. "characters/enemies/basi
 local fall_animation = utils.Animation:new({speed = 0.1, looping = true})
 fall_animation:manage_spritesheet(consts.ASSETS_PATH .. "characters/enemies/basic_enemy/enemy_fall.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 1, 1)
 
-local punch_animation = utils.Animation:new({speed = 0.06, looping = true})
+local punch_animation = utils.Animation:new({speed = 0.05, looping = true})
 punch_animation:manage_spritesheet(consts.ASSETS_PATH .. "characters/enemies/basic_enemy/enemy_punch.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 10, 3)
 
 local default_stun = 3
@@ -105,6 +105,7 @@ end
 function Main.Enemy:update(dt, target, slow_down)
     if not self.states.dead then
         local speed = self.stats.speed * slow_down
+        punch_animation.speed = (PUNCH_COOLDOWN / 10) / slow_down
 
         local movement_vector = utils.Vector:new()
 
@@ -142,7 +143,7 @@ function Main.Enemy:update(dt, target, slow_down)
                 self.states.punch = true
                 punch_timer = PUNCH_COOLDOWN
             else
-                punch_timer = punch_timer - dt
+                punch_timer = punch_timer - dt * slow_down
             end
         else
             self.states.idle = false
