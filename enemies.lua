@@ -45,7 +45,7 @@ walk_animation:manage_spritesheet(consts.ASSETS_PATH .. "characters/enemies/basi
 local fall_animation = utils.Animation:new({speed = 0.1, looping = true})
 fall_animation:manage_spritesheet(consts.ASSETS_PATH .. "characters/enemies/basic_enemy/enemy_fall.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 1, 1)
 
-local punch_animation = utils.Animation:new({speed = 0.05, looping = true})
+local punch_animation = utils.Animation:new({speed = 0.05, looping = false}) --R no looping for this thx
 punch_animation:manage_spritesheet(consts.ASSETS_PATH .. "characters/enemies/basic_enemy/enemy_punch.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 10, 3)
 
 local default_stun = 3
@@ -141,6 +141,8 @@ function Main.Enemy:update(dt, target, slow_down)
             self.animation.current_frame = 1
             if punch_timer <= 0 then
                 self.states.punch = true
+                punch_animation.current_frame = 1
+                punch_animation.finished = false
                 punch_timer = PUNCH_COOLDOWN
             else
                 punch_timer = punch_timer - dt * slow_down
@@ -154,13 +156,23 @@ function Main.Enemy:update(dt, target, slow_down)
                 self.animation = walk_animation
             else
                 self.animation = punch_animation
-                if self.animation.current_frame == #self.animation.frames then
+                if punch_animation.current_frame >= 5 and punch_animation.current_frame <= 7 then
+                    self.punch_hurtbox.active = true
+                    local reach = 20
+                    self.punch_hurtbox.x = self.position.x + math.cos(self.angle) * reach
+                    self.punch_hurtbox.y = self.position.y + math.sin(self.angle) * reach
+                else
+                    self.punch_hurtbox.active = false
+                end
+                if punch_animation.finished then
                     self.states.punch = false
+                    punch_animation.current_frame = 1
+                    punch_animation.finished = false
                 end
             end
             self.states.fall = false
-
         else
+            self.punch_hurtbox.active = false
             self.stats.stun_duration = self.stats.stun_duration - dt * slow_down
             self.animation = fall_animation
         end
@@ -271,6 +283,7 @@ function Main.Enemy:update(dt, target, slow_down)
         end
     else
         -- Freeing up memory. Only release LÖVE2D objects, everything else gets managed by Lua.
+        --R i have no idea what ts is but ig it's better? not gonna try 2 understand.
         particle_system_blood:release()
         particle_system_burst:release()
         walk_sound:release()
@@ -286,6 +299,9 @@ function Main.Enemy:draw()
         self.animation:draw(self.position.x, self.position.y, self.angle, 1, set.shading, 0, 3)
         if consts.DEBUG then
             utils.draw_collision(self.hitbox)
+            if self.punch_hurtbox.active then
+                utils.draw_collision(self.punch_hurtbox)
+            end
         end
     end
 end

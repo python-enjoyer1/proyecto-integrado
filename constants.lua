@@ -25,7 +25,7 @@ Main.CONSUMER_PATH = "stuff/assets/characters/consumer/"
 Main.PARTICLE_PATH = "stuff/assets/particles/"
 Main.FONT_PATH = "stuff/assets/fonts/"
 
-Main.DEBUG = false
+Main.DEBUG = true
 
 Main.MIN_ENEMY_SOUL = 5
 Main.MAX_ENEMY_SOUL = 20

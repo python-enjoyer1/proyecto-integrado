@@ -170,6 +170,15 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
     self.position.x = self.hitbox.x
     self.position.y = self.hitbox.y
 
+    for i = 1, #targets do
+        if targets[i].punch_hurtbox and targets[i].punch_hurtbox.active then
+            if utils.check_collision(self.hitbox, targets[i].punch_hurtbox) then
+                --R insert dmg stuff
+                print("player hit 4: " .. targets[i].stats.attack_damage)
+            end
+        end
+    end
+
     for i = 1, #walk_sound_table do
         if walk_sound_timer <= 0 then
             walk_sound_table[i]:setPitch((love.math.random(50, 100) / 100) * slow_down * speed / DEFAULT_SPEED)
