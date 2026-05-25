@@ -283,10 +283,14 @@ function Main.Enemy:update(dt, target, slow_down)
         end
     else
         -- Freeing up memory. Only release LÖVE2D objects, everything else gets managed by Lua.
-        --R i have no idea what ts is but ig it's better? not gonna try 2 understand.
-        particle_system_blood:release()
-        particle_system_burst:release()
-        walk_sound:release()
+        --R might as well free it up more.
+        if not self.released then
+            for i = 1, #particle_systems do
+                particle_systems[i].particle:release()
+            end
+            walk_sound:release()
+            self.released = true
+        end
     end
 end
 
