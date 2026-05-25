@@ -283,12 +283,11 @@ function Main.Enemy:update(dt, target, slow_down)
         end
     else
         -- Freeing up memory. Only release LÖVE2D objects, everything else gets managed by Lua.
-        --R might as well free it up more.
         if not self.released then
-            for i = 1, #particle_systems do
-                particle_systems[i].particle:release()
-            end
+            punch_sound:release()
             walk_sound:release()
+            particle_system_blood:release()
+            particle_system_burst:release() -- I think we will have to move most global variables to inside the enemy class.
             self.released = true
         end
     end
@@ -299,13 +298,11 @@ function Main.Enemy:draw()
         love.graphics.draw(particle_systems[system].particle, particle_systems[system].x, particle_systems[system].y)
     end
 
-    if not self.states.dead then
-        self.animation:draw(self.position.x, self.position.y, self.angle, 1, set.shading, 0, 3)
-        if consts.DEBUG then
-            utils.draw_collision(self.hitbox)
-            if self.punch_hurtbox.active then
-                utils.draw_collision(self.punch_hurtbox)
-            end
+    self.animation:draw(self.position.x, self.position.y, self.angle, 1, set.shading, 0, 3)
+    if consts.DEBUG then
+        utils.draw_collision(self.hitbox)
+        if self.punch_hurtbox.active then
+            utils.draw_collision(self.punch_hurtbox)
         end
     end
 end
