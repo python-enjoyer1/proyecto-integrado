@@ -10,6 +10,9 @@ walk_animation:manage_spritesheet(consts.CONSUMER_PATH .. "consumer_walk.png", c
 local punch_animation = utils.Animation:new({speed = 0.04, looping = false})
 punch_animation:manage_spritesheet(consts.CONSUMER_PATH .. "consumer_punch.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 10, 3)
 
+local fall_animation = utils.Animation:new({speed = 0.1, looping = true})
+fall_animation:manage_spritesheet(consts.CONSUMER_PATH .. "consumer_fall.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 1, 1) --R placeholder
+
 local mouse_x, mouse_y
 
 love.audio.setEffect("reverb", {type = "reverb"})
@@ -174,7 +177,7 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
         if targets[i].punch_hurtbox and targets[i].punch_hurtbox.active then
             if utils.check_collision(self.hitbox, targets[i].punch_hurtbox) then
                 --R insert dmg stuff
-                print("player hit 4: " .. targets[i].stats.attack_damage)
+                
             end
         end
     end

@@ -59,7 +59,7 @@ function love.load()
     vcr_osd_mono = love.graphics.newFont(consts.FONT_PATH .. "vcr_osd_mono.ttf")
     vcr_osd_mono:setFilter(consts.DEFAULT_FILTER, consts.DEFAULT_FILTER)
 
-    fps = 0
+    fps = love.timer.getFPS()
     time = love.timer.getTime()
 
     if consts.DEBUG then

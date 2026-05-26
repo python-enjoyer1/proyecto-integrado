@@ -67,6 +67,8 @@ local punch_timer = PUNCH_COOLDOWN
 
 local DEFAULT_SPEED = 100
 
+local movement_vector = utils.Vector:new()
+
 Main.Enemy = {
     velocity = utils.Vector:new(),
     position = {x = 100, y = 100},
@@ -106,8 +108,6 @@ function Main.Enemy:update(dt, target, slow_down)
     if not self.states.dead then
         local speed = self.stats.speed * slow_down
         punch_animation.speed = (PUNCH_COOLDOWN / 10) / slow_down
-
-        local movement_vector = utils.Vector:new()
 
         movement_vector.x = target.position.x - self.position.x
         movement_vector.y = target.position.y - self.position.y
@@ -173,7 +173,7 @@ function Main.Enemy:update(dt, target, slow_down)
             self.states.fall = false
         else
             self.punch_hurtbox.active = false
-            self.stats.stun_duration = self.stats.stun_duration - dt * slow_down
+            self.stats.stun_duration = self.stats.stun_duration - (dt * slow_down)
             self.animation = fall_animation
         end
 
@@ -282,13 +282,11 @@ function Main.Enemy:update(dt, target, slow_down)
             end
         end
     else
-        -- Freeing up memory. Only release LÖVE2D objects, everything else gets managed by Lua.
-        --R might as well free it up more.
         if not self.released then
-            for i = 1, #particle_systems do
-                particle_systems[i].particle:release()
-            end
+            punch_sound:release()
             walk_sound:release()
+            particle_system_blood:release()
+            particle_system_burst:release() -- I think we will have to move most global variables to inside the enemy class.
             self.released = true
         end
     end
@@ -299,13 +297,11 @@ function Main.Enemy:draw()
         love.graphics.draw(particle_systems[system].particle, particle_systems[system].x, particle_systems[system].y)
     end
 
-    if not self.states.dead then
-        self.animation:draw(self.position.x, self.position.y, self.angle, 1, set.shading, 0, 3)
-        if consts.DEBUG then
-            utils.draw_collision(self.hitbox)
-            if self.punch_hurtbox.active then
-                utils.draw_collision(self.punch_hurtbox)
-            end
+    self.animation:draw(self.position.x, self.position.y, self.angle, 1, set.shading, 0, 3)
+    if consts.DEBUG then
+        utils.draw_collision(self.hitbox)
+        if self.punch_hurtbox.active then
+            utils.draw_collision(self.punch_hurtbox)
         end
     end
 end
