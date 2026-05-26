@@ -279,6 +279,8 @@ function Main.Enemy:update(dt, target, slow_down)
             end
         end
     else
+        -- Freeing up memory. Only release LÖVE2D objects, everything else gets managed by Lua.
+        --R might as well free it up more.
         if not self.released then
             punch_sound:release()
             walk_sound:release()
