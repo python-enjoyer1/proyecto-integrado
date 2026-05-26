@@ -64,7 +64,9 @@ local Player = {
     states = {
         idle = true,
         punch = false,
-        stunned = false
+        stunned = false,
+        fall = false,
+        dead = false,
     },
     angle = 0,
     animation = walk_animation,

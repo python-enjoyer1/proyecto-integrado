@@ -48,8 +48,6 @@ fall_animation:manage_spritesheet(consts.ASSETS_PATH .. "characters/enemies/basi
 local punch_animation = utils.Animation:new({speed = 0.05, looping = false}) --R no looping for this thx
 punch_animation:manage_spritesheet(consts.ASSETS_PATH .. "characters/enemies/basic_enemy/enemy_punch.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 10, 3)
 
-local default_stun = 3
-
 love.audio.setEffect("reverb", {type = "reverb"})
 
 local walk_sound = love.audio.newSource(consts.SOUND_PATH .. "footstep.wav", "static")
@@ -62,19 +60,12 @@ local punch_sound = love.audio.newSource(consts.SOUND_PATH .. "punch_hit.wav", "
 punch_sound:setVolume(set.sfx_volume)
 punch_sound:setEffect("reverb")
 
-local PUNCH_COOLDOWN = 0.5
-local punch_timer = PUNCH_COOLDOWN
-
-local DEFAULT_SPEED = 100
-
-local movement_vector = utils.Vector:new()
-
 Main.Enemy = {
     velocity = utils.Vector:new(),
     position = {x = 100, y = 100},
     stats = {
         hp = 20,
-        speed = DEFAULT_SPEED,
+        speed = 100,
         attack_damage = 5,
         soul_amount = love.math.random(consts.MIN_ENEMY_SOUL, consts.MAX_ENEMY_SOUL),
         essence_amount = love.math.random(consts.MIN_ENEMY_ESSENCE, consts.MAX_ENEMY_ESSENCE),
@@ -89,11 +80,16 @@ Main.Enemy = {
         fall = false,
         dead = false
     },
+    cooldowns = {
+        punch = 0.5
+    },
+    movement_vector = utils.Vector:new(),
     animation = walk_animation,
     angle = 0,
     min_distance = 30,
     hitbox = {x = 100, y = 100, width = consts.CHARACTER_SIZE / 2, height = consts.CHARACTER_SIZE / 2, types = {"hitbox", "enemycollisionbox"}},
-    punch_hurtbox = {x = 0, y = 0, width = 20, height = 20, types = {"hurtbox"}, active = false}
+    punch_hurtbox = {x = 0, y = 0, width = 20, height = 20, types = {"hurtbox"}, active = false},
+    punch_timer
 }
 
 -- This is just so we can have inheritance between different enemy variations.
@@ -107,11 +103,11 @@ end
 function Main.Enemy:update(dt, target, slow_down)
     if not self.states.dead then
         local speed = self.stats.speed * slow_down
-        punch_animation.speed = (PUNCH_COOLDOWN / 10) / slow_down
+        punch_animation.speed = (self.cooldowns.punch / 10) / slow_down
 
-        movement_vector.x = target.position.x - self.position.x
-        movement_vector.y = target.position.y - self.position.y
-        local distance = math.sqrt(movement_vector.x ^ 2 + movement_vector.y ^ 2)
+        self.movement_vector.x = target.position.x - self.position.x
+        self.movement_vector.y = target.position.y - self.position.y
+        local distance = math.sqrt(self.movement_vector.x ^ 2 + self.movement_vector.y ^ 2)
 
 
         if distance > self.min_distance then
@@ -123,10 +119,11 @@ function Main.Enemy:update(dt, target, slow_down)
                 end
             end
 
-            movement_vector:normalize()
+            
+            self.movement_vector:normalize()
 
-            self.velocity.x = movement_vector.x * speed
-            self.velocity.y = movement_vector.y * speed
+            self.velocity.x = self.movement_vector.x * speed
+            self.velocity.y = self.movement_vector.y * speed
 
             if self.stats.stun_duration <= 0 then
                 self.position.x = self.position.x + (self.velocity.x * dt)
@@ -139,13 +136,13 @@ function Main.Enemy:update(dt, target, slow_down)
         elseif not self.states.punch then
             self.states.idle = true
             self.animation.current_frame = 1
-            if punch_timer <= 0 then
+            if self.punch_timer <= 0 then
                 self.states.punch = true
                 punch_animation.current_frame = 1
                 punch_animation.finished = false
-                punch_timer = PUNCH_COOLDOWN
+                self.punch_timer = self.cooldowns.punch
             else
-                punch_timer = punch_timer - dt * slow_down
+                self.punch_timer = self.punch_timer - dt * slow_down
             end
         else
             self.states.idle = false
@@ -182,7 +179,7 @@ function Main.Enemy:update(dt, target, slow_down)
             if not self.hit_this_swing then
                 if utils.check_collision(self.hitbox, target.punch_hurtbox) and not self.states.fall then
                     self.hit_this_swing = true
-                    self.stats.stun_duration = default_stun
+                    self.stats.stun_duration = 3
 
                     local angle = math.atan2(self.position.y - target.position.y, self.position.x - target.position.x)
                     local force = target.stats.knockback / self.stats.weight
@@ -275,7 +272,7 @@ function Main.Enemy:update(dt, target, slow_down)
 
         for sound = 1, #walk_sound_table do
             if walk_sound_timer <= 0 then
-                walk_sound_table[sound]:setPitch((love.math.random(50, 100) / 100) * slow_down * (speed / DEFAULT_SPEED))
+                walk_sound_table[sound]:setPitch((love.math.random(50, 100) / 100) * slow_down * (speed / self.stats.speed))
                 walk_sound_table[sound]:play()
                 table.remove(walk_sound_table, sound)
                 walk_sound_timer = 50.0 / speed
