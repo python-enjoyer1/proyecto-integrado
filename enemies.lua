@@ -17,6 +17,8 @@ local particle_image = love.graphics.newImage(consts.PARTICLE_PATH .. particle_p
 
 local particle_system_blood = love.graphics.newParticleSystem(particle_image)
 local particle_system_burst = love.graphics.newParticleSystem(particle_image)
+
+-- Later replace with pieces of the enemies body. Guts and shit.
 local particle_system_death = love.graphics.newParticleSystem(particle_image)
 
 local particle_systems = {
