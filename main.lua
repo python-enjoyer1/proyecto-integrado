@@ -88,16 +88,16 @@ function love.load()
 
     enemy = enemies.Enemy:new()
 
-    soul_bar = utils.Animation:new({speed = 0.07})
+    soul_bar = utils.Animation:new({speed = 0.07, looping = true})
     soul_bar:manage_spritesheet(consts.ASSETS_PATH .. "hud/soul_bar.png", 128, 32, 21, 2)
 
     soul_bar_bg = utils.Animation:new({speed = 0.07})
     soul_bar_bg:manage_spritesheet(consts.ASSETS_PATH .. "hud/soul_bar_bg.png", 128, 32, 21, 2)
 
-    soul_bar_frame = utils.Animation:new({speed = 0.07})
+    soul_bar_frame = utils.Animation:new({speed = 0.07, looping = true})
     soul_bar_frame:manage_spritesheet(consts.ASSETS_PATH .. "hud/soul_bar_frame.png", 128, 32, 21, 2)
 
-    cursor = utils.Animation:new({speed = 0.1})
+    cursor = utils.Animation:new({speed = 0.1, looping = true})
     cursor:manage_spritesheet(consts.ASSETS_PATH .. "hud/cursor.png", 8, 8, 4, 2)
 
     enemy_table = {}
@@ -105,6 +105,8 @@ function love.load()
 end
 
 function love.update(dt)
+    love.window.setVSync(set.vsync)
+
     fps = love.timer.getFPS()
     time = love.timer.getTime() * slow_down
 
@@ -144,12 +146,6 @@ function love.update(dt)
     for i = 1, #tilemap.walls do
         utils.check_collision(enemy.hitbox, tilemap.walls[i])
     end
-
-    enemy.position.x = enemy.hitbox.x
-    enemy.position.y = enemy.hitbox.y
-
-    player.position.x = player.hitbox.x
-    player.position.y = player.hitbox.y
 
     -- Enemy management.
     for i = 1, #enemy_table do

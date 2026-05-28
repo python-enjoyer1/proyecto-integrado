@@ -25,7 +25,7 @@ Main.CONSUMER_PATH = "stuff/assets/characters/consumer/"
 Main.PARTICLE_PATH = "stuff/assets/particles/"
 Main.FONT_PATH = "stuff/assets/fonts/"
 
-Main.DEBUG = false --R we should shove this into settings instead -- This is a communist household, if a player wants to see the hitboxes they can fucking kill themselves.
+Main.DEBUG = true --R we should shove this into settings instead -- This is a communist household, if a player wants to see the hitboxes they can fucking kill themselves.
 
 Main.MIN_ENEMY_SOUL = 5
 Main.MAX_ENEMY_SOUL = 20

@@ -9,6 +9,6 @@ Main.gore = true
 Main.ca_allowed = true -- CA means Chromatic Aberration, the shader that separates the red, green, and blue colors.
 Main.show_fps = true
 Main.shading = true
-
+Main.vsync = true
 
 return Main

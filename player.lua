@@ -71,7 +71,8 @@ local Player = {
     angle = 0,
     animation = walk_animation,
     hitbox = {x = 320, y = 180, width = consts.CHARACTER_SIZE / 2, height = consts.CHARACTER_SIZE / 2, types = {"hitbox", "playercollisionbox"}},
-    punch_hurtbox = {x = 0, y = 0, width = 20, height = 20, types = {"hurtbox"}, active = false}
+    punch_hurtbox = {x = 0, y = 0, width = 20, height = 20, types = {"hurtbox"}, active = false},
+    render = true
 }
 
 function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_down)
