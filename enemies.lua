@@ -89,7 +89,7 @@ Main.Enemy = {
     min_distance = 30,
     hitbox = {x = 100, y = 100, width = consts.CHARACTER_SIZE / 2, height = consts.CHARACTER_SIZE / 2, types = {"hitbox", "enemycollisionbox"}},
     punch_hurtbox = {x = 0, y = 0, width = 20, height = 20, types = {"hurtbox"}, active = false},
-    punch_timer
+    punch_timer = 0.5
 }
 
 -- This is just so we can have inheritance between different enemy variations.
@@ -119,7 +119,6 @@ function Main.Enemy:update(dt, target, slow_down)
                 end
             end
 
-            
             self.movement_vector:normalize()
 
             self.velocity.x = self.movement_vector.x * speed
@@ -280,12 +279,11 @@ function Main.Enemy:update(dt, target, slow_down)
         end
     else
         -- Freeing up memory. Only release LÖVE2D objects, everything else gets managed by Lua.
-        --R might as well free it up more.
         if not self.released then
             punch_sound:release()
             walk_sound:release()
             particle_system_blood:release()
-            particle_system_burst:release() -- I think we will have to move most global variables to inside the enemy class.
+            particle_system_burst:release()
             self.released = true
         end
     end
