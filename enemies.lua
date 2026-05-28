@@ -17,6 +17,7 @@ local particle_image = love.graphics.newImage(consts.PARTICLE_PATH .. particle_p
 
 local particle_system_blood = love.graphics.newParticleSystem(particle_image)
 local particle_system_burst = love.graphics.newParticleSystem(particle_image)
+local particle_system_death = love.graphics.newParticleSystem(particle_image)
 
 local particle_systems = {
     particle = particle_system_blood,
@@ -39,14 +40,23 @@ particle_system_burst:setSizeVariation(1, 2)
 particle_system_burst:setColors(1, 1, 1, 1, 1, 1, 1, 1)
 particle_system_burst:setSpeed(consts.BURST_SPEED)
 
+particle_system_death:setEmitterLifetime(-1)
+particle_system_death:setParticleLifetime(1)
+particle_system_death:setSizeVariation(1, 5)
+particle_system_death:setColors(1, 1, 1, 1, 1, 1, 1, 1)
+particle_system_death:setSpeed(consts.DEATH_SPEED)
+
 local walk_animation = utils.Animation:new({speed = 0.1, looping = true})
 walk_animation:manage_spritesheet(consts.ASSETS_PATH .. "characters/enemies/basic_enemy/enemy_walk.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 8, 3)
 
 local fall_animation = utils.Animation:new({speed = 0.1, looping = true})
 fall_animation:manage_spritesheet(consts.ASSETS_PATH .. "characters/enemies/basic_enemy/enemy_fall.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 1, 1)
 
-local punch_animation = utils.Animation:new({speed = 0.05, looping = false}) --R no looping for this thx
+local punch_animation = utils.Animation:new({speed = 0.05, looping = false}) --R no looping for this thx -- Well, then.
 punch_animation:manage_spritesheet(consts.ASSETS_PATH .. "characters/enemies/basic_enemy/enemy_punch.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 10, 3)
+
+local death_animation = utils.Animation:new({speed = 0.5, looping = false})
+death_animation:manage_spritesheet(consts.ASSETS_PATH .. "characters/enemies/basic_enemy/enemy_death.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 5, 2)
 
 love.audio.setEffect("reverb", {type = "reverb"})
 
@@ -89,7 +99,8 @@ Main.Enemy = {
     min_distance = 30,
     hitbox = {x = 100, y = 100, width = consts.CHARACTER_SIZE / 2, height = consts.CHARACTER_SIZE / 2, types = {"hitbox", "enemycollisionbox"}},
     punch_hurtbox = {x = 0, y = 0, width = 20, height = 20, types = {"hurtbox"}, active = false},
-    punch_timer = 0.5
+    punch_timer = 0.5,
+    render = true
 }
 
 -- This is just so we can have inheritance between different enemy variations.
@@ -286,6 +297,42 @@ function Main.Enemy:update(dt, target, slow_down)
             particle_system_burst:release()
             self.released = true
         end
+
+        self.animation = death_animation
+        if self.animation.finished and self.render then
+            self.render = false
+            table.insert(particle_systems, {
+                particle = particle_system_death:clone(),
+                x = self.position.x,
+                y = self.position.y,
+                started = false,
+                emitted = false,
+                death = true
+            })
+        else
+            self.animation:update(dt)
+        end
+
+        for system = 1, #particle_systems do
+            if particle_systems[system].death then
+                if not particle_systems[system].started then
+                    particle_systems[system].particle:start()
+                    particle_systems[system].started = true
+                end
+
+                particle_systems[system].particle:setSpread(360)
+                particle_systems[system].particle:setSpeed(-consts.DEATH_SPEED, consts.DEATH_SPEED)
+
+                if not particle_systems[system].emitted then
+                    particle_systems[system].particle:emit(love.math.random(consts.MIN_DEATH, consts.MAX_DEATH))
+                    particle_systems[system].emitted = true
+                    local step = 1.0 / 600.0
+                    particle_systems[system].particle:update(step)
+                end
+                particle_systems[system].particle:setSpeed(0, 0)
+            end
+        end
+
     end
 end
 
@@ -294,7 +341,10 @@ function Main.Enemy:draw()
         love.graphics.draw(particle_systems[system].particle, particle_systems[system].x, particle_systems[system].y)
     end
 
-    self.animation:draw(self.position.x, self.position.y, self.angle, 1, set.shading, 0, 3)
+    if self.render then
+        self.animation:draw(self.position.x, self.position.y, self.angle, 1, set.shading, 0, 3)
+    end
+
     if consts.DEBUG then
         utils.draw_collision(self.hitbox)
         if self.punch_hurtbox.active then

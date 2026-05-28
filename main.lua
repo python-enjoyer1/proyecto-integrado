@@ -126,7 +126,9 @@ function love.update(dt)
     mouse_x = (mouse_x / scale_x)
     mouse_y = (mouse_y / scale_y)
 
-    enemy:update(dt, player, slow_down)
+    for item = 1, #enemy_table do
+        enemy_table[item]:update(dt, player, slow_down)
+    end
 
     player:update(dt, scale_x, scale_y, global_offset_x, global_offset_y, enemy_table, slow_down)
 
@@ -151,7 +153,7 @@ function love.update(dt)
 
     -- Enemy management.
     for i = 1, #enemy_table do
-        if enemy_table[i].states.dead and not player.states.punch then
+        if not enemy_table[i].render and not player.states.punch then
             table.remove(enemy_table, i)
         end
     end
@@ -206,9 +208,9 @@ function love.draw()
     soul_bar:draw(65, 20, 0, 1, set.shading, 0, 4)
     soul_bar_frame:draw(65, 20)
 
-    if set.show_fps and fps > 0 then -- Unholy math here.
+    if set.show_fps then -- Unholy math here.
         local length = #tostring(fps)
-        local x = (1.0 / length) * (consts.RENDER_WIDTH * length * 0.95)
+        local x = (1.0 / length) * (consts.RENDER_WIDTH * length * 0.95) + (3 - length) * 7
 
         love.graphics.setColor(0, 0, 0, 0.5)
         love.graphics.rectangle("fill", x - length, 1, length * 9, 12, 3, 3)

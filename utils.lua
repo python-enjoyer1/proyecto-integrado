@@ -59,7 +59,7 @@ function Main.Animation:update(dt, paused)
             self.current_frame = self.current_frame + 1
 
             if self.current_frame > #self.frames then
-                if self.looping == false then
+                if not self.looping then
                     self.current_frame = #self.frames
                     self.finished = true
                 else

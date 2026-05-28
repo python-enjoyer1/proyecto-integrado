@@ -179,7 +179,6 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
         if targets[i].punch_hurtbox and targets[i].punch_hurtbox.active then
             if utils.check_collision(self.hitbox, targets[i].punch_hurtbox) then
                 --R insert dmg stuff
-                
             end
         end
     end

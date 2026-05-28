@@ -43,4 +43,8 @@ Main.MIN_BURST = 200
 Main.MAX_BURST = 400
 Main.BURST_SPEED = 10000
 
+Main.MIN_DEATH = 600
+Main.MAX_DEATH = 800
+Main.DEATH_SPEED = 25000
+
 return Main
