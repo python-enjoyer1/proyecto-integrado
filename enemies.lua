@@ -105,7 +105,7 @@ function Main.Enemy:new(o)
     return o
 end
 
-function Main.Enemy:update(dt, target, slow_down)
+function Main.Enemy:update(dt, target, slow_down, tilemap)
     if not self.states.dead then
         local speed = self.stats.speed * slow_down
         punch_animation.speed = (self.cooldowns.punch / 10) / slow_down
@@ -275,6 +275,10 @@ function Main.Enemy:update(dt, target, slow_down)
         end
 
         self.animation:update(dt, self.states.idle)
+
+        for i = 1, #tilemap.walls do
+            utils.check_collision(self.hitbox, tilemap.walls[i])
+        end
 
         self.hitbox.x = self.position.x
         self.hitbox.y = self.position.y
