@@ -129,31 +129,10 @@ function love.update(dt)
     mouse_y = (mouse_y / scale_y)
 
     for item = 1, #enemy_table do
-        enemy_table[item]:update(dt, player, slow_down)
+        enemy_table[item]:update(dt, player, slow_down, tilemap)
     end
 
-    player:update(dt, scale_x, scale_y, global_offset_x, global_offset_y, enemy_table, slow_down)
-
-    for i = 1, #tilemap.walls do
-        utils.check_collision(player.hitbox, tilemap.walls[i])
-    end
-
-    for i = 1, #tilemap.walls do
-        utils.check_collision(player.hitbox, tilemap.walls[i])
-    end
-
-    player.position.x = player.hitbox.x
-    player.position.y = player.hitbox.y
-
-    --R enemy wall stuff
-    for i = 1, #enemy_table do
-        for j = 1, #tilemap.walls do
-            utils.check_collision(enemy_table[i].hitbox, tilemap.walls[j])
-
-            enemy_table[i].position.x = enemy_table[i].hitbox.x
-            enemy_table[i].position.y = enemy_table[i].hitbox.y
-        end
-    end
+    player:update(dt, scale_x, scale_y, global_offset_x, global_offset_y, enemy_table, slow_down, tilemap)
 
     -- Enemy management.
     for i = 1, #enemy_table do

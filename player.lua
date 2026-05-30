@@ -75,7 +75,7 @@ local Player = {
     render = true
 }
 
-function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_down)
+function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_down, tilemap)
     self.targets = targets
 
     local speed = self.stats.speed * slow_down
@@ -171,6 +171,10 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
             self.animation = walk_animation
             punch_animation.finished = false
         end
+    end
+
+    for i = 1, #tilemap.walls do
+        utils.check_collision(self.hitbox, tilemap.walls[i])
     end
 
     self.position.x = self.hitbox.x
