@@ -294,10 +294,6 @@ function Main.Enemy:update(dt, target, slow_down, tilemap, tilemap)
 
         self.animation:update(dt, self.states.idle)
 
-        for i = 1, #tilemap.walls do
-            utils.check_collision(self.hitbox, tilemap.walls[i])
-        end
-
         for sound = 1, #self.walk_sound_table do
             if self.walk_sound_timer <= 0 then
                 self.walk_sound_table[sound]:setPitch((love.math.random(50, 100) / 100) * slow_down * (speed / self.stats.speed))
