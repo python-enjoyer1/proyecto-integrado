@@ -345,29 +345,34 @@ function Main.Tilemap:draw(offset_x, offset_y)
         local oy = self.tilemap[i].origin_y or 0
         local tile_type = self.tilemap[i].tile_type or nil
 
-        -- Peak optimization done by ME. Basically any tiles that are not in the view of the player, are simply, not rendered. Quite awesome, isn't it?
-        if x < (consts.RENDER_WIDTH - offset_x) + 15 and y < (consts.RENDER_HEIGHT - offset_y) + 15 then
-            love.graphics.push()
-            love.graphics.scale(consts.TILE_SCALE, consts.TILE_SCALE)
+        local screen_x = x + offset_x
+        local screen_y = y + offset_y
 
-            if set.shading then
-                love.graphics.setColor(consts.SHADOW_COLOR)
-                if tile_type == "upper" then
-                    love.graphics.draw(tile, x, y + consts.WALL_SHADOW_OFFSET, r, 1, 1, ox, oy)
-                elseif tile_type == "lower" then
-                    love.graphics.draw(tile, x, y - consts.WALL_SHADOW_OFFSET, r, 1, 1, ox, oy)
-                elseif tile_type == "left" then
-                    love.graphics.draw(tile, x + consts.WALL_SHADOW_OFFSET, y, r, 1, 1, ox, oy)
-                elseif tile_type == "right" then
-                    love.graphics.draw(tile, x - consts.WALL_SHADOW_OFFSET, y, r, 1, 1, ox, oy)
+        if screen_x > -consts.WALL_TILE_SIZE * 2 and screen_x < consts.RENDER_WIDTH + consts.WALL_TILE_SIZE * 2 and
+        screen_y > -consts.WALL_TILE_SIZE * 2 and screen_y < consts.RENDER_HEIGHT + consts.WALL_TILE_SIZE * 2 then --R ts is getting long
+            -- Peak optimization done by ME. Basically any tiles that are not in the view of the player, are simply, not rendered. Quite awesome, isn't it?
+            if x < (consts.RENDER_WIDTH - offset_x) + 15 and y < (consts.RENDER_HEIGHT - offset_y) + 15 then
+                love.graphics.push()
+                love.graphics.scale(consts.TILE_SCALE, consts.TILE_SCALE)
+
+                if set.shading then
+                    love.graphics.setColor(consts.SHADOW_COLOR)
+                    if tile_type == "upper" then
+                        love.graphics.draw(tile, x, y + consts.WALL_SHADOW_OFFSET, r, 1, 1, ox, oy)
+                    elseif tile_type == "lower" then
+                        love.graphics.draw(tile, x, y - consts.WALL_SHADOW_OFFSET, r, 1, 1, ox, oy)
+                    elseif tile_type == "left" then
+                        love.graphics.draw(tile, x + consts.WALL_SHADOW_OFFSET, y, r, 1, 1, ox, oy)
+                    elseif tile_type == "right" then
+                        love.graphics.draw(tile, x - consts.WALL_SHADOW_OFFSET, y, r, 1, 1, ox, oy)
+                    end
                 end
-            end
 
-            love.graphics.setColor(1, 1, 1)
-            love.graphics.draw(tile, x, y, r, 1, 1, ox, oy)
-            love.graphics.pop()
-        end
-    end
+                love.graphics.setColor(1, 1, 1)
+                love.graphics.draw(tile, x, y, r, 1, 1, ox, oy)
+                love.graphics.pop()
+            end
+        end    end
 end
 
 function Main.lerp(a, b, x, dt)
