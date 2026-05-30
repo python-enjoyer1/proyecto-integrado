@@ -56,7 +56,6 @@ function Main.Enemy:new(o)
     o.particle_systems = {}
 
     --R sounds
-
     o.walk_sound = love.audio.newSource(consts.SOUND_PATH .. "footstep.wav", "static")
     o.walk_sound:setVolume(set.sfx_volume)
     o.walk_sound:setEffect("reverb")
@@ -68,14 +67,12 @@ function Main.Enemy:new(o)
     o.punch_sound:setEffect("reverb")
 
     --R animations
-
     o.walk_animation = o.walk_animation or default_walk_animation
     o.fall_animation = o.fall_animation or default_fall_animation
     o.punch_animation = o.punch_animation or default_punch_animation
     o.death_animation = o.death_animation or default_death_animation
 
     --R general enemy stuff
-
     o.velocity = utils.Vector:new()
     o.position = {x = o.position and o.position.x or 100, y = o.position and o.position.y or 100}
     o.stats = {
@@ -113,7 +110,7 @@ function Main.Enemy:new(o)
     return o
 end --R Main.Enemy is shared so i shoved it in here instead
 
-function Main.Enemy:update(dt, target, slow_down, tilemap, tilemap)
+function Main.Enemy:update(dt, target, slow_down, tilemap)
     if not self.states.dead then
         local speed = self.stats.speed * slow_down
         self.punch_animation.speed = (self.cooldowns.punch / 10) / slow_down
