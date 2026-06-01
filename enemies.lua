@@ -109,7 +109,7 @@ function Main.Enemy:new(o)
     return o
 end --R Main.Enemy is shared so i shoved it in here instead
 
-function Main.Enemy:update(dt, target, slow_down, tilemap)
+function Main.Enemy:update(dt, target, slow_down, tilemap, target_table)
     if not self.states.dead then
         local speed = self.stats.speed * slow_down
         self.punch_animation.speed = (self.cooldowns.punch / 10) / slow_down
@@ -279,6 +279,12 @@ function Main.Enemy:update(dt, target, slow_down, tilemap)
 
         for i = 1, #tilemap.walls do
             utils.check_collision(self.hitbox, tilemap.walls[i])
+        end
+
+        for i = 1, #target_table do
+            if target_table[i] ~= self then
+                utils.check_collision(self.hitbox, target_table[i].hitbox)
+            end
         end
 
         self.position.x = self.hitbox.x

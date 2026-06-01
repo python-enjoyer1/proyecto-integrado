@@ -133,7 +133,7 @@ function love.update(dt)
     mouse_y = (mouse_y / scale_y)
 
     for item = 1, #enemy_table do
-        enemy_table[item]:update(dt, player, slow_down, tilemap)
+        enemy_table[item]:update(dt, player, slow_down, tilemap, enemy_table)
     end
 
     player:update(dt, scale_x, scale_y, global_offset_x, global_offset_y, enemy_table, slow_down, tilemap)
