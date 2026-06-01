@@ -1,3 +1,6 @@
+local love = require("love")
+local set = require("settings")
+
 local Main = {}
 
 Main.RENDER_WIDTH = 640
@@ -24,6 +27,21 @@ Main.SOUND_PATH = "stuff/assets/sounds/"
 Main.CONSUMER_PATH = "stuff/assets/characters/consumer/"
 Main.PARTICLE_PATH = "stuff/assets/particles/"
 Main.FONT_PATH = "stuff/assets/fonts/"
+Main.ENEMY_PATH = "stuff/assets/enemies/"
+
+love.audio.setEffect("reverb", {type = "reverb"})
+
+Main.WALK_SOUND = love.audio.newSource(Main.SOUND_PATH .. "footstep.wav", "static")
+Main.WALK_SOUND:setVolume(set.sfx_volume)
+Main.WALK_SOUND:setEffect("reverb")
+
+Main.HIT_SOUND = love.audio.newSource(Main.SOUND_PATH .. "punch_hit.wav", "static")
+Main.HIT_SOUND:setVolume(set.sfx_volume)
+Main.HIT_SOUND:setEffect("reverb")
+
+Main.MISS_SOUND = love.audio.newSource(Main.SOUND_PATH .. "punch_miss.wav", "static")
+Main.MISS_SOUND:setVolume(set.sfx_volume)
+Main.MISS_SOUND:setEffect("reverb")
 
 Main.MIN_ENEMY_SOUL = 5
 Main.MAX_ENEMY_SOUL = 20

@@ -1,4 +1,3 @@
--- TODO: Re-implement the player miss sound, since I moved the player audio in enemies.lua to player.lua.
 local love = require("love")
 local utils = require("utils")
 local consts = require("constants")
@@ -17,20 +16,13 @@ local mouse_x, mouse_y
 
 love.audio.setEffect("reverb", {type = "reverb"})
 
-local walk_sound = love.audio.newSource(consts.SOUND_PATH .. "footstep.wav", "static")
-walk_sound:setVolume(set.sfx_volume)
-walk_sound:setEffect("reverb")
+local walk_sound = consts.WALK_SOUND
 local walk_sound_table = {} -- Makes it so footsteps can be speeded played at different speeds.
 local walk_sound_timer = 0
 
-local miss_sound = love.audio.newSource(consts.SOUND_PATH .. "punch_miss.wav", "static")
-miss_sound:setVolume(set.sfx_volume)
-miss_sound:setEffect("reverb")
-miss_sound:setPitch(0.7)
+local miss_sound = consts.MISS_SOUND
 
-local punch_sound = love.audio.newSource(consts.SOUND_PATH .. "punch_hit.wav", "static")
-punch_sound:setVolume(set.sfx_volume)
-punch_sound:setEffect("reverb")
+local punch_sound = consts.HIT_SOUND
 
 -- add this near the top of player.lua with the other locals
 local punch_sound_played = false

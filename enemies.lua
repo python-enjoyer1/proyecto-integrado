@@ -50,21 +50,18 @@ Main.Enemy = {}
 -- This is just so we can have inheritance between different enemy variations.
 function Main.Enemy:new(o)
     o = o or {}
+    setmetatable(o, self)
+    self.__index = self
 
     --R particle thing
-
     o.particle_systems = {}
 
     --R sounds
-    o.walk_sound = love.audio.newSource(consts.SOUND_PATH .. "footstep.wav", "static")
-    o.walk_sound:setVolume(set.sfx_volume)
-    o.walk_sound:setEffect("reverb")
+    o.walk_sound = consts.WALK_SOUND
     o.walk_sound_table = {}
     o.walk_sound_timer = 0
 
-    o.punch_sound = love.audio.newSource(consts.SOUND_PATH .. "punch_hit.wav", "static")
-    o.punch_sound:setVolume(set.sfx_volume)
-    o.punch_sound:setEffect("reverb")
+    o.punch_sound = consts.HIT_SOUND
 
     --R animations
     o.walk_animation = o.walk_animation or default_walk_animation
@@ -104,9 +101,6 @@ function Main.Enemy:new(o)
     o.knockback_velx = 0
     o.knockback_vely = 0
     o.render = true
-
-    setmetatable(o, self)
-    self.__index = self
     return o
 end --R Main.Enemy is shared so i shoved it in here instead
 
@@ -301,13 +295,6 @@ function Main.Enemy:update(dt, target, slow_down, tilemap)
         end
 
     else
-        -- Freeing up memory. Only release LÖVE2D objects, everything else gets managed by Lua.
-        if not self.released then
-            self.punch_sound:release()
-            self.walk_sound:release()
-            self.released = true
-        end
-
         self.animation = self.death_animation
         if self.animation.finished and self.render then
             self.render = false
