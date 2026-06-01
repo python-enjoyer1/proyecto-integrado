@@ -180,12 +180,6 @@ function love.draw()
 
     player:draw()
 
-    if consts.DEBUG then
-        for i = 1, #tilemap.walls do
-            utils.draw_collision(tilemap.walls[i])
-        end
-    end
-
     love.graphics.pop()
 
     -- HUD/GUI goes here.

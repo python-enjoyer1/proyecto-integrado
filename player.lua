@@ -201,7 +201,7 @@ end
 function Player:draw()
     self.animation:draw(self.position.x, self.position.y, self.angle, 1, set.shading, 0, 3)
 
-    if consts.DEBUG then
+    if set.debug then
         utils.draw_collision(self.hitbox)
         if self.punch_hurtbox.active then
             utils.draw_collision(self.punch_hurtbox)

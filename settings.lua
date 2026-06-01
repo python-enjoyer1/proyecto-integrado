@@ -10,5 +10,6 @@ Main.ca_allowed = true -- CA means Chromatic Aberration, the shader that separat
 Main.show_fps = true
 Main.shading = true
 Main.vsync = true
+Main.debug = true
 
 return Main

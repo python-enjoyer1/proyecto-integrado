@@ -282,7 +282,7 @@ function Main.Enemy:update(dt, target, slow_down, tilemap)
             utils.check_collision(self.hitbox, tilemap.walls[i])
         end
 
-        self.position.x = self.hitbox.x 
+        self.position.x = self.hitbox.x
         self.position.y = self.hitbox.y
 
         if not self.states.fall then
@@ -326,7 +326,7 @@ function Main.Enemy:draw()
         self.animation:draw(self.position.x, self.position.y, self.angle, 1, set.shading, 0, 3)
     end
 
-    if consts.DEBUG and self.render then
+    if set.debug and self.render then
         utils.draw_collision(self.hitbox)
         if self.punch_hurtbox.active then
             utils.draw_collision(self.punch_hurtbox)

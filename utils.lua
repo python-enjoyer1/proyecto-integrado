@@ -335,6 +335,7 @@ function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keepi
 end
 
 function Main.Tilemap:draw(offset_x, offset_y)
+
     for i = 1, #self.tilemap do
         local tile = self.tilemap[i].tile
         local x = self.tilemap[i].position.x
@@ -372,7 +373,14 @@ function Main.Tilemap:draw(offset_x, offset_y)
                 love.graphics.draw(tile, x, y, r, 1, 1, ox, oy)
                 love.graphics.pop()
             end
-        end    end
+        end
+    end
+
+    if set.debug then
+        for i = 1, #self.walls do
+            Main.draw_collision(self.walls[i])
+        end
+    end
 end
 
 function Main.lerp(a, b, x, dt)
