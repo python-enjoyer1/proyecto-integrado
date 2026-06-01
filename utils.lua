@@ -94,6 +94,21 @@ function Main.has_type(collision, type) --R ts makes it easy to check for collis
     return false
 end
 
+function Main.Animation:clone()
+    local o = Main.Animation:new({
+        speed = self.speed,
+        looping = self.looping,
+        image = self.image,
+        frames = self.frames,
+        sprite_width = self.sprite_width,
+        sprite_height = self.sprite_height,
+        current_frame = 1,
+        timer = 0,
+        finished = false
+    })
+    return o
+end
+
 function Main.check_collision(collision1, collision2)
     local x = collision1.x - collision1.width / 2
     local y = collision1.y - collision1.height / 2

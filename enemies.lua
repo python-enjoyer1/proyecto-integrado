@@ -52,7 +52,6 @@ function Main.Enemy:new(o)
     o = o or {}
 
     --R particle thing
-
     o.particle_systems = {}
 
     --R sounds
@@ -67,10 +66,10 @@ function Main.Enemy:new(o)
     o.punch_sound:setEffect("reverb")
 
     --R animations
-    o.walk_animation = o.walk_animation or default_walk_animation
-    o.fall_animation = o.fall_animation or default_fall_animation
-    o.punch_animation = o.punch_animation or default_punch_animation
-    o.death_animation = o.death_animation or default_death_animation
+    o.walk_animation = (o.walk_animation or default_walk_animation):clone()
+    o.fall_animation = (o.fall_animation or default_fall_animation):clone()
+    o.punch_animation = (o.punch_animation or default_punch_animation):clone()
+    o.death_animation = (o.death_animation or default_death_animation):clone()
 
     --R general enemy stuff
     o.velocity = utils.Vector:new()
