@@ -130,7 +130,7 @@ function Main.check_collision(collision1, collision2)
         local c1_moves = Main.has_type(collision1, "playercollisionbox") or Main.has_type(collision1, "enemycollisionbox")
         local c2_moves = Main.has_type(collision2, "playercollisionbox") or Main.has_type(collision2, "enemycollisionbox")
         local either_is_main = Main.has_type(collision1, "maincollisionbox") or Main.has_type(collision2, "maincollisionbox")
-        local both_are_enemies = Main.has_type(collision1, "enemycollisionbox") or Main.has_type(collision2, "enemycollisionbox")
+        local both_are_enemies = Main.has_type(collision1, "enemycollisionbox") and Main.has_type(collision2, "enemycollisionbox")
 
         if (either_is_main or both_are_enemies) and (c1_moves or c2_moves) then
             if both_are_enemies then
