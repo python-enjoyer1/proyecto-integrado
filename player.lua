@@ -53,7 +53,7 @@ local Player = {
         weight = 1, --R How much knockback player takes.
         ammo_boost = 1, -- How much your ammo is multiplied by. By default it's nothing (1), but the Reichmann Relic changes it to 2, duplicating ammo.
         stun_duration = 0,
-        stability = 25
+        stability = 35
     },
     states = {
         idle = true,
@@ -228,6 +228,7 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
         if walk_sound_timer <= 0 then
             walk_sound_table[i]:setPitch((love.math.random(50, 100) / 100) * slow_down * speed / DEFAULT_SPEED)
             walk_sound_table[i]:play()
+            walk_sound_table[i]:release()
             table.remove(walk_sound_table, i)
             walk_sound_timer = 50.0 / speed
         end

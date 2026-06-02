@@ -48,6 +48,8 @@ Main.MAX_ENEMY_SOUL = 20
 Main.MIN_ENEMY_ESSENCE = 5
 Main.MAX_ENEMY_ESSENCE = 15
 
+Main.ENEMY_MOE = 30 -- Got a singular factoid for you. MOE refers to margin of error.
+
 Main.BACKGROUND_COLOR = {0, 0, 0}
 Main.SHADOW_COLOR = {0, 0, 0, 0.5}
 

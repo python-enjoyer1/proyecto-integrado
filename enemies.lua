@@ -80,9 +80,9 @@ function Main.Enemy:new(o)
         essence_amount = love.math.random(consts.MIN_ENEMY_ESSENCE, consts.MAX_ENEMY_ESSENCE),
         weight = 1,
         stun_duration = 0,
-        knockback = 400,
-        stagger = love.math.random(20,30),
-        stability = love.math.random(20,30)
+        knockback = 100,
+        stagger = love.math.random(20, 30),
+        stability = love.math.random(20, 30),
     }
     o.states = {
         idle = false,
@@ -110,6 +110,7 @@ function Main.Enemy:update(dt, target, slow_down, tilemap, target_table)
     if not self.states.dead then
         local speed = self.stats.speed * slow_down
         self.punch_animation.speed = (self.cooldowns.punch / 10) / slow_down
+        self.walk_animation.speed = (self.stats.speed / 1000) / slow_down
 
         self.movement_vector.x = target.position.x - self.position.x
         self.movement_vector.y = target.position.y - self.position.y
@@ -187,7 +188,7 @@ function Main.Enemy:update(dt, target, slow_down, tilemap, target_table)
                         self.hit_this_swing = true
 
                         local angle = math.atan2(self.position.y - target.position.y, self.position.x - target.position.x)
-                        local force = target.stats.knockback * 1.5 / self.stats.weight 
+                        local force = target.stats.knockback * 1.5 / self.stats.weight
                         self.knockback_velx = math.cos(angle) * force
                         self.knockback_vely = math.sin(angle) * force
 
@@ -369,6 +370,7 @@ function Main.Enemy:update(dt, target, slow_down, tilemap, target_table)
             if self.walk_sound_timer <= 0 then
                 self.walk_sound_table[sound]:setPitch((love.math.random(50, 100) / 100) * slow_down * (speed / self.stats.speed))
                 self.walk_sound_table[sound]:play()
+                self.walk_sound_table[sound]:release()
                 table.remove(self.walk_sound_table, sound)
                 self.walk_sound_timer = 50.0 / speed
             end
