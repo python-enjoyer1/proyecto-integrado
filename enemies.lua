@@ -183,12 +183,11 @@ function Main.Enemy:update(dt, target, slow_down, tilemap, target_table)
             --R so enemy doesnt get fucking comboed in 1 punch
             if not self.hit_this_swing then
                 if utils.check_collision(self.hitbox, target.punch_hurtbox) and not self.states.fall then
-                    if (self.stats.stability - target.stats.stagger) < 0  then
+                    if target.stats.stagger < self.stats.stability then
                         self.hit_this_swing = true
-                        self.stats.stun_duration = 3
 
                         local angle = math.atan2(self.position.y - target.position.y, self.position.x - target.position.x)
-                        local force = target.stats.knockback / self.stats.weight / 2
+                        local force = target.stats.knockback * 1.5 / self.stats.weight 
                         self.knockback_velx = math.cos(angle) * force
                         self.knockback_vely = math.sin(angle) * force
 
@@ -355,6 +354,10 @@ function Main.Enemy:update(dt, target, slow_down, tilemap, target_table)
             if target_table[i] ~= self then
                 utils.check_collision(self.hitbox, target_table[i].hitbox)
             end
+        end
+
+        if target.states.fall then
+            utils.check_collision(self.hitbox, target.hitbox)
         end
 
         self.position.x = self.hitbox.x
