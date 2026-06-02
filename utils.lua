@@ -94,6 +94,21 @@ function Main.has_type(collision, type) --R ts makes it easy to check for collis
     return false
 end
 
+function Main.Animation:clone()
+    local o = Main.Animation:new({
+        speed = self.speed,
+        looping = self.looping,
+        image = self.image,
+        frames = self.frames,
+        sprite_width = self.sprite_width,
+        sprite_height = self.sprite_height,
+        current_frame = 1,
+        timer = 0,
+        finished = false
+    })
+    return o
+end
+
 function Main.check_collision(collision1, collision2)
     local x = collision1.x - collision1.width / 2
     local y = collision1.y - collision1.height / 2
@@ -115,17 +130,37 @@ function Main.check_collision(collision1, collision2)
         local c1_moves = Main.has_type(collision1, "playercollisionbox") or Main.has_type(collision1, "enemycollisionbox")
         local c2_moves = Main.has_type(collision2, "playercollisionbox") or Main.has_type(collision2, "enemycollisionbox")
         local either_is_main = Main.has_type(collision1, "maincollisionbox") or Main.has_type(collision2, "maincollisionbox")
+        local both_are_enemies = Main.has_type(collision1, "enemycollisionbox") or Main.has_type(collision2, "enemycollisionbox")
 
-        if either_is_main and (c1_moves or c2_moves) then
-            local sign = c1_moves and 1 or -1
-            if overlap_x < overlap_y then
-                local push = (dx > 0 and overlap_x or -overlap_x) * sign
-                if c1_moves then collision1.x = collision1.x + push
-                else collision2.x = collision2.x - push end
+        if (either_is_main or both_are_enemies) and (c1_moves or c2_moves) then
+            if both_are_enemies then
+                if overlap_x < overlap_y then
+                    local push = (dx > 0 and overlap_x or -overlap_x) * 0.5
+                    collision1.x = collision1.x + push
+                    collision2.x = collision2.x - push
+                else
+                    local sign = c1_moves and 1 or -1
+                    if overlap_x < overlap_y then
+                        local push = (dx > 0 and overlap_x or -overlap_x) * sign
+                        if c1_moves then collision1.x = collision1.x + push
+                        else collision2.x = collision2.x - push end
+                    else
+                        local push = (dy > 0 and overlap_y or -overlap_y) * sign
+                        if c1_moves then collision1.y = collision1.y + push
+                        else collision2.y = collision2.y - push end
+                    end
+                end
             else
-                local push = (dy > 0 and overlap_y or -overlap_y) * sign
-                if c1_moves then collision1.y = collision1.y + push
-                else collision2.y = collision2.y - push end
+                local sign = c1_moves and 1 or -1
+                if overlap_x < overlap_y then
+                    local push = (dx > 0 and overlap_x or -overlap_x) * sign
+                    if c1_moves then collision1.x = collision1.x + push
+                    else collision2.x = collision2.x - push end
+                else
+                    local push = (dy > 0 and overlap_y or -overlap_y) * sign
+                    if c1_moves then collision1.y = collision1.y + push
+                    else collision2.y = collision2.y - push end
+                end
             end
         end
     end

@@ -20,8 +20,6 @@ local global_offset_x
 local global_offset_y
 local look_ahead
 
-local enemy
-
 --R Tilemap shits
 local tilemap
 
@@ -86,8 +84,6 @@ function love.load()
     player.position.x = (tilemap.width * consts.TILE_SIZE) / 2
     player.position.y = (tilemap.height * consts.TILE_SIZE) / 2
 
-    enemy = enemies.Enemy:new()
-
     soul_bar = utils.Animation:new({speed = 0.07, looping = true})
     soul_bar:manage_spritesheet(consts.ASSETS_PATH .. "hud/soul_bar.png", 128, 32, 21, 2)
 
@@ -101,7 +97,15 @@ function love.load()
     cursor:manage_spritesheet(consts.ASSETS_PATH .. "hud/cursor.png", 8, 8, 4, 2)
 
     enemy_table = {}
-    table.insert(enemy_table, enemy)
+
+    local map_w = tilemap.width * consts.TILE_SIZE
+    local map_h = tilemap.height * consts.TILE_SIZE
+
+    for i = 1, 3 do
+        local x = love.math.random(consts.TILE_SIZE, map_w - consts.TILE_SIZE)
+        local x = love.math.random(consts.TILE_SIZE, map_h - consts.TILE_SIZE)
+        table.insert(enemy_table, enemies.Enemy:new({position = {x = x, y = y}}))
+    end
 end
 
 function love.update(dt)
@@ -129,14 +133,14 @@ function love.update(dt)
     mouse_y = (mouse_y / scale_y)
 
     for item = 1, #enemy_table do
-        enemy_table[item]:update(dt, player, slow_down, tilemap)
+        enemy_table[item]:update(dt, player, slow_down, tilemap, enemy_table)
     end
 
     player:update(dt, scale_x, scale_y, global_offset_x, global_offset_y, enemy_table, slow_down, tilemap)
 
     -- Enemy management.
-    for i = 1, #enemy_table do
-        if not enemy_table[i].render and not player.states.punch then
+    for i = #enemy_table, 1, -1 do
+        if not enemy_table[i].render then
             table.remove(enemy_table, i)
         end
     end
