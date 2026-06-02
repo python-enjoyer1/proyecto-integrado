@@ -73,8 +73,8 @@ function Main.Enemy:new(o)
     o.velocity = utils.Vector:new()
     o.position = {x = o.position and o.position.x or 100, y = o.position and o.position.y or 100}
     o.stats = {
-        hp = 20,
-        speed = 100,
+        hp = o.stats.hp or 20,
+        speed = o.stats.speed or 100,
         attack_damage = 5,
         soul_amount = love.math.random(consts.MIN_ENEMY_SOUL, consts.MAX_ENEMY_SOUL),
         essence_amount = love.math.random(consts.MIN_ENEMY_ESSENCE, consts.MAX_ENEMY_ESSENCE),
