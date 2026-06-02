@@ -356,10 +356,6 @@ function Main.Enemy:update(dt, target, slow_down, tilemap, target_table)
             end
         end
 
-        if target.states.fall then
-            utils.check_collision(self.hitbox, target.hitbox)
-        end
-
         self.position.x = self.hitbox.x
         self.position.y = self.hitbox.y
 
