@@ -103,7 +103,7 @@ function love.load()
 
     for i = 1, 3 do
         local x = love.math.random(consts.TILE_SIZE, map_w - consts.TILE_SIZE)
-        local x = love.math.random(consts.TILE_SIZE, map_h - consts.TILE_SIZE)
+        local y = love.math.random(consts.TILE_SIZE, map_h - consts.TILE_SIZE)
         table.insert(enemy_table, enemies.Enemy:new({position = {x = x, y = y}}))
     end
 end
