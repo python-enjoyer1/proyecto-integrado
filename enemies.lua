@@ -80,7 +80,9 @@ function Main.Enemy:new(o)
         essence_amount = love.math.random(consts.MIN_ENEMY_ESSENCE, consts.MAX_ENEMY_ESSENCE),
         weight = 1,
         stun_duration = 0,
-        knockback = 500
+        knockback = 400,
+        stagger = love.math.random(20,30),
+        stability = love.math.random(20,30)
     }
     o.states = {
         idle = false,
@@ -265,8 +267,8 @@ function Main.Enemy:update(dt, target, slow_down, tilemap, target_table)
         if math.abs(self.knockback_velx) > 0.1 or math.abs(self.knockback_vely) > 0.1 then
             self.position.x = self.position.x + self.knockback_velx * dt
             self.position.y = self.position.y + self.knockback_vely * dt
-            self.knockback_velx = self.knockback_velx * (1 - 10 * dt)
-            self.knockback_vely = self.knockback_vely * (1 - 10 * dt)
+            self.knockback_velx = self.knockback_velx * (1 - 7 * dt)
+            self.knockback_vely = self.knockback_vely * (1 - 7 * dt)
         end
 
         self.hitbox.x = self.position.x
