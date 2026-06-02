@@ -50,7 +50,7 @@ local Player = {
         essence_limit = 100,
         luck = 1,
         view_distance = 500,
-        weight = 20, --R How much knockback player takes.
+        weight = 1, --R How much knockback player takes.
         ammo_boost = 1, -- How much your ammo is multiplied by. By default it's nothing (1), but the Reichmann Relic changes it to 2, duplicating ammo.
         stun_duration = 0,
         stability = 25
@@ -62,6 +62,10 @@ local Player = {
         fall = false,
         dead = false,
     },
+    hit_this_swing = false,
+    iframe_timer = 0,
+    knockback_velx = 0,
+    knockback_vely = 0,
     angle = 0,
     animation = walk_animation,
     hitbox = {x = 320, y = 180, width = consts.CHARACTER_SIZE / 2, height = consts.CHARACTER_SIZE / 2, types = {"hitbox", "playercollisionbox"}},
@@ -83,20 +87,22 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
 
     local movement_vector = utils.Vector:new()
 
-    if love.keyboard.isDown("w") then
-        movement_vector.y = movement_vector.y - 1
-    end
+    if self.stats.stun_duration <= 0 then
+        if love.keyboard.isDown("w") then
+            movement_vector.y = movement_vector.y - 1
+        end
 
-    if love.keyboard.isDown("s") then
-        movement_vector.y = movement_vector.y + 1
-    end
+        if love.keyboard.isDown("s") then
+            movement_vector.y = movement_vector.y + 1
+        end
 
-    if love.keyboard.isDown("a") then
-        movement_vector.x = movement_vector.x - 1
-    end
+        if love.keyboard.isDown("a") then
+            movement_vector.x = movement_vector.x - 1
+        end
 
-    if love.keyboard.isDown("d") then
-        movement_vector.x = movement_vector.x + 1
+        if love.keyboard.isDown("d") then
+            movement_vector.x = movement_vector.x + 1
+        end
     end
 
     movement_vector:normalize()
@@ -127,9 +133,6 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
 
     self.position.x = self.position.x + (self.velocity.x * dt)
     self.position.y = self.position.y + (self.velocity.y * dt)
-
-    self.hitbox.x = self.position.x
-    self.hitbox.y = self.position.y
 
     mouse_x, mouse_y = love.mouse.getPosition()
     mouse_x = mouse_x / scale_x
@@ -167,20 +170,59 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
         end
     end
 
+    for i = 1, #targets do
+        if targets[i].punch_hurtbox and targets[i].punch_hurtbox.active then
+            if not self.hit_this_swing and self.iframe_timer <= 0 and utils.check_collision(self.hitbox, targets[i].punch_hurtbox) then
+                self.hit_this_swing = true
+                local angle = math.atan2(self.position.y - targets[i].position.y, self.position.x - targets[i].position.x)
+                local force
+                if targets[i].stats.stagger < self.stats.stability then
+                    force = targets[i].stats.knockback * 1.5 / self.stats.weight
+                else
+                    force = targets[i].stats.knockback / self.stats.weight
+
+                    self.states.fall = true
+                    self.stats.stun_duration = 3
+                    self.iframe_timer = 3.8
+                end
+                self.knockback_velx = math.cos(angle) * force
+                self.knockback_vely = math.sin(angle) * force
+            end
+        else
+            self.hit_this_swing = false
+        end
+    end
+
+    if math.abs(self.knockback_velx or 0) > 0.1 or math.abs(self.knockback_vely or 0) > 0.1 then
+        self.position.x = self.position.x + self.knockback_velx * dt
+        self.position.y = self.position.y + self.knockback_vely * dt
+        self.knockback_velx = self.knockback_velx * (1 - 7 * dt)
+        self.knockback_vely = self.knockback_vely * (1 - 7 * dt)
+    end
+
+    if self.stats.stun_duration > 0 then
+        self.stats.stun_duration = self.stats.stun_duration - (dt * slow_down)
+        self.animation = fall_animation
+    else
+        if self.states.fall then
+            self.iframe_timer = 0.8
+        end
+        self.states.fall = false
+    end
+
+    self.hitbox.x = self.position.x
+    self.hitbox.y = self.position.y
+
+    if self.iframe_timer > 0 then
+        self.iframe_timer = self.iframe_timer - dt
+    end
+
     for i = 1, #tilemap.walls do
         utils.check_collision(self.hitbox, tilemap.walls[i])
     end
 
     self.position.x = self.hitbox.x
     self.position.y = self.hitbox.y
-
-    for i = 1, #targets do
-        if targets[i].punch_hurtbox and targets[i].punch_hurtbox.active then
-            if utils.check_collision(self.hitbox, targets[i].punch_hurtbox) then
-                --R insert dmg stuff
-            end
-        end
-    end
 
     for i = 1, #walk_sound_table do
         if walk_sound_timer <= 0 then
@@ -204,7 +246,7 @@ function Player:draw()
 end
 
 function Player:punch()
-    if not self.states.punch then
+    if not self.states.punch and self.stats.stun_duration <= 0 then
         self.states.punch = true
         self.animation = punch_animation
         punch_animation.current_frame = 1
