@@ -183,77 +183,150 @@ function Main.Enemy:update(dt, target, slow_down, tilemap, target_table)
             --R so enemy doesnt get fucking comboed in 1 punch
             if not self.hit_this_swing then
                 if utils.check_collision(self.hitbox, target.punch_hurtbox) and not self.states.fall then
-                    self.hit_this_swing = true
-                    self.stats.stun_duration = 3
+                    if (self.stats.stability - target.stats.stagger) < 0  then
+                        self.hit_this_swing = true
+                        self.stats.stun_duration = 3
 
-                    local angle = math.atan2(self.position.y - target.position.y, self.position.x - target.position.x)
-                    local force = target.stats.knockback / self.stats.weight
-                    self.knockback_velx = math.cos(angle) * force
-                    self.knockback_vely = math.sin(angle) * force
+                        local angle = math.atan2(self.position.y - target.position.y, self.position.x - target.position.x)
+                        local force = target.stats.knockback / self.stats.weight / 2
+                        self.knockback_velx = math.cos(angle) * force
+                        self.knockback_vely = math.sin(angle) * force
 
-                    if set.screenshake_allowed then
-                        events.screenshake = true
-                        events.screenshake_duration = consts.DEFAULT_SCREENSHAKE_DURATION
-                        events.screenshake_magnitude = 4.0
-                    end
-
-                    -- Blood particles.
-                    table.insert(self.particle_systems, {
-                        particle = particle_system_blood:clone(),
-                        x = self.position.x,
-                        y = self.position.y,
-                        started = false,
-                        emitted = false
-                    })
-
-                    self.stats.hp = self.stats.hp - target.stats.attack_damage
-                    if self.stats.hp <= 0 then
-                        self.states.dead = true
-                    end
-
-                    for system = 1, #self.particle_systems do
-                        if not self.particle_systems[system].started then
-                            self.particle_systems[system].particle:start()
-                            self.particle_systems[system].started = true
+                        if set.screenshake_allowed then
+                            events.screenshake = true
+                            events.screenshake_duration = consts.DEFAULT_SCREENSHAKE_DURATION
+                            events.screenshake_magnitude = 2.5
                         end
 
-                        if self.states.dead then
-                            self.particle_systems[system].burst = true
+                        table.insert(self.particle_systems, {
+                            particle = particle_system_blood:clone(),
+                            x = self.position.x,
+                            y = self.position.y,
+                            started = false,
+                            emitted = false
+                        })
+
+                        self.stats.hp = self.stats.hp - target.stats.attack_damage
+                        if self.stats.hp <= 0 then
+                            self.states.dead = true
                         end
 
-                        if not self.particle_systems[system].burst then
-                            self.particle_systems[system].particle:setSpread(math.rad(love.math.random(180, 360)))
-                        else
-                            self.particle_systems[system].particle:setSpread(360)
-                            self.particle_systems[system].particle:setSpeed(-consts.BURST_SPEED, consts.BURST_SPEED)
-
-                            if set.screenshake_allowed then
-                                events.screenshake = true
-                                events.screenshake_duration = 0.3
-                                events.screenshake_magnitude = 10.0
+                        for system = 1, #self.particle_systems do
+                            if not self.particle_systems[system].started then
+                                self.particle_systems[system].particle:start()
+                                self.particle_systems[system].started = true
                             end
 
-                        end
+                            if self.states.dead then
+                                self.particle_systems[system].burst = true
+                            end
 
-                        self.particle_systems[system].particle:setDirection(angle)
-
-
-                        if not self.particle_systems[system].emitted then
                             if not self.particle_systems[system].burst then
-                                self.particle_systems[system].particle:emit(love.math.random(consts.MIN_BLOOD, consts.MAX_BLOOD))
+                                self.particle_systems[system].particle:setSpread(math.rad(love.math.random(180, 360)))
                             else
-                                self.particle_systems[system].particle:emit(love.math.random(consts.MIN_BURST, consts.MAX_BURST))
+                                self.particle_systems[system].particle:setSpread(360)
+                                self.particle_systems[system].particle:setSpeed(-consts.BURST_SPEED, consts.BURST_SPEED)
+
+                                if set.screenshake_allowed then
+                                    events.screenshake = true
+                                    events.screenshake_duration = 0.3
+                                    events.screenshake_magnitude = 10.0
+                                end
+
                             end
 
-                            self.particle_systems[system].emitted = true
+                            self.particle_systems[system].particle:setDirection(angle)
 
-                            local step = 1.0 / 600.0
-                            self.particle_systems[system].particle:update(step)
+
+                            if not self.particle_systems[system].emitted then
+                                if not self.particle_systems[system].burst then
+                                    self.particle_systems[system].particle:emit(love.math.random(consts.MIN_BLOOD, consts.MAX_BLOOD))
+                                else
+                                    self.particle_systems[system].particle:emit(love.math.random(consts.MIN_BURST, consts.MAX_BURST))
+                                end
+
+                                self.particle_systems[system].emitted = true
+
+                                local step = 1.0 / 600.0
+                                self.particle_systems[system].particle:update(step)
+                            end
+
+                            self.particle_systems[system].particle:setSpeed(0, 0)
+                        end
+                        self.hit_flag = true
+                    else
+                        self.hit_this_swing = true
+                        self.stats.stun_duration = 3
+
+                        local angle = math.atan2(self.position.y - target.position.y, self.position.x - target.position.x)
+                        local force = target.stats.knockback / self.stats.weight
+                        self.knockback_velx = math.cos(angle) * force
+                        self.knockback_vely = math.sin(angle) * force
+
+                        if set.screenshake_allowed then
+                            events.screenshake = true
+                            events.screenshake_duration = consts.DEFAULT_SCREENSHAKE_DURATION
+                            events.screenshake_magnitude = 4.0
                         end
 
-                        self.particle_systems[system].particle:setSpeed(0, 0)
+                        -- Blood particles.
+                        table.insert(self.particle_systems, {
+                            particle = particle_system_blood:clone(),
+                            x = self.position.x,
+                            y = self.position.y,
+                            started = false,
+                            emitted = false
+                        })
+
+                        self.stats.hp = self.stats.hp - target.stats.attack_damage
+                        if self.stats.hp <= 0 then
+                            self.states.dead = true
+                        end
+
+                        for system = 1, #self.particle_systems do
+                            if not self.particle_systems[system].started then
+                                self.particle_systems[system].particle:start()
+                                self.particle_systems[system].started = true
+                            end
+
+                            if self.states.dead then
+                                self.particle_systems[system].burst = true
+                            end
+
+                            if not self.particle_systems[system].burst then
+                                self.particle_systems[system].particle:setSpread(math.rad(love.math.random(180, 360)))
+                            else
+                                self.particle_systems[system].particle:setSpread(360)
+                                self.particle_systems[system].particle:setSpeed(-consts.BURST_SPEED, consts.BURST_SPEED)
+
+                                if set.screenshake_allowed then
+                                    events.screenshake = true
+                                    events.screenshake_duration = 0.3
+                                    events.screenshake_magnitude = 10.0
+                                end
+
+                            end
+
+                            self.particle_systems[system].particle:setDirection(angle)
+
+
+                            if not self.particle_systems[system].emitted then
+                                if not self.particle_systems[system].burst then
+                                    self.particle_systems[system].particle:emit(love.math.random(consts.MIN_BLOOD, consts.MAX_BLOOD))
+                                else
+                                    self.particle_systems[system].particle:emit(love.math.random(consts.MIN_BURST, consts.MAX_BURST))
+                                end
+
+                                self.particle_systems[system].emitted = true
+
+                                local step = 1.0 / 600.0
+                                self.particle_systems[system].particle:update(step)
+                            end
+
+                            self.particle_systems[system].particle:setSpeed(0, 0)
+                        end
+                        self.hit_flag = true
                     end
-                    self.hit_flag = true
                 else
                     self.hit_flag = false
                 end
