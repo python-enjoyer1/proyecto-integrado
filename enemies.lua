@@ -93,8 +93,9 @@ function Main.Enemy:new(o)
         attack_damage = 5,
         soul_amount = love.math.random(consts.MIN_ENEMY_SOUL, consts.MAX_ENEMY_SOUL),
         essence_amount = love.math.random(consts.MIN_ENEMY_ESSENCE, consts.MAX_ENEMY_ESSENCE),
-        weight = 1,
+        weight = o.stats.weight or 1,
         stun_duration = 0,
+        stun_reduction = o.stats.stun_reduction or 0, --R seconds
         knockback = 400,
         stagger = love.math.random(20,30),
         stability = love.math.random(20,30)
@@ -220,7 +221,8 @@ function Main.Enemy:update(dt, target, slow_down, tilemap, target_table)
                         self.hit_flag = true
                     else
                         self.hit_this_swing = true
-                        self.stats.stun_duration = 3
+                        self.stats.stun_duration = 3 - self.stats.stun_reduction
+                        print(self.stats.stun_reduction)
 
                         local angle = math.atan2(self.position.y - target.position.y, self.position.x - target.position.x)
                         local force = target.stats.knockback / self.stats.weight

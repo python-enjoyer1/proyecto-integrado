@@ -105,7 +105,7 @@ function love.load()
         local x = love.math.random(consts.TILE_SIZE, map_w - consts.TILE_SIZE)
         local y = love.math.random(consts.TILE_SIZE, map_h - consts.TILE_SIZE)
         if love.math.random(1,2) == 1 then
-            table.insert(enemy_table, enemies.Enemy:new({position = {x = x, y = y}, stats = {hp = 10, speed = 150}})) --R sprinters
+            table.insert(enemy_table, enemies.Enemy:new({position = {x = x, y = y}, stats = {hp = 10, speed = 150, weight = 0.8, stun_reduction = 1.3}})) --R sprinters
         else
             table.insert(enemy_table, enemies.Enemy:new({position = {x = x, y = y}, stats = {hp = 20, speed = 100}}))
         end
