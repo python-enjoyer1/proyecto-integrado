@@ -47,6 +47,8 @@ default_death_animation:manage_spritesheet(consts.ASSETS_PATH .. "characters/ene
 
 Main.Enemy = {}
 
+-- Put shit here.
+
 -- This is just so we can have inheritance between different enemy variations.
 function Main.Enemy:new(o)
     o = o or {}
