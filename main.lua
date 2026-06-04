@@ -7,6 +7,7 @@ local consts = require("constants")
 local shaders = require("shaders")
 local events = require("events")
 local set = require("settings")
+local parts = require("particles")
 
 local canvas
 
@@ -149,6 +150,9 @@ function love.update(dt)
         end
     end
 
+    parts.update()
+
+
     -- Shaders.
     shaders.backgrounds[background_index]:send("resolution", {consts.RENDER_WIDTH, consts.RENDER_HEIGHT})
     shaders.backgrounds[background_index]:send("time", time)
@@ -182,11 +186,15 @@ function love.draw()
 
     tilemap:draw(global_offset_x, global_offset_y)
 
+    parts.draw()
+
+
     for i = 1, #enemy_table do
         enemy_table[i]:draw()
     end
 
     player:draw()
+
 
     love.graphics.pop()
 
