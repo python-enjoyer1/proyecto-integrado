@@ -53,6 +53,7 @@ local Player = {
         weight = 1, --R How much knockback player takes.
         ammo_boost = 1, -- How much your ammo is multiplied by. By default it's nothing (1), but the Reichmann Relic changes it to 2, duplicating ammo.
         stun_duration = 0,
+        stun_reduction = 0,
         stability = 35
     },
     states = {
@@ -182,7 +183,7 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
                     force = targets[i].stats.knockback / self.stats.weight
 
                     self.states.fall = true
-                    self.stats.stun_duration = 3
+                    self.stats.stun_duration = 3 - self.stats.stun_reduction
                     self.iframe_timer = 3.8
                 end
                 self.knockback_velx = math.cos(angle) * force

@@ -21,6 +21,24 @@ default_punch_animation:manage_spritesheet(consts.ASSETS_PATH .. "characters/ene
 local default_death_animation = utils.Animation:new({speed = 0.2, looping = false})
 default_death_animation:manage_spritesheet(consts.ASSETS_PATH .. "characters/enemies/basic_enemy/variation1/enemy_death.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 5, 2)
 
+local function emit_blood(particle_system, x, y, angle, burst) --R this will make the code 100x easier to read
+    local p = particle_system:clone()
+    p:start()
+    if burst then
+        p:setSpread(360)
+        p:setSpeed(-consts.BURST_SPEED, consts.BURST_SPEED)
+    else
+        p:setSpread(math.rad(love.math.random(180, 360)))
+        p:setSpeed(0, consts.BLOOD_SPEED)
+    end
+    p:setDirection(angle)
+    p:emit(love.math.random(burst and consts.MIN_BURST or consts.MIN_BLOOD, burst and consts.MAX_BURST or consts.MAX_BLOOD))
+    local step = 1.0 / 600.0
+    p:update(step)
+    p:setSpeed(0, 0)
+    utils.Particles:add(p, x, y)
+end
+
 Main.Enemy = {}
 
 -- Put shit here.
@@ -53,11 +71,12 @@ function Main.Enemy:new(o)
         attack_damage = 5,
         soul_amount = love.math.random(consts.MIN_ENEMY_SOUL, consts.MAX_ENEMY_SOUL),
         essence_amount = love.math.random(consts.MIN_ENEMY_ESSENCE, consts.MAX_ENEMY_ESSENCE),
-        weight = 1,
+        weight = o.stats.weight or 1,
         stun_duration = 0,
-        knockback = 100,
-        stagger = love.math.random(20, 30),
-        stability = love.math.random(20, 30),
+        stun_reduction = o.stats.stun_reduction or 0, --R seconds
+        knockback = 400,
+        stagger = love.math.random(20,30),
+        stability = love.math.random(20,30)
     }
     o.states = {
         idle = false,
@@ -85,12 +104,10 @@ function Main.Enemy:update(dt, target, slow_down, tilemap, target_table)
     if not self.states.dead then
         local speed = self.stats.speed * slow_down
         self.punch_animation.speed = (self.cooldowns.punch / 10) / slow_down
-        self.walk_animation.speed = (self.stats.speed / 1000) / slow_down
 
         self.movement_vector.x = target.position.x - self.position.x
         self.movement_vector.y = target.position.y - self.position.y
         local distance = math.sqrt(self.movement_vector.x ^ 2 + self.movement_vector.y ^ 2)
-
 
         if distance > self.min_distance then
             if self.animation ~= self.fall_animation then
@@ -163,7 +180,7 @@ function Main.Enemy:update(dt, target, slow_down, tilemap, target_table)
                         self.hit_this_swing = true
 
                         local angle = math.atan2(self.position.y - target.position.y, self.position.x - target.position.x)
-                        local force = target.stats.knockback * 1.5 / self.stats.weight
+                        local force = target.stats.knockback * 1.5 / self.stats.weight 
                         self.knockback_velx = math.cos(angle) * force
                         self.knockback_vely = math.sin(angle) * force
 
@@ -191,7 +208,8 @@ function Main.Enemy:update(dt, target, slow_down, tilemap, target_table)
                         self.hit_flag = true
                     else
                         self.hit_this_swing = true
-                        self.stats.stun_duration = 3
+                        self.stats.stun_duration = 3 - self.stats.stun_reduction
+                        print(self.stats.stun_reduction)
 
                         local angle = math.atan2(self.position.y - target.position.y, self.position.x - target.position.x)
                         local force = target.stats.knockback / self.stats.weight
@@ -205,6 +223,9 @@ function Main.Enemy:update(dt, target, slow_down, tilemap, target_table)
                         end
 
                         self.stats.hp = self.stats.hp - target.stats.attack_damage
+
+                        -- Blood particles.
+
                         if self.stats.hp <= 0 then
                             self.states.dead = true
                         end
@@ -253,7 +274,6 @@ function Main.Enemy:update(dt, target, slow_down, tilemap, target_table)
             if self.walk_sound_timer <= 0 then
                 self.walk_sound_table[sound]:setPitch((love.math.random(50, 100) / 100) * slow_down * (speed / self.stats.speed))
                 self.walk_sound_table[sound]:play()
-                self.walk_sound_table[sound]:release()
                 table.remove(self.walk_sound_table, sound)
                 self.walk_sound_timer = 50.0 / speed
             end

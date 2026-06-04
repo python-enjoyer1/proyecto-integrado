@@ -7,6 +7,7 @@ local Main = {}
 Main.Vector = {x = 0, y = 0}
 Main.Animation = {speed = 1, current_frame = 1}
 Main.Tilemap = {type = "high", width = 1, height = 1, walls = {}} -- Higher floors refer to earlier floors, since you descend in this game.
+Main.Particles = {systems = {}}
 
 function Main.Vector:new(o)
     o = o or {}
@@ -416,6 +417,25 @@ function Main.Tilemap:draw(offset_x, offset_y)
             Main.draw_collision(self.walls[i])
         end
     end
+end
+
+function Main.Particles:update(dt)
+    for i = #self.systems, 1, -1 do
+        self.systems[i].particle:update(dt)
+        if self.systems[i].particle:getCount() == 0 then
+            table.remove(self.systems, 1)
+        end
+    end
+end
+
+function Main.Particles:draw()
+    for i = 1, #self.systems do
+        love.graphics.draw(self.systems[i].particle, self.systems[i].x, self.systems[i].y)
+    end
+end
+
+function Main.Particles:add(particle, x, y)
+    table.insert(self.systems, {particle = particle, x = x, y = y})
 end
 
 function Main.lerp(a, b, x, dt)
