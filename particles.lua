@@ -67,8 +67,6 @@ function Main.add(p_type, x, y)
 end
 
 function Main.update()
-
-    print(#particle_systems)
     for system = 1, #particle_systems do
         if not particle_systems[system].started then
             particle_systems[system].particle:start()

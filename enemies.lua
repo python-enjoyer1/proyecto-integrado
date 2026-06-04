@@ -57,7 +57,6 @@ function Main.Enemy:new(o)
     o.punch_sound = consts.HIT_SOUND
 
     --R animations
-    print(o.walk_animation.speed)
     o.walk_animation = o.walk_animation or (default_walk_animation):clone()
     o.fall_animation = o.fall_animation or (default_fall_animation):clone()
     o.punch_animation = o.punch_animation or (default_punch_animation):clone()
@@ -211,7 +210,6 @@ function Main.Enemy:update(dt, target, slow_down, tilemap, target_table)
                     else
                         self.hit_this_swing = true
                         self.stats.stun_duration = 3 - self.stats.stun_reduction
-                        print(self.stats.stun_reduction)
 
                         local angle = math.atan2(self.position.y - target.position.y, self.position.x - target.position.x)
                         local force = target.stats.knockback / self.stats.weight
