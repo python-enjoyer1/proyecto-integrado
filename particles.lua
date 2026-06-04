@@ -51,6 +51,19 @@ function Main.add(p_type, x, y)
             type = "burst"
         })
     end
+
+    --[[R alt? unless u're planning smth
+
+    table.insert(particle_systems, {
+        particle = particle_system_burst:clone(),
+        x = x,
+        y = y,
+        started = false,
+        emitted = false,
+        type = p_type
+    })
+
+    ]]
 end
 
 function Main.update()

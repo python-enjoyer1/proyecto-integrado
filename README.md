@@ -7,3 +7,4 @@ Things to add:
  - Make enemies smarter.
  - Tutorial.
  - Replace shadows with a shader to improve performance. 
+ - Make wavy text for Menu

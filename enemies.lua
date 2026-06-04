@@ -229,6 +229,7 @@ function Main.Enemy:update(dt, target, slow_down, tilemap, target_table)
                         if self.stats.hp <= 0 then
                             self.states.dead = true
                         end
+                        parts.add("blood", self.position.x, self.position.y)
                         self.hit_flag = true
                     end
                 else
