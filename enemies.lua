@@ -229,6 +229,16 @@ function Main.Enemy:update(dt, target, slow_down, tilemap, target_table)
                         if self.stats.hp <= 0 then
                             self.states.dead = true
                         end
+
+                        if self.states.dead then
+                            parts.add("burst", self.position.x, self.position.y)
+                            if set.screenshake_allowed then
+                                events.screenshake = true
+                                events.screenshake_duration = 0.3
+                                events.screenshake_magnitude = 10.0
+                            end
+                        end
+
                         parts.add("blood", self.position.x, self.position.y)
                         self.hit_flag = true
                     end
