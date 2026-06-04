@@ -21,7 +21,7 @@ default_punch_animation:manage_spritesheet(consts.ASSETS_PATH .. "characters/ene
 local default_death_animation = utils.Animation:new({speed = 0.2, looping = false})
 default_death_animation:manage_spritesheet(consts.ASSETS_PATH .. "characters/enemies/basic_enemy/variation1/enemy_death.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 5, 2)
 
-local function emit_blood(particle_system, x, y, angle, burst) --R this will make the code 100x easier to read
+--[[ local function emit_blood(particle_system, x, y, angle, burst) --R this will make the code 100x easier to read
     local p = particle_system:clone()
     p:start()
     if burst then
@@ -37,7 +37,7 @@ local function emit_blood(particle_system, x, y, angle, burst) --R this will mak
     p:update(step)
     p:setSpeed(0, 0)
     utils.Particles:add(p, x, y)
-end
+end ]]
 
 Main.Enemy = {}
 
