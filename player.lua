@@ -173,6 +173,22 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
 
     for i = 1, #targets do
         if targets[i].punch_hurtbox and targets[i].punch_hurtbox.active then
+            if self.punch_hurtbox.active and punch_animation.current_frame == 5 and 
+                targets[i].punch_animation.current_frame == 5 and 
+                utils.check_collision(self.punch_hurtbox, targets[i].punch_hurtbox) then
+                
+                self.punch_hurtbox.active = false
+                targets[i].punch_hurtbox.active = false
+                local angle = math.atan2(self.position.y - targets[i].position.y, self.position.x - targets[i].position.x)
+                local force = -(targets[i].stats.knockback * .8 / self.stats.weight)
+                self.knockback_velx = math.cos(angle) * force
+                self.knockback_vely = math.sin(angle) * force
+
+                local angle = math.atan2(targets[i].position.y - self.position.y, targets[i].position.x - self.position.x)
+                local force = -(self.stats.knockback * 1.2 / targets[i].stats.weight)
+                targets[i].knockback_velx = math.cos(angle) * force
+                targets[i].knockback_vely = math.sin(angle) * force
+            end
             if not self.hit_this_swing and self.iframe_timer <= 0 and utils.check_collision(self.hitbox, targets[i].punch_hurtbox) then
                 self.hit_this_swing = true
                 local angle = math.atan2(self.position.y - targets[i].position.y, self.position.x - targets[i].position.x)
@@ -184,7 +200,7 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
 
                     self.states.fall = true
                     self.stats.stun_duration = 3 - self.stats.stun_reduction
-                    self.iframe_timer = 3.8
+                    self.iframe_timer = 4
                 end
                 self.knockback_velx = math.cos(angle) * force
                 self.knockback_vely = math.sin(angle) * force
@@ -204,10 +220,8 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
     if self.stats.stun_duration > 0 then
         self.stats.stun_duration = self.stats.stun_duration - (dt * slow_down)
         self.animation = fall_animation
+        self.punch_hurtbox.active = false
     else
-        if self.states.fall then
-            self.iframe_timer = 0.8
-        end
         self.states.fall = false
     end
 

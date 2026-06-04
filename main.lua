@@ -65,7 +65,7 @@ function love.load()
         set.show_fps = true
     end
 
-    slow_down = 1.0 -- Might change name later, bigger means faster, smaller means slower.
+    slow_down = 1 -- Might change name later, bigger means faster, smaller means slower.
 
     canvas = love.graphics.newCanvas(consts.RENDER_WIDTH, consts.RENDER_HEIGHT)
     canvas:setFilter(consts.DEFAULT_FILTER, consts.DEFAULT_FILTER)
@@ -105,10 +105,22 @@ function love.load()
     for i = 1, 3 do
         local x = love.math.random(consts.TILE_SIZE, map_w - consts.TILE_SIZE)
         local y = love.math.random(consts.TILE_SIZE, map_h - consts.TILE_SIZE)
-        if love.math.random(1,2) == 1 then
-            table.insert(enemy_table, enemies.Enemy:new({position = {x = x, y = y}, stats = {hp = 10, speed = 150, weight = 0.8, stun_reduction = 1.3}})) --R sprinters
+
+        local variant = love.math.random(1,3)
+
+        local walk_animation = utils.Animation:new({speed = 0.1, looping = true})
+        walk_animation:manage_spritesheet(consts.ENEMY_PATH.. "basic_enemy/variation".. variant.. "/enemy_walk.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 8, 3)
+        local fall_animation = utils.Animation:new({speed = 0.1, looping = true})
+        fall_animation:manage_spritesheet(consts.ENEMY_PATH.. "basic_enemy/variation".. variant.. "/enemy_fall.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 1, 1)
+        local punch_animation = utils.Animation:new({speed = 0.05, looping = false})
+        punch_animation:manage_spritesheet(consts.ENEMY_PATH.. "basic_enemy/variation".. variant.. "/enemy_punch.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 10, 3)
+        local death_animation = utils.Animation:new({speed = 0.2, looping = false})
+        death_animation:manage_spritesheet(consts.ENEMY_PATH.. "basic_enemy/variation".. variant.. "/enemy_death.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 5, 2)
+
+        if love.math.random(1,2) == 1 then            
+            table.insert(enemy_table, enemies.Enemy:new({walk_animation = walk_animation, fall_animation = fall_animation, punch_animation = punch_animation, death_animation = death_animation, position = {x = x, y = y}, stats = {hp = 10, speed = 150, weight = 0.8, stun_reduction = 1.3}})) --R sprinters
         else
-            table.insert(enemy_table, enemies.Enemy:new({position = {x = x, y = y}, stats = {hp = 20, speed = 100}}))
+            table.insert(enemy_table, enemies.Enemy:new({walk_animation = walk_animation, fall_animation = fall_animation, punch_animation = punch_animation, death_animation = death_animation, position = {x = x, y = y}, stats = {hp = 20, speed = 100}}))
         end
     end
 end

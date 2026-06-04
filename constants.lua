@@ -27,7 +27,7 @@ Main.SOUND_PATH = "stuff/assets/sounds/"
 Main.CONSUMER_PATH = "stuff/assets/characters/consumer/"
 Main.PARTICLE_PATH = "stuff/assets/particles/"
 Main.FONT_PATH = "stuff/assets/fonts/"
-Main.ENEMY_PATH = "stuff/assets/enemies/"
+Main.ENEMY_PATH = "stuff/assets/characters/enemies/"
 
 love.audio.setEffect("reverb", {type = "reverb"})
 

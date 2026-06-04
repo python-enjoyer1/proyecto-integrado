@@ -57,10 +57,11 @@ function Main.Enemy:new(o)
     o.punch_sound = consts.HIT_SOUND
 
     --R animations
-    o.walk_animation = (o.walk_animation or default_walk_animation):clone()
-    o.fall_animation = (o.fall_animation or default_fall_animation):clone()
-    o.punch_animation = (o.punch_animation or default_punch_animation):clone()
-    o.death_animation = (o.death_animation or default_death_animation):clone()
+    print(o.walk_animation.speed)
+    o.walk_animation = o.walk_animation or (default_walk_animation):clone()
+    o.fall_animation = o.fall_animation or (default_fall_animation):clone()
+    o.punch_animation = o.punch_animation or (default_punch_animation):clone()
+    o.death_animation = o.death_animation or (default_death_animation):clone()
 
     --R general enemy stuff
     o.velocity = utils.Vector:new()
@@ -104,6 +105,7 @@ function Main.Enemy:update(dt, target, slow_down, tilemap, target_table)
     if not self.states.dead then
         local speed = self.stats.speed * slow_down
         self.punch_animation.speed = (self.cooldowns.punch / 10) / slow_down
+        self.walk_animation.speed = 55.0 / (speed * 5)
 
         self.movement_vector.x = target.position.x - self.position.x
         self.movement_vector.y = target.position.y - self.position.y
