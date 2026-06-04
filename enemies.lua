@@ -230,6 +230,8 @@ function Main.Enemy:update(dt, target, slow_down, tilemap, target_table)
                             self.states.dead = true
                         end
 
+                        parts.add("blood", self.position.x, self.position.y)
+
                         if self.states.dead then
                             parts.add("burst", self.position.x, self.position.y)
                             if set.screenshake_allowed then
@@ -238,8 +240,6 @@ function Main.Enemy:update(dt, target, slow_down, tilemap, target_table)
                                 events.screenshake_magnitude = 10.0
                             end
                         end
-
-                        parts.add("blood", self.position.x, self.position.y)
                         self.hit_flag = true
                     end
                 else
