@@ -173,10 +173,10 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
 
     for i = 1, #targets do
         if targets[i].punch_hurtbox and targets[i].punch_hurtbox.active then
-            if self.punch_hurtbox.active and punch_animation.current_frame == 5 and 
-                targets[i].punch_animation.current_frame == 5 and 
+            if self.punch_hurtbox.active and punch_animation.current_frame == 5 and
+                targets[i].punch_animation.current_frame == 5 and
                 utils.check_collision(self.punch_hurtbox, targets[i].punch_hurtbox) then
-                
+
                 self.punch_hurtbox.active = false
                 targets[i].punch_hurtbox.active = false
                 local angle = math.atan2(self.position.y - targets[i].position.y, self.position.x - targets[i].position.x)

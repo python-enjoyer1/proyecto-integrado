@@ -21,27 +21,7 @@ default_punch_animation:manage_spritesheet(consts.ASSETS_PATH .. "characters/ene
 local default_death_animation = utils.Animation:new({speed = 0.2, looping = false})
 default_death_animation:manage_spritesheet(consts.ASSETS_PATH .. "characters/enemies/basic_enemy/variation1/enemy_death.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 5, 2)
 
---[[ local function emit_blood(particle_system, x, y, angle, burst) --R this will make the code 100x easier to read
-    local p = particle_system:clone()
-    p:start()
-    if burst then
-        p:setSpread(360)
-        p:setSpeed(-consts.BURST_SPEED, consts.BURST_SPEED)
-    else
-        p:setSpread(math.rad(love.math.random(180, 360)))
-        p:setSpeed(0, consts.BLOOD_SPEED)
-    end
-    p:setDirection(angle)
-    p:emit(love.math.random(burst and consts.MIN_BURST or consts.MIN_BLOOD, burst and consts.MAX_BURST or consts.MAX_BLOOD))
-    local step = 1.0 / 600.0
-    p:update(step)
-    p:setSpeed(0, 0)
-    utils.Particles:add(p, x, y)
-end ]]
-
 Main.Enemy = {}
-
--- Put shit here.
 
 -- This is just so we can have inheritance between different enemy variations.
 function Main.Enemy:new(o)
@@ -153,6 +133,7 @@ function Main.Enemy:update(dt, target, slow_down, tilemap, target_table)
             else
                 self.animation = self.punch_animation
                 if self.punch_animation.current_frame >= 5 and self.punch_animation.current_frame <= 7 then
+                    self.punch_sound:play()
                     self.punch_hurtbox.active = true
                     local reach = 20
                     self.punch_hurtbox.x = self.position.x + math.cos(self.angle) * reach
@@ -224,8 +205,6 @@ function Main.Enemy:update(dt, target, slow_down, tilemap, target_table)
 
                         self.stats.hp = self.stats.hp - target.stats.attack_damage
 
-                        -- Blood particles.
-
                         if self.stats.hp <= 0 then
                             self.states.dead = true
                         end
@@ -285,6 +264,7 @@ function Main.Enemy:update(dt, target, slow_down, tilemap, target_table)
             if self.walk_sound_timer <= 0 then
                 self.walk_sound_table[sound]:setPitch((love.math.random(50, 100) / 100) * slow_down * (speed / self.stats.speed))
                 self.walk_sound_table[sound]:play()
+                self.walk_sound_table[sound]:release()
                 table.remove(self.walk_sound_table, sound)
                 self.walk_sound_timer = 50.0 / speed
             end
