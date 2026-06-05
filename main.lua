@@ -155,8 +155,6 @@ function love.update(dt)
 
     player:update(dt, scale_x, scale_y, global_offset_x, global_offset_y, enemy_table, slow_down, tilemap)
 
-    utils.Particles:update(dt)
-
     -- Enemy management.
     for i = #enemy_table, 1, -1 do
         if not enemy_table[i].render then
