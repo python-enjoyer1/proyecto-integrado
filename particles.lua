@@ -82,9 +82,13 @@ function Main.update()
     end
 end
 
-function Main.draw()
+function Main.draw(offset_x, offset_y)
     for system = 1, #particle_systems do
-        love.graphics.draw(particle_systems[system].particle, particle_systems[system].x, particle_systems[system].y)
+        local screen_x = particle_systems[system].x + offset_x
+        local screen_y = particle_systems[system].y + offset_y
+        if screen_x > -200 and screen_x < consts.RENDER_WIDTH + 200 and screen_y > -200 and screen_x < consts.RENDER_HEIGHT + 200 then
+            love.graphics.draw(particle_systems[system].particle, particle_systems[system].x, particle_systems[system].y)
+        end
     end
 end
 

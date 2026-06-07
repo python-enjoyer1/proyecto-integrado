@@ -202,8 +202,7 @@ function love.draw()
 
     tilemap:draw(global_offset_x, global_offset_y)
 
-    parts.draw()
-
+    parts.draw(global_offset_x, global_offset_y)
 
     for i = 1, #enemy_table do
         enemy_table[i]:draw()
