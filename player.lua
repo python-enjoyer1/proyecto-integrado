@@ -2,6 +2,7 @@ local love = require("love")
 local utils = require("utils")
 local consts = require("constants")
 local set = require("settings")
+local events = require("events")
 
 local walk_animation = utils.Animation:new({speed = 0.08, looping = true})
 walk_animation:manage_spritesheet(consts.CONSUMER_PATH .. "consumer_walk.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 7, 3)
@@ -180,12 +181,12 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
                 self.punch_hurtbox.active = false
                 targets[i].punch_hurtbox.active = false
                 local angle = math.atan2(self.position.y - targets[i].position.y, self.position.x - targets[i].position.x)
-                local force = -(targets[i].stats.knockback * .8 / self.stats.weight)
+                local force = -(targets[i].stats.knockback * 0.8 / self.stats.weight)
                 self.knockback_velx = math.cos(angle) * force
                 self.knockback_vely = math.sin(angle) * force
 
-                local angle = math.atan2(targets[i].position.y - self.position.y, targets[i].position.x - self.position.x)
-                local force = -(self.stats.knockback * 1.2 / targets[i].stats.weight)
+                angle = math.atan2(targets[i].position.y - self.position.y, targets[i].position.x - self.position.x)
+                force = -(self.stats.knockback * 1.2 / targets[i].stats.weight)
                 targets[i].knockback_velx = math.cos(angle) * force
                 targets[i].knockback_vely = math.sin(angle) * force
             end
@@ -204,6 +205,12 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
                 end
                 self.knockback_velx = math.cos(angle) * force
                 self.knockback_vely = math.sin(angle) * force
+
+                if set.screenshake_allowed then
+                    events.screenshake = true
+                    events.screenshake_duration = consts.DEFAULT_SCREENSHAKE_DURATION
+                    events.screenshake_magnitude = 4.0
+                end
             end
         else
             self.hit_this_swing = false
