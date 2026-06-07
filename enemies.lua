@@ -66,7 +66,7 @@ function Main.Enemy:new(o)
     }
     o.cooldowns = {
         punch = 0.5
-    }
+    } --R we should add a utils func for cooldowns
     o.animation = o.walk_animation
     o.movement_vector = utils.Vector:new()
     o.angle = 0
