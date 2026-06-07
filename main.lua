@@ -65,7 +65,7 @@ function love.load()
         set.show_fps = true
     end
 
-    slow_down = 1 -- Might change name later, bigger means faster, smaller means slower.
+    slow_down = 1.0 -- Might change name later, bigger means faster, smaller means slower.
 
     canvas = love.graphics.newCanvas(consts.RENDER_WIDTH, consts.RENDER_HEIGHT)
     canvas:setFilter(consts.DEFAULT_FILTER, consts.DEFAULT_FILTER)
@@ -168,7 +168,6 @@ function love.update(dt)
 
     parts.update()
 
-
     -- Shaders.
     shaders.backgrounds[background_index]:send("resolution", {consts.RENDER_WIDTH, consts.RENDER_HEIGHT})
     shaders.backgrounds[background_index]:send("time", time)
@@ -237,8 +236,14 @@ function love.draw()
     love.graphics.setShader()
 end
 
+function love.mousepressed(x, y, button)
+    player:mousepressed(button)
+end
+
 function love.keypressed(key)
     if key == "escape" then
         love.event.quit()
     end
+
+    player:keypressed(key)
 end

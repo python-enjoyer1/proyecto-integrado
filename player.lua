@@ -55,7 +55,8 @@ local Player = {
         ammo_boost = 1, -- How much your ammo is multiplied by. By default it's nothing (1), but the Reichmann Relic changes it to 2, duplicating ammo.
         stun_duration = 0,
         stun_reduction = 0,
-        stability = 30
+        stability = 30,
+        recovery_speed = 0.5 -- How much faster you get up while spamming space.
     },
     states = {
         idle = true,
@@ -80,6 +81,8 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
 
     local speed = self.stats.speed * slow_down
     local attack_speed = self.stats.attack_speed * slow_down
+
+    self.slow_down = slow_down
 
     punch_animation.speed = 1.0 / (attack_speed * 5)
     punch_sound:setPitch(attack_speed / 5)
@@ -174,18 +177,18 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
 
     for i = 1, #targets do
         if targets[i].punch_hurtbox and targets[i].punch_hurtbox.active then
-            if self.punch_hurtbox.active and punch_animation.current_frame == 5 and
-                targets[i].punch_animation.current_frame == 5 and
-                utils.check_collision(self.punch_hurtbox, targets[i].punch_hurtbox) then
+            if self.punch_hurtbox.active and punch_animation.current_frame >= 5 and punch_animation.current_frame <= 7 and
+            targets[i].punch_animation.current_frame >= 5 and targets[i].punch_animation.current_frame <= 7 and
+            utils.check_collision(self.punch_hurtbox, targets[i].punch_hurtbox) then
 
                 self.punch_hurtbox.active = false
                 targets[i].punch_hurtbox.active = false
-                local angle = math.atan2(self.position.y - targets[i].position.y, self.position.x - targets[i].position.x)
+                local angle = math.atan2(targets[i].position.y - self.position.y, targets[i].position.x - self.position.x)
                 local force = -(targets[i].stats.knockback * 0.8 / self.stats.weight)
                 self.knockback_velx = math.cos(angle) * force
                 self.knockback_vely = math.sin(angle) * force
 
-                angle = math.atan2(targets[i].position.y - self.position.y, targets[i].position.x - self.position.x)
+                angle = math.atan2(self.position.y - targets[i].position.y, self.position.x - targets[i].position.x)
                 force = -(self.stats.knockback * 1.2 / targets[i].stats.weight)
                 targets[i].knockback_velx = math.cos(angle) * force
                 targets[i].knockback_vely = math.sin(angle) * force
@@ -201,7 +204,7 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
 
                     self.states.fall = true
                     self.stats.stun_duration = 3 - self.stats.stun_reduction
-                    self.iframe_timer = 4
+                    self.iframe_timer = 2
                 end
                 self.knockback_velx = math.cos(angle) * force
                 self.knockback_vely = math.sin(angle) * force
@@ -229,6 +232,7 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
         self.animation = fall_animation
         self.punch_hurtbox.active = false
     else
+        self.animation = walk_animation
         self.states.fall = false
     end
 
@@ -278,9 +282,17 @@ function Player:punch()
     end
 end
 
-function love.mousepressed(x, y, button)
+function Player:mousepressed(button)
     if button == 1 then
-        Player:punch()
+        self:punch()
+    end
+end
+
+function Player:keypressed(key)
+    if key == "space" and self.states.fall and self.stats.stun_duration > 0 then
+        self.stats.stun_duration = self.stats.stun_duration - self.stats.recovery_speed * self.slow_down
+    elseif self.stats.stun_duration <= 0 then
+        self.stats.stun_duration = 0
     end
 end
 

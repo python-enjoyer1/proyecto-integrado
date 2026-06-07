@@ -146,13 +146,15 @@ function Main.Enemy:update(dt, target, slow_down, tilemap, enemy_table)
         elseif not self.states.punch then
             self.states.idle = true
             self.animation.current_frame = 1
-            if self.punch_timer <= 0 then
+            if self.punch_timer <= 0 and not target.states.fall then
                 self.states.punch = true
                 self.punch_animation.current_frame = 1
                 self.punch_animation.finished = false
                 self.punch_timer = self.cooldowns.punch
-            else
+            elseif not target.states.fall then
                 self.punch_timer = self.punch_timer - dt * slow_down
+            else
+                self.punch_timer = self.cooldowns.punch
             end
         else
             self.states.idle = false

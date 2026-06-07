@@ -77,7 +77,9 @@ function Main.Animation:draw(x, y, rotate, size, shade, shade_offset_x, shade_of
     shade_offset_x = shade_offset_x or 0
     shade_offset_y = shade_offset_y or 0
     shade_color = shade_color or consts.SHADOW_COLOR
+
     local origin_x, origin_y = self.sprite_width / 2, self.sprite_height / 2
+
     if shade then
         love.graphics.setColor(shade_color)
         love.graphics.draw(self.image, self.frames[self.current_frame], x + shade_offset_x, y + shade_offset_y, rotate, size, size, origin_x, origin_y)
