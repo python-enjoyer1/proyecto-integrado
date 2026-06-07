@@ -102,7 +102,7 @@ function love.load()
     local map_w = tilemap.width * consts.TILE_SIZE
     local map_h = tilemap.height * consts.TILE_SIZE
 
-    for i = 1, 3 do
+    for i = 1, 6 do
         local x = love.math.random(consts.TILE_SIZE, map_w - consts.TILE_SIZE)
         local y = love.math.random(consts.TILE_SIZE, map_h - consts.TILE_SIZE)
 
