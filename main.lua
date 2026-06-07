@@ -117,7 +117,7 @@ function love.load()
         local death_animation = utils.Animation:new({speed = 0.2, looping = false})
         death_animation:manage_spritesheet(consts.ENEMY_PATH.. "basic_enemy/variation".. variant.. "/enemy_death.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 5, 2)
 
-        if love.math.random(1,2) == 1 then            
+        if love.math.random(1, 2) == 1 then
             table.insert(enemy_table, enemies.Enemy:new({walk_animation = walk_animation, fall_animation = fall_animation, punch_animation = punch_animation, death_animation = death_animation, position = {x = x, y = y}, stats = {hp = 10, speed = 150, weight = 0.8, stun_reduction = 1.3}})) --R sprinters
         else
             table.insert(enemy_table, enemies.Enemy:new({walk_animation = walk_animation, fall_animation = fall_animation, punch_animation = punch_animation, death_animation = death_animation, position = {x = x, y = y}, stats = {hp = 20, speed = 100}}))

@@ -70,7 +70,6 @@ function Main.Enemy:new(o)
     o.animation = o.walk_animation
     o.movement_vector = utils.Vector:new()
     o.angle = 0
-    o.min_distance = 30
     o.hitbox = {x = o.position.x, y = o.position.y, width = consts.CHARACTER_SIZE / 2, height = consts.CHARACTER_SIZE / 2, types = {"hitbox", "enemycollisionbox"}}
     o.punch_hurtbox = {x = 0, y = 0, width = 20, height = 20, types = {"hurtbox"}, active = false}
     o.punch_timer = 0.5
@@ -80,17 +79,49 @@ function Main.Enemy:new(o)
     return o
 end --R Main.Enemy is shared so i shoved it in here instead
 
-function Main.Enemy:update(dt, target, slow_down, tilemap, target_table)
+function Main.Enemy:update(dt, target, slow_down, tilemap, enemy_table)
     if not self.states.dead then
         local speed = self.stats.speed * slow_down
         self.punch_animation.speed = (self.cooldowns.punch / 10) / slow_down
         self.walk_animation.speed = 55.0 / (speed * 5)
 
-        self.movement_vector.x = target.position.x - self.position.x
-        self.movement_vector.y = target.position.y - self.position.y
-        local distance = math.sqrt(self.movement_vector.x ^ 2 + self.movement_vector.y ^ 2)
+        local offset_multiplier = love.math.random(20, 35)
+        local time_multiplier = love.math.random()
+        local time = love.timer.getTime() * time_multiplier
 
-        if distance > self.min_distance then
+        self.movement_vector.x = (target.position.x - self.position.x) + love.math.noise(time - 0.5) * offset_multiplier
+        self.movement_vector.y = (target.position.y - self.position.y) + love.math.noise(time + 1000) * offset_multiplier
+
+        for enemy = 1, #enemy_table do
+            if enemy_table[enemy].position.x ~= self.position.x and enemy_table[enemy].position.y ~= self.position.y then
+                local distance_x = self.position.x - enemy_table[enemy].position.x
+                local distance_y = self.position.y - enemy_table[enemy].position.y
+                local distance = math.sqrt(distance_x ^ 2 + distance_y ^ 2)
+                local min_distance = 30
+                local direction_x = distance_x
+                local direction_y = distance_y
+
+                if distance == 0 then
+                    direction_x = love.math.random(-1, 1) * 2 - 1
+                    direction_y = love.math.random(-1, 1) * 2 - 1
+                end
+
+                if distance < min_distance then
+                    local overlap = min_distance - distance
+                    local push_x = overlap * direction_x
+                    local push_y = overlap * direction_y
+                    local push_force = 3
+
+                    self.movement_vector.x = self.movement_vector.x + (push_x * push_force)
+                    self.movement_vector.y = self.movement_vector.y + (push_y * push_force)
+                end
+            end
+        end
+
+        local distance = math.sqrt((target.position.x - self.position.x) ^ 2 + (target.position.y - self.position.y) ^ 2)
+        local min_distance = 30
+
+        if distance > min_distance then
             if self.animation ~= self.fall_animation then
                 if self.walk_sound_timer <= 0 then
                     table.insert(self.walk_sound_table, self.walk_sound:clone())
@@ -162,7 +193,7 @@ function Main.Enemy:update(dt, target, slow_down, tilemap, target_table)
                         self.hit_this_swing = true
 
                         local angle = math.atan2(self.position.y - target.position.y, self.position.x - target.position.x)
-                        local force = target.stats.knockback * 1.5 / self.stats.weight 
+                        local force = target.stats.knockback * 1.5 / self.stats.weight
                         self.knockback_velx = math.cos(angle) * force
                         self.knockback_vely = math.sin(angle) * force
 
@@ -243,12 +274,6 @@ function Main.Enemy:update(dt, target, slow_down, tilemap, target_table)
 
         for i = 1, #tilemap.walls do
             utils.check_collision(self.hitbox, tilemap.walls[i])
-        end
-
-        for i = 1, #target_table do
-            if target_table[i] ~= self then
-                utils.check_collision(self.hitbox, target_table[i].hitbox)
-            end
         end
 
         self.position.x = self.hitbox.x
