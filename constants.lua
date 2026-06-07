@@ -19,6 +19,7 @@ Main.MAX_WIDTH_TILEMAP = 20
 Main.MIN_HEIGHT_TILEMAP = 10
 Main.MAX_HEIGHT_TILEMAP = 15
 Main.WALL_SHADOW_OFFSET = 5
+Main.VBUCKS_AMOUNT = 9999
 
 Main.ASSETS_PATH = "stuff/assets/"
 Main.TILE_PATH = "stuff/assets/tiles/"

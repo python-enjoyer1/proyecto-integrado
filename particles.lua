@@ -17,7 +17,7 @@ local particle_system_blood = love.graphics.newParticleSystem(particle_image)
 local particle_system_burst = love.graphics.newParticleSystem(particle_image)
 
 particle_system_blood:setEmitterLifetime(-1) -- -1 means it never stops.
-particle_system_blood:setParticleLifetime(1) --R dont mind me -- I absolutely mind.
+particle_system_blood:setParticleLifetime(1)
 particle_system_blood:setSizeVariation(1)
 particle_system_blood:setColors(1, 1, 1, 1, 1, 1, 1, 1)
 particle_system_blood:setSpeed(0, consts.BLOOD_SPEED)
@@ -51,19 +51,6 @@ function Main.add(p_type, x, y)
             type = "burst"
         })
     end
-
-    --[[R alt? unless u're planning smth
-
-    table.insert(particle_systems, {
-        particle = particle_system_burst:clone(),
-        x = x,
-        y = y,
-        started = false,
-        emitted = false,
-        type = p_type
-    })
-
-    ]]
 end
 
 function Main.update()
