@@ -63,7 +63,7 @@ function Main.update()
         if particle_systems[system].type == "blood" then
             particle_systems[system].particle:setSpread(math.rad(love.math.random(180, 360)))
         elseif particle_systems[system].type == "burst" then
-            particle_systems[system].particle:setSpread(360)
+            particle_systems[system].particle:setSpread(math.rad(360))
             particle_systems[system].particle:setSpeed(-consts.BURST_SPEED, consts.BURST_SPEED)
         end
 

@@ -232,7 +232,9 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
         self.animation = fall_animation
         self.punch_hurtbox.active = false
     else
-        self.animation = walk_animation
+        if not self.states.punch then
+            self.animation = walk_animation
+        end
         self.states.fall = false
     end
 
