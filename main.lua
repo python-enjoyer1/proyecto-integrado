@@ -8,6 +8,7 @@ local shaders = require("shaders")
 local events = require("events")
 local set = require("settings")
 local parts = require("particles")
+local weapons = require("weapons")
 
 local canvas
 
@@ -41,6 +42,7 @@ local time
 local slow_down
 
 local enemy_table
+local weapon_table
 
 local seed
 
@@ -98,6 +100,7 @@ function love.load()
     cursor:manage_spritesheet(consts.ASSETS_PATH .. "hud/cursor.png", 8, 8, 4, 2)
 
     enemy_table = {}
+    weapon_table = {}
 
     local map_w = tilemap.width * consts.TILE_SIZE
     local map_h = tilemap.height * consts.TILE_SIZE
@@ -127,6 +130,8 @@ function love.load()
             table.insert(enemy_table, enemies.Enemy:new({walk_animation = walk_animation, fall_animation = fall_animation, punch_animation = punch_animation, death_animation = death_animation, position = {x = x, y = y}, stats = {hp = 34, speed = love.math.random(70, 90), weight = love.math.random(1.3, 1.45), stun_reduction = -love.math.random(.4, .7), stagger = love.math.random(23, 33), stability = love.math.random(23, 33), knockback = 500}})) --R heavy people
         end
     end
+
+    table.insert(weapon_table, weapons.HeavyGun:new())
 end
 
 function love.update(dt)
@@ -152,6 +157,10 @@ function love.update(dt)
     mouse_x, mouse_y = love.mouse.getPosition()
     mouse_x = (mouse_x / scale_x)
     mouse_y = (mouse_y / scale_y)
+
+    for weapon = 1, #weapon_table do
+        weapon_table[weapon]:update(dt)
+    end
 
     for item = 1, #enemy_table do
         enemy_table[item]:update(dt, player, slow_down, tilemap, enemy_table)
@@ -203,12 +212,15 @@ function love.draw()
 
     parts.draw(global_offset_x, global_offset_y)
 
+    for weapon = 1, #weapon_table do
+        weapon_table[weapon]:draw(global_offset_x, global_offset_y)
+    end
+
     for i = 1, #enemy_table do
         enemy_table[i]:draw()
     end
 
     player:draw()
-
 
     love.graphics.pop()
 
