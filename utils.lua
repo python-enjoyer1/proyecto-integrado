@@ -133,6 +133,7 @@ function Main.check_collision(collision1, collision2)
         local c2_moves = Main.has_type(collision2, "playercollisionbox") or Main.has_type(collision2, "enemycollisionbox")
         local either_is_main = Main.has_type(collision1, "maincollisionbox") or Main.has_type(collision2, "maincollisionbox")
         local both_are_enemies = Main.has_type(collision1, "enemycollisionbox") and Main.has_type(collision2, "enemycollisionbox")
+        local selection_on_interactable = Main.has_type(collision1, "selectionbox") and Main.has_type(collision2, "interactbox")
 
         if (either_is_main or both_are_enemies) and (c1_moves or c2_moves) then
             if both_are_enemies then
@@ -151,6 +152,10 @@ function Main.check_collision(collision1, collision2)
                         if c1_moves then collision1.y = collision1.y + push
                         else collision2.y = collision2.y - push end
                     end
+                end
+            elseif selection_on_interactable then
+                if overlap_x < overlap_y then
+                    print("clicked")
                 end
             else
                 local sign = c1_moves and 1 or -1

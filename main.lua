@@ -31,6 +31,7 @@ local soul_bar_bg
 local soul_bar_frame
 
 local cursor
+local cursor_selection_box
 
 local background_index
 
@@ -99,6 +100,8 @@ function love.load()
     cursor = utils.Animation:new({speed = 0.1, looping = true})
     cursor:manage_spritesheet(consts.ASSETS_PATH .. "hud/cursor.png", 8, 8, 4, 2)
 
+    cursor_selection_box = {x = 0, y = 0, width = 8, height = 8, types = {"selectionbox"}}
+
     enemy_table = {}
     weapon_table = {}
 
@@ -157,6 +160,9 @@ function love.update(dt)
     mouse_x, mouse_y = love.mouse.getPosition()
     mouse_x = (mouse_x / scale_x)
     mouse_y = (mouse_y / scale_y)
+
+    cursor_selection_box.x = mouse_x
+    cursor_selection_box.y = mouse_y
 
     for weapon = 1, #weapon_table do
         weapon_table[weapon]:update(dt)
@@ -249,7 +255,7 @@ function love.draw()
 end
 
 function love.mousepressed(x, y, button)
-    player:mousepressed(button)
+    player:mousepressed(button, mouse_x, mouse_y)
 end
 
 function love.keypressed(key)

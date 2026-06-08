@@ -284,11 +284,15 @@ function Player:punch()
     end
 end
 
-function Player:mousepressed(x, y, button)
+function Player:mousepressed(button, x, y)
     x = x or 0
     y = y or 0
     if button == 1 then
         self:punch()
+    end
+
+    if button == 2 then
+        
     end
 end
 
