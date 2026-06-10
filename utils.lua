@@ -143,7 +143,7 @@ function Main.check_collision(collision1, collision2)
                     collision2.x = collision2.x - push
                 else
                     local sign = c1_moves and 1 or -1
-                    if overlap_x < overlap_y then
+                    if overlap_x >= overlap_y then
                         local push = (dx > 0 and overlap_x or -overlap_x) * sign
                         if c1_moves then collision1.x = collision1.x + push
                         else collision2.x = collision2.x - push end

@@ -55,7 +55,7 @@ local Player = {
         ammo_boost = 1, -- How much your ammo is multiplied by. By default it's nothing (1), but the Reichmann Relic changes it to 2, duplicating ammo.
         stun_duration = 0,
         stun_reduction = 0,
-        stability = 30,
+        stability = 300,
         recovery_speed = 0.5 -- How much faster you get up while spamming space.
     },
     states = {
