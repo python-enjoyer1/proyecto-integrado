@@ -138,7 +138,9 @@ function love.load()
 end
 
 function love.update(dt)
-    dt = math.min(dt, 1 / 60) -- Set maximum value on dt so that when you tab out the player does not teleport while timing an alt-tab.
+    if not love.window.hasFocus() then
+        dt = 0
+    end
 
     love.window.setVSync(set.vsync)
 
