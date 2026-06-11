@@ -201,7 +201,13 @@ function Main.draw_collision(collision)
     end
 
     love.graphics.setColor(r, g, b)
+    love.graphics.push()
+
+    if collision.rotation ~= nil then
+        love.graphics.rotate(collision.rotation)
+    end
     love.graphics.rectangle("line", collision.x - collision.width / 2, collision.y - collision.height / 2, collision.width, collision.height)
+    love.graphics.pop()
     love.graphics.setColor(1, 1, 1)
 end
 

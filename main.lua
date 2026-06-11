@@ -45,12 +45,24 @@ local slow_down
 local enemy_table
 local weapon_table
 
+local quit_timer
+local quit_hold_time
+local quitting
+
+local paused
+
 local seed
 
 -- For pre-loading. Loads stuff after loading modules.
 function love.load()
     love.mouse.setVisible(false)
     love.graphics.setDefaultFilter(consts.DEFAULT_FILTER, consts.DEFAULT_FILTER)
+
+    quit_hold_time = 3
+    quit_timer = quit_hold_time
+    quitting = false
+
+    paused = false
 
     seed = utils.generate_seed()
 
@@ -138,14 +150,26 @@ function love.load()
 end
 
 function love.update(dt)
-    if not love.window.hasFocus() then
+    if love.window.hasFocus() and not paused then
+        love.audio.setVolume(1.0)
+    else
         dt = 0
+    end
+
+    if love.keyboard.isDown("f1") and quit_timer > 0 and not paused then
+        quit_timer = quit_timer - dt
+        quitting = true
+    elseif love.keyboard.isDown("f1") and quit_timer <= 0 then
+        love.event.quit()
     end
 
     love.window.setVSync(set.vsync)
 
     fps = love.timer.getFPS()
-    time = love.timer.getTime() * slow_down
+
+    if not paused then
+        time = love.timer.getTime() * slow_down
+    end
 
     camera_movement = player.stats.speed / 25 -- So that when the player gets fast it stays on the screen.
 
@@ -168,24 +192,26 @@ function love.update(dt)
     cursor_selection_box.x = mouse_x
     cursor_selection_box.y = mouse_y
 
-    for weapon = 1, #weapon_table do
-        weapon_table[weapon]:update(dt)
-    end
-
-    for item = 1, #enemy_table do
-        enemy_table[item]:update(dt, player, slow_down, tilemap, enemy_table)
-    end
-
-    player:update(dt, scale_x, scale_y, global_offset_x, global_offset_y, enemy_table, slow_down, tilemap)
-
-    -- Enemy management.
-    for i = #enemy_table, 1, -1 do
-        if not enemy_table[i].render then
-            table.remove(enemy_table, i)
+    if not paused and love.window.hasFocus() then
+        for weapon = 1, #weapon_table do
+            weapon_table[weapon]:update(dt)
         end
-    end
 
-    parts.update()
+        for item = 1, #enemy_table do
+            enemy_table[item]:update(dt, player, slow_down, tilemap, enemy_table)
+        end
+
+        player:update(dt, scale_x, scale_y, global_offset_x, global_offset_y, enemy_table, slow_down, tilemap)
+
+        -- Enemy management.
+        for i = #enemy_table, 1, -1 do
+            if not enemy_table[i].render then
+                table.remove(enemy_table, i)
+            end
+        end
+
+        parts.update()
+    end
 
     -- Shaders.
     shaders.backgrounds[background_index]:send("resolution", {consts.RENDER_WIDTH, consts.RENDER_HEIGHT})
@@ -202,6 +228,7 @@ function love.update(dt)
 end
 
 function love.draw()
+    love.graphics.setFont(vcr_osd_mono)
     love.graphics.setCanvas(canvas)
     love.graphics.clear()
 
@@ -212,7 +239,7 @@ function love.draw()
     love.graphics.push()
     love.graphics.translate(global_offset_x, global_offset_y)
 
-    if events.screenshake then
+    if events.screenshake and not paused then
         local dx = love.math.random(-events.screenshake_magnitude, events.screenshake_magnitude)
         local dy = love.math.random(-events.screenshake_magnitude, events.screenshake_magnitude)
         love.graphics.translate(dx, dy)
@@ -239,7 +266,7 @@ function love.draw()
     soul_bar:draw(65, 20, 0, 1, set.shading, 0, 4)
     soul_bar_frame:draw(65, 20)
 
-    if set.show_fps then -- Unholy math here.
+    if set.show_fps and not paused then -- Unholy math here.
         local length = #tostring(fps)
         local x = (1.0 / length) * (consts.RENDER_WIDTH * length * 0.95) + (3 - length) * 7
 
@@ -247,9 +274,29 @@ function love.draw()
         love.graphics.rectangle("fill", x - length, 1, length * 9, 12, 3, 3)
         love.graphics.setColor(1, 1, 1)
 
-        love.graphics.setFont(vcr_osd_mono)
         love.graphics.print(fps, x, 0)
     end
+
+    if quitting and not paused then
+        love.graphics.setColor(1, 1, 1, 0.5)
+        love.graphics.print("QUITTING...", 5, 345)
+        love.graphics.setColor(1, 1, 1)
+    end
+
+    if paused then
+        love.graphics.setColor(0, 0, 0, 0.75)
+        love.graphics.rectangle("fill", 0, 0, consts.RENDER_WIDTH, consts.RENDER_HEIGHT)
+        love.graphics.setColor(1, 1, 1)
+    end
+
+    if paused then
+        love.graphics.push()
+        love.graphics.translate(-(vcr_osd_mono:getWidth("PAUSED") / 2), -(vcr_osd_mono:getHeight("PAUSED") / 2))
+        love.graphics.print("PAUSED", consts.RENDER_WIDTH / 2, consts.RENDER_HEIGHT / 2)
+        love.graphics.pop()
+    end
+
+    love.graphics.setColor(1, 1, 1)
 
     cursor:draw(mouse_x, mouse_y, 0, 1, set.shading, 0, 2)
     love.graphics.setCanvas()
@@ -264,8 +311,15 @@ end
 
 function love.keypressed(key)
     if key == "escape" then
-        love.event.quit()
+        paused = not paused
     end
 
     player:keypressed(key)
+end
+
+function love.keyreleased(key)
+    if key == "f1" then
+        quitting = false
+        quit_timer = quit_hold_time
+    end
 end
