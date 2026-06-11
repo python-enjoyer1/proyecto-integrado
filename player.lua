@@ -284,9 +284,9 @@ function Player:punch()
     end
 end
 
-function Player:mousepressed(button, x, y)
-    x = x or 0
-    y = y or 0
+function Player:mousepressed(button, mouse_collision)
+    x = mouse_collision.x or 0
+    y = mouse_collision.y or 0
     if button == 1 then
         self:punch()
     end

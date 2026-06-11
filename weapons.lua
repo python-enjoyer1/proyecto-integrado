@@ -23,7 +23,7 @@ function Main.HeavyGun:new(o)
     o.rotation = love.math.random(1, 360)
     o.floor_sprite = o.floor_sprite or love.graphics.newImage(consts.WEAPON_PATH .. "range/heavy_gun_floor.png")
     o.hold_sprite = o.hold_sprite or love.graphics.newImage(consts.WEAPON_PATH .. "range/heavy_gun_hold.png")
-    o.interact_box = {x = o.position.x, y = o.position.y, width = 12, height = 12, types = {"interactbox"}}
+    o.interact_box = {x = o.position.x, y = o.position.y, width = 20, height = 20, types = {"interactbox"}}
     o.sprite = o.floor_sprite
     o.render = true
     o.image_dimensions = {28, 16}

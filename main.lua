@@ -112,7 +112,7 @@ function love.load()
     cursor = utils.Animation:new({speed = 0.1, looping = true})
     cursor:manage_spritesheet(consts.ASSETS_PATH .. "hud/cursor.png", 8, 8, 4, 2)
 
-    cursor_selection_box = {x = 0, y = 0, width = 8, height = 8, types = {"selectionbox"}}
+    cursor_selection_box = {x = 0, y = 0, width = 8, height = 8, types = {"cursorselectionbox"}}
 
     enemy_table = {}
     weapon_table = {}
@@ -299,6 +299,7 @@ function love.draw()
     love.graphics.setColor(1, 1, 1)
 
     cursor:draw(mouse_x, mouse_y, 0, 1, set.shading, 0, 2)
+    utils.draw_collision(cursor_selection_box)
     love.graphics.setCanvas()
 
     love.graphics.draw(canvas, 0, 0, 0, scale_x, scale_y)
@@ -306,7 +307,7 @@ function love.draw()
 end
 
 function love.mousepressed(x, y, button)
-    player:mousepressed(button, mouse_x, mouse_y)
+    player:mousepressed(button, cursor_selection_box)
 end
 
 function love.keypressed(key)

@@ -184,7 +184,9 @@ function Main.draw_collision(collision)
         hurtbox = {1, 0, 0},
         maincollisionbox = {1, 1, 1},
         playercollisionbox = {0, 1, 1},
-        enemycollisionbox = {1, 0.5, 0}
+        enemycollisionbox = {1, 0.5, 0},
+        interactbox = {0, 1, 0.},
+        cursor_selection_box = {0, 0, 0}
     }
 
     for i, v in ipairs(collision.types) do
