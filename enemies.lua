@@ -271,8 +271,20 @@ function Main.Enemy:update(dt, target, slow_down, tilemap, enemy_table)
             self.knockback_vely = self.knockback_vely * (1 - 7 * dt)
         end
 
+        if self.states.fall then
+            self.hitbox.types = {"hitbox"}
+        else
+            self.hitbox.types = {"hitbox", "enemycollisionbox"}
+        end
+
         self.hitbox.x = self.position.x
         self.hitbox.y = self.position.y
+
+        for i = 1, #enemy_table do
+            if enemy_table[i] ~= self then
+                utils.check_collision(self.hitbox, enemy_table[i].hitbox)
+            end
+        end
 
         for i = 1, #tilemap.walls do
             utils.check_collision(self.hitbox, tilemap.walls[i])
