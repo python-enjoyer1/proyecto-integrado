@@ -189,12 +189,11 @@ function love.update(dt)
     mouse_x = (mouse_x / scale_x)
     mouse_y = (mouse_y / scale_y)
 
-    cursor_selection_box.x = mouse_x
-    cursor_selection_box.y = mouse_y
+    cursor_selection_box.x = mouse_x - global_offset_x
+    cursor_selection_box.y = mouse_y - global_offset_y
 
     if not paused and love.window.hasFocus() then
         for weapon = 1, #weapon_table do
-            utils.check_collision(cursor_selection_box, weapon_table[weapon].interact_box)
             weapon_table[weapon]:update(dt, cursor_selection_box)
         end
 
@@ -300,7 +299,7 @@ function love.draw()
     love.graphics.setColor(1, 1, 1)
 
     cursor:draw(mouse_x, mouse_y, 0, 1, set.shading, 0, 2)
-    utils.draw_collision(cursor_selection_box)
+    utils.draw_collision({x = mouse_x, y = mouse_y, width = 9, height = 8, types = {"cursorselectionbox"}})
     love.graphics.setCanvas()
 
     love.graphics.draw(canvas, 0, 0, 0, scale_x, scale_y)

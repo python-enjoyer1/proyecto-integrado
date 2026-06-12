@@ -280,14 +280,14 @@ function Main.Enemy:update(dt, target, slow_down, tilemap, enemy_table)
         self.hitbox.x = self.position.x
         self.hitbox.y = self.position.y
 
+        for i = 1, #tilemap.walls do
+            utils.check_collision(self.hitbox, tilemap.walls[i])
+        end
+        
         for i = 1, #enemy_table do
             if enemy_table[i] ~= self then
                 utils.check_collision(self.hitbox, enemy_table[i].hitbox)
             end
-        end
-
-        for i = 1, #tilemap.walls do
-            utils.check_collision(self.hitbox, tilemap.walls[i])
         end
 
         self.position.x = self.hitbox.x
