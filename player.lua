@@ -38,7 +38,7 @@ local Player = {
     stats = {
         speed = DEFAULT_SPEED,
         friction = 1, --R Floor friction
-        attack_damage = 4, --R We should prolly replace this with "dmg bonus" since stuff will have predetermined dmg
+        attack_damage = 40, --R We should prolly replace this with "dmg bonus" since stuff will have predetermined dmg
         attack_speed = 5,
         crit_chance = 1, --R You did mention something about adding critical hits to the game didn't you? -- No, but it's a good idea.
         knockback = 400,
@@ -284,9 +284,7 @@ function Player:punch()
     end
 end
 
-function Player:mousepressed(button, mouse_collision)
-    x = mouse_collision.x or 0
-    y = mouse_collision.y or 0
+function Player:mousepressed(button)
     if button == 1 then
         self:punch()
     end

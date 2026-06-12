@@ -26,15 +26,19 @@ function Main.HeavyGun:new(o)
     o.interact_box = {x = o.position.x, y = o.position.y, width = 20, height = 20, types = {"interactbox"}}
     o.sprite = o.floor_sprite
     o.render = true
-    o.image_dimensions = {28, 16}
+    o.image_dimensions = {55, 32}
+    o.mouse_on = false
+    o.whiteout_shader = love.graphics.newShader("stuff/shaders/whiteout.fs")
 
     return o
 end
 
-function Main.HeavyGun:update(dt, hold)
+function Main.HeavyGun:update(dt, mouse_selection_box, hold)
+    hold = hold or false
     if hold then
         self.sprite = self.hold_sprite
     else
+        self.mouse_on = utils.check_collision(mouse_selection_box, self.interact_box)
         self.sprite = self.floor_sprite
     end
 end
@@ -43,10 +47,21 @@ function Main.HeavyGun:draw(offset_x, offset_y)
     if self.render then
         if set.shading then
             love.graphics.setColor(consts.SHADOW_COLOR)
-            love.graphics.draw(self.sprite, self.position.x, self.position.y + 2.0, math.rad(self.rotation), 0.5, 0.5, self.image_dimensions[1], self.image_dimensions[2])
+            love.graphics.draw(self.sprite, self.position.x, self.position.y + 2.0, math.rad(self.rotation), 0.5, 0.5, self.image_dimensions[1] / 2, self.image_dimensions[2] / 2)
             love.graphics.setColor(1, 1, 1)
         end
-        love.graphics.draw(self.sprite, self.position.x, self.position.y, math.rad(self.rotation), 0.5, 0.5, self.image_dimensions[1], self.image_dimensions[2])
+
+        if self.mouse_on then
+            local offset = 1
+            love.graphics.setShader(self.whiteout_shader)
+            love.graphics.draw(self.sprite, self.position.x + offset, self.position.y, math.rad(self.rotation), 0.5, 0.5, self.image_dimensions[1] / 2, self.image_dimensions[2] / 2)
+            love.graphics.draw(self.sprite, self.position.x - offset, self.position.y, math.rad(self.rotation), 0.5, 0.5, self.image_dimensions[1] / 2, self.image_dimensions[2] / 2)
+            love.graphics.draw(self.sprite, self.position.x, self.position.y + offset, math.rad(self.rotation), 0.5, 0.5, self.image_dimensions[1] / 2, self.image_dimensions[2] / 2)
+            love.graphics.draw(self.sprite, self.position.x, self.position.y - offset, math.rad(self.rotation), 0.5, 0.5, self.image_dimensions[1] / 2, self.image_dimensions[2] / 2)
+            love.graphics.setShader()
+        end
+
+        love.graphics.draw(self.sprite, self.position.x, self.position.y, math.rad(self.rotation), 0.5, 0.5, self.image_dimensions[1] / 2, self.image_dimensions[2] / 2)
     end
     if set.debug then
         utils.draw_collision(self.interact_box)

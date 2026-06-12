@@ -11,5 +11,8 @@ Main.show_fps = true
 Main.shading = true
 Main.vsync = false
 Main.debug = true
+Main.keybinds = {
+    exit = "ralt"
+}
 
 return Main

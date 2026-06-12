@@ -120,7 +120,7 @@ function love.load()
     local map_w = tilemap.width * consts.TILE_SIZE
     local map_h = tilemap.height * consts.TILE_SIZE
 
-    for i = 1, 6 do
+    for i = 1, 1 do
         local x = love.math.random(consts.TILE_SIZE, map_w - consts.TILE_SIZE)
         local y = love.math.random(consts.TILE_SIZE, map_h - consts.TILE_SIZE)
 
@@ -156,10 +156,10 @@ function love.update(dt)
         dt = 0
     end
 
-    if love.keyboard.isDown("f1") and quit_timer > 0 and not paused then
+    if love.keyboard.isDown(set.keybinds.exit) and quit_timer > 0 and not paused then
         quit_timer = quit_timer - dt
         quitting = true
-    elseif love.keyboard.isDown("f1") and quit_timer <= 0 then
+    elseif love.keyboard.isDown(set.keybinds.exit) and quit_timer <= 0 then
         love.event.quit()
     end
 
@@ -194,7 +194,8 @@ function love.update(dt)
 
     if not paused and love.window.hasFocus() then
         for weapon = 1, #weapon_table do
-            weapon_table[weapon]:update(dt)
+            utils.check_collision(cursor_selection_box, weapon_table[weapon].interact_box)
+            weapon_table[weapon]:update(dt, cursor_selection_box)
         end
 
         for item = 1, #enemy_table do
@@ -307,7 +308,7 @@ function love.draw()
 end
 
 function love.mousepressed(x, y, button)
-    player:mousepressed(button, cursor_selection_box)
+    player:mousepressed(button)
 end
 
 function love.keypressed(key)
@@ -319,7 +320,7 @@ function love.keypressed(key)
 end
 
 function love.keyreleased(key)
-    if key == "f1" then
+    if key == set.keybinds.exit then
         quitting = false
         quit_timer = quit_hold_time
     end
