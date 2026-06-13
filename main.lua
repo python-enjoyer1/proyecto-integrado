@@ -158,6 +158,11 @@ function love.update(dt)
 
     if events.screenshake_delay > 0 then
         events.screenshake_delay = events.screenshake_delay - dt
+
+        if events.screenshake_delay <= 0 then
+            consts.PARRY_END_SOUND:stop()
+            consts.PARRY_END_SOUND:play()
+        end
     elseif events.screenshake and events.screenshake_duration > 0 then
         events.screenshake_duration = events.screenshake_duration - dt
     elseif events.screenshake_duration <= 0 then
