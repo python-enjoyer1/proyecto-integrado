@@ -308,18 +308,22 @@ end
 
 function love.mousepressed(x, y, button)
     player:mousepressed(button)
+
+    for weapon = 1, #weapon_table do
+        weapon_table[weapon]:mousepressed(button)
+    end
 end
 
-function love.keypressed(key)
-    if key == "escape" then
+function love.keypressed(key, scancode)
+    if scancode == set.keybinds.pause then
         paused = not paused
     end
 
-    player:keypressed(key)
+    player:keypressed(scancode)
 end
 
-function love.keyreleased(key)
-    if key == set.keybinds.exit then
+function love.keyreleased(key, scancode)
+    if scancode == set.keybinds.exit then
         quitting = false
         quit_timer = quit_hold_time
     end

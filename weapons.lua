@@ -29,13 +29,13 @@ function Main.HeavyGun:new(o)
     o.image_dimensions = {55, 32}
     o.mouse_on = false
     o.whiteout_shader = love.graphics.newShader("stuff/shaders/whiteout.fs")
+    o.hold = false
 
     return o
 end
 
-function Main.HeavyGun:update(dt, mouse_selection_box, hold)
-    hold = hold or false
-    if hold then
+function Main.HeavyGun:update(dt, mouse_selection_box)
+    if self.hold then
         self.sprite = self.hold_sprite
     else
         self.mouse_on = utils.check_collision(mouse_selection_box, self.interact_box)
@@ -47,11 +47,15 @@ function Main.HeavyGun:draw(offset_x, offset_y)
     if self.render then
         if set.shading then
             love.graphics.setColor(consts.SHADOW_COLOR)
-            love.graphics.draw(self.sprite, self.position.x, self.position.y + 2.0, math.rad(self.rotation), 0.5, 0.5, self.image_dimensions[1] / 2, self.image_dimensions[2] / 2)
+            if not self.hold then
+                love.graphics.draw(self.sprite, self.position.x, self.position.y + 2.0, math.rad(self.rotation), 0.5, 0.5, self.image_dimensions[1] / 2, self.image_dimensions[2] / 2)
+            else
+                love.graphics.draw(self.sprite, self.position.x, self.position.y + 2.0)
+            end
             love.graphics.setColor(1, 1, 1)
         end
 
-        if self.mouse_on then
+        if self.mouse_on and not self.hold then
             local offset = 1
             love.graphics.setShader(self.whiteout_shader)
             love.graphics.draw(self.sprite, self.position.x + offset, self.position.y, math.rad(self.rotation), 0.5, 0.5, self.image_dimensions[1] / 2, self.image_dimensions[2] / 2)
@@ -61,10 +65,20 @@ function Main.HeavyGun:draw(offset_x, offset_y)
             love.graphics.setShader()
         end
 
-        love.graphics.draw(self.sprite, self.position.x, self.position.y, math.rad(self.rotation), 0.5, 0.5, self.image_dimensions[1] / 2, self.image_dimensions[2] / 2)
+        if not self.hold then
+            love.graphics.draw(self.sprite, self.position.x, self.position.y, math.rad(self.rotation), 0.5, 0.5, self.image_dimensions[1] / 2, self.image_dimensions[2] / 2)
+        else
+            love.graphics.draw(self.sprite, self.position.x, self.position.y)
+        end
     end
     if set.debug then
         utils.draw_collision(self.interact_box)
+    end
+end
+
+function Main.HeavyGun:mousepressed(button)
+    if self.mouse_on and button == 2 then
+        self.hold = true
     end
 end
 

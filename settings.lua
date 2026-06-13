@@ -12,7 +12,8 @@ Main.shading = true
 Main.vsync = false
 Main.debug = true
 Main.keybinds = {
-    exit = "ralt"
+    exit = "f1",
+    pause = "escape"
 }
 
 return Main
