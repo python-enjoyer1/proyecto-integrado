@@ -120,7 +120,7 @@ function love.load()
     local map_w = tilemap.width * consts.TILE_SIZE
     local map_h = tilemap.height * consts.TILE_SIZE
 
-    for i = 1, 1 do
+    for i = 1, 6 do
         local x = love.math.random(consts.TILE_SIZE, map_w - consts.TILE_SIZE)
         local y = love.math.random(consts.TILE_SIZE, map_h - consts.TILE_SIZE)
 
@@ -156,6 +156,19 @@ function love.update(dt)
         dt = 0
     end
 
+    if events.screenshake_delay > 0 then
+        events.screenshake_delay = events.screenshake_delay - dt
+    elseif events.screenshake and events.screenshake_duration > 0 then
+        events.screenshake_duration = events.screenshake_duration - dt
+    elseif events.screenshake_duration <= 0 then
+        events.screenshake = false
+    end
+
+    if events.freezeframe_duration > 0 then
+        events.freezeframe_duration = events.freezeframe_duration - dt
+        dt = 0
+    end
+
     if love.keyboard.isDown(set.keybinds.exit) and quit_timer > 0 and not paused then
         quit_timer = quit_timer - dt
         quitting = true
@@ -173,12 +186,6 @@ function love.update(dt)
 
     camera_movement = player.stats.speed / 25 -- So that when the player gets fast it stays on the screen.
 
-    if events.screenshake and events.screenshake_duration > 0 then
-        events.screenshake_duration = events.screenshake_duration - dt
-    elseif events.screenshake_duration <= 0 then
-        events.screenshake = false
-    end
-
     local target_x = -player.position.x + consts.RENDER_WIDTH / 2 - (player.velocity.x / player.stats.speed) * look_ahead
     local target_y = -player.position.y + consts.RENDER_HEIGHT / 2 - (player.velocity.y / player.stats.speed) * look_ahead
 
@@ -193,24 +200,25 @@ function love.update(dt)
     cursor_selection_box.y = mouse_y - global_offset_y
 
     if not paused and love.window.hasFocus() then
-        for weapon = 1, #weapon_table do
-            weapon_table[weapon]:update(dt, cursor_selection_box)
-        end
+        if events.freezeframe_duration <= 0 then
+            for weapon = 1, #weapon_table do
+                weapon_table[weapon]:update(dt, cursor_selection_box)
+            end
 
-        for item = 1, #enemy_table do
-            enemy_table[item]:update(dt, player, slow_down, tilemap, enemy_table)
-        end
+            for item = 1, #enemy_table do
+                enemy_table[item]:update(dt, player, slow_down, tilemap, enemy_table)
+            end
 
-        player:update(dt, scale_x, scale_y, global_offset_x, global_offset_y, enemy_table, slow_down, tilemap, weapon_table)
+            player:update(dt, scale_x, scale_y, global_offset_x, global_offset_y, enemy_table, slow_down, tilemap, weapon_table)
 
-        -- Enemy management.
-        for i = #enemy_table, 1, -1 do
-            if not enemy_table[i].render then
-                table.remove(enemy_table, i)
+            for i = #enemy_table, 1, -1 do
+                if not enemy_table[i].render then
+                    table.remove(enemy_table, i)
+                end
             end
         end
 
-        parts.update()
+        parts.update() --R keeping ts outside cuz it'll prolly look awesome
     end
 
     -- Shaders.
@@ -225,7 +233,6 @@ function love.update(dt)
     soul_bar:update(dt)
     soul_bar_frame:update(dt)
     cursor:update(dt)
-    print(scale_x)
 end
 
 function love.draw()
@@ -240,7 +247,7 @@ function love.draw()
     love.graphics.push()
     love.graphics.translate(global_offset_x, global_offset_y)
 
-    if events.screenshake and not paused then
+    if events.screenshake and (events.screenshake_delay or 0) <= 0 and not paused then
         local dx = love.math.random(-events.screenshake_magnitude, events.screenshake_magnitude)
         local dy = love.math.random(-events.screenshake_magnitude, events.screenshake_magnitude)
         love.graphics.translate(dx, dy)
@@ -277,6 +284,10 @@ function love.draw()
         love.graphics.setColor(1, 1, 1)
 
         love.graphics.print(fps, x, 0)
+    end
+
+    if events.freezeframe_duration > 0 then
+        --R add some like white transparent thing here lol
     end
 
     if quitting and not paused then

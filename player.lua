@@ -66,6 +66,7 @@ local Player = {
         dead = false,
     },
     hit_this_swing = false,
+    parried_this_swing = false,
     iframe_timer = 0,
     knockback_velx = 0,
     knockback_vely = 0,
@@ -187,17 +188,33 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
             targets[i].punch_animation.current_frame >= 5 and targets[i].punch_animation.current_frame <= 7 and
             utils.check_collision(self.punch_hurtbox, targets[i].punch_hurtbox) then
 
-                self.punch_hurtbox.active = false
-                targets[i].punch_hurtbox.active = false
-                local angle = math.atan2(targets[i].position.y - self.position.y, targets[i].position.x - self.position.x)
-                local force = -(targets[i].stats.knockback * 0.8 / self.stats.weight)
-                self.knockback_velx = math.cos(angle) * force
-                self.knockback_vely = math.sin(angle) * force
+                if not self.parried_this_swing then
+                    self.parried_this_swing = true
 
-                angle = math.atan2(self.position.y - targets[i].position.y, self.position.x - targets[i].position.x)
-                force = -(self.stats.knockback * 1.2 / targets[i].stats.weight)
-                targets[i].knockback_velx = math.cos(angle) * force
-                targets[i].knockback_vely = math.sin(angle) * force
+                    self.punch_hurtbox.active = false
+                    targets[i].punch_hurtbox.active = false
+
+                    consts.PARRY_SOUND:stop()
+                    consts.PARRY_SOUND:play()
+                    
+                    events.freezeframe_duration = 0.15 
+                    if set.screenshake_allowed then
+                        events.screenshake = true
+                        events.screenshake_delay = 0.4
+                        events.screenshake_duration = 0.2
+                        events.screenshake_magnitude = 8.0
+                    end
+
+                    local angle = math.atan2(targets[i].position.y - self.position.y, targets[i].position.x - self.position.x)
+                    local force = -(targets[i].stats.knockback * 0.8 / self.stats.weight)
+                    self.knockback_velx = math.cos(angle) * force
+                    self.knockback_vely = math.sin(angle) * force
+
+                    angle = math.atan2(self.position.y - targets[i].position.y, self.position.x - targets[i].position.x)
+                    force = -(self.stats.knockback * 1.2 / targets[i].stats.weight)
+                    targets[i].knockback_velx = math.cos(angle) * force
+                    targets[i].knockback_vely = math.sin(angle) * force
+                end
             end
             if not self.hit_this_swing and self.iframe_timer <= 0 and utils.check_collision(self.hitbox, targets[i].punch_hurtbox) then
                 self.hit_this_swing = true
@@ -229,8 +246,8 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
     if math.abs(self.knockback_velx or 0) > 0.1 or math.abs(self.knockback_vely or 0) > 0.1 then
         self.position.x = self.position.x + self.knockback_velx * dt
         self.position.y = self.position.y + self.knockback_vely * dt
-        self.knockback_velx = self.knockback_velx * (1 - 7 * dt)
-        self.knockback_vely = self.knockback_vely * (1 - 7 * dt)
+        self.knockback_velx = utils.lerp(self.knockback_velx, 0, 7, dt)
+        self.knockback_vely = utils.lerp(self.knockback_vely, 0, 7, dt)
     end
 
     if self.stats.stun_duration > 0 then
@@ -258,7 +275,7 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
     self.position.x = self.hitbox.x
     self.position.y = self.hitbox.y
 
-    for i = 1, #walk_sound_table do
+    for i = #walk_sound_table, 1, -1 do
         if walk_sound_timer <= 0 then
             walk_sound_table[i]:setPitch((love.math.random(50, 100) / 100) * slow_down * speed / DEFAULT_SPEED)
             walk_sound_table[i]:play()
@@ -282,6 +299,7 @@ end
 
 function Player:punch()
     if not self.states.punch and self.stats.stun_duration <= 0 then
+        self.parried_this_swing = false
         self.states.punch = true
         self.animation = punch_animation
         punch_animation.current_frame = 1

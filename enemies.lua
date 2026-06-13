@@ -249,8 +249,8 @@ function Main.Enemy:update(dt, target, slow_down, tilemap, enemy_table, weapon_t
         if math.abs(self.knockback_velx) > 0.1 or math.abs(self.knockback_vely) > 0.1 then
             self.position.x = self.position.x + self.knockback_velx * dt
             self.position.y = self.position.y + self.knockback_vely * dt
-            self.knockback_velx = self.knockback_velx * (1 - 7 * dt)
-            self.knockback_vely = self.knockback_vely * (1 - 7 * dt)
+            self.knockback_velx = utils.lerp(self.knockback_velx, 0, 7, dt)
+            self.knockback_vely = utils.lerp(self.knockback_vely, 0, 7, dt)
         end
 
         if self.states.fall then
