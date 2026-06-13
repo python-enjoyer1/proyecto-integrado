@@ -43,9 +43,9 @@ local Player = {
         crit_chance = 1, --R You did mention something about adding critical hits to the game didn't you? -- No, but it's a good idea.
         knockback = 400,
         stagger = 25,
-        souls = 30, --R In seconds perhaps?
-        soul_gain = 4, -- We could possibly add some randomness.
-        soul_limit = 60,
+        souls = 15, --R In seconds perhaps?
+        soul_gain = 1, -- We could possibly add some randomness. --R extra soul gain
+        soul_limit = 25,
         essence = 0, -- Money.
         essence_gain = 5, -- Add some randomness.
         essence_limit = 100,
@@ -55,7 +55,7 @@ local Player = {
         ammo_boost = 1, -- How much your ammo is multiplied by. By default it's nothing (1), but the Reichmann Relic changes it to 2, duplicating ammo.
         stun_duration = 0,
         stun_reduction = 0,
-        stability = 300,
+        stability = 30,
         recovery_speed = 0.5 -- How much faster you get up while spamming space.
     },
     states = {
@@ -206,12 +206,12 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
                     end
 
                     local angle = math.atan2(targets[i].position.y - self.position.y, targets[i].position.x - self.position.x)
-                    local force = -(targets[i].stats.knockback * 0.8 / self.stats.weight)
+                    local force = -(targets[i].stats.knockback * 1.1 / self.stats.weight)
                     self.knockback_velx = math.cos(angle) * force
                     self.knockback_vely = math.sin(angle) * force
 
                     angle = math.atan2(self.position.y - targets[i].position.y, self.position.x - targets[i].position.x)
-                    force = -(self.stats.knockback * 1.2 / targets[i].stats.weight)
+                    force = -(self.stats.knockback * 1.4 / targets[i].stats.weight)
                     targets[i].knockback_velx = math.cos(angle) * force
                     targets[i].knockback_vely = math.sin(angle) * force
                 end
