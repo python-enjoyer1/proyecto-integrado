@@ -287,7 +287,9 @@ function love.draw()
     end
 
     if events.freezeframe_duration > 0 then
-        --R add some like white transparent thing here lol
+        love.graphics.setColor(1, 1, 1, .3)
+        love.graphics.rectangle("fill", 0, 0, consts.RENDER_WIDTH, consts.RENDER_HEIGHT)
+        love.graphics.setColor(1, 1, 1)
     end
 
     if quitting and not paused then
