@@ -38,7 +38,7 @@ local Player = {
     stats = {
         speed = DEFAULT_SPEED,
         friction = 1, --R Floor friction
-        attack_damage = 40, --R We should prolly replace this with "dmg bonus" since stuff will have predetermined dmg
+        attack_damage = 4, --R We should prolly replace this with "dmg bonus" since stuff will have predetermined dmg
         attack_speed = 5,
         crit_chance = 1, --R You did mention something about adding critical hits to the game didn't you? -- No, but it's a good idea.
         knockback = 400,
@@ -73,10 +73,11 @@ local Player = {
     animation = walk_animation,
     hitbox = {x = 320, y = 180, width = consts.CHARACTER_SIZE / 2, height = consts.CHARACTER_SIZE / 2, types = {"hitbox", "playercollisionbox"}},
     punch_hurtbox = {x = 0, y = 0, width = 20, height = 20, types = {"hurtbox"}, active = false},
+    held_weapon = nil, --R will be the current weapon held, if none then nil
     render = true
 }
 
-function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_down, tilemap)
+function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_down, tilemap, weapon_table)
     self.targets = targets
 
     local speed = self.stats.speed * slow_down
@@ -91,6 +92,11 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
     walk_animation.speed = 55.0 / (speed * 5)
 
     local movement_vector = utils.Vector:new()
+
+    self.stats.souls = self.stats.souls - dt * slow_down
+    if self.stats.souls <= 0 then
+        self.states.dead = true
+    end
 
     if self.stats.stun_duration <= 0 then
         if love.keyboard.isDown("w") then
@@ -290,7 +296,14 @@ function Player:mousepressed(button)
     end
 
     if button == 2 then
-        
+        if not self.held_weapon then
+            for i=1,#weapon_table do
+                if weapon_table[i].mouse_on then
+                    self.held_weapon = weapon_table[i]
+                    weapon_table[i].render = false
+                end
+            end
+        end
     end
 end
 

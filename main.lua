@@ -201,7 +201,7 @@ function love.update(dt)
             enemy_table[item]:update(dt, player, slow_down, tilemap, enemy_table)
         end
 
-        player:update(dt, scale_x, scale_y, global_offset_x, global_offset_y, enemy_table, slow_down, tilemap)
+        player:update(dt, scale_x, scale_y, global_offset_x, global_offset_y, enemy_table, slow_down, tilemap, weapon_table)
 
         -- Enemy management.
         for i = #enemy_table, 1, -1 do
@@ -225,6 +225,7 @@ function love.update(dt)
     soul_bar:update(dt)
     soul_bar_frame:update(dt)
     cursor:update(dt)
+    print(scale_x)
 end
 
 function love.draw()
@@ -263,13 +264,14 @@ function love.draw()
 
     -- HUD/GUI goes here.
     soul_bar_bg:draw(65, 20)
-    soul_bar:draw(65, 20, 0, 1, set.shading, 0, 4)
+    love.graphics.setScissor(9 * scale_x, 4 * scale_y , 35 * player.stats.souls / player.stats.soul_limit * scale_x, 32 * scale_y)
+    soul_bar:draw(65, 20, 0, 1, set.shading, 0, 4) --R shit above is being held up by hopes and prayers
+    love.graphics.setScissor()
     soul_bar_frame:draw(65, 20)
 
     if set.show_fps and not paused then -- Unholy math here.
         local length = #tostring(fps)
         local x = (1.0 / length) * (consts.RENDER_WIDTH * length * 0.95) + (3 - length) * 7
-
         love.graphics.setColor(0, 0, 0, 0.5)
         love.graphics.rectangle("fill", x - length, 1, length * 9, 12, 3, 3)
         love.graphics.setColor(1, 1, 1)

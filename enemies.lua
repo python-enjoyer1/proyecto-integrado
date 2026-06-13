@@ -79,7 +79,7 @@ function Main.Enemy:new(o)
     return o
 end --R Main.Enemy is shared so i shoved it in here instead
 
-function Main.Enemy:update(dt, target, slow_down, tilemap, enemy_table)
+function Main.Enemy:update(dt, target, slow_down, tilemap, enemy_table, weapon_table)
     if not self.states.dead then
         local speed = self.stats.speed * slow_down
         self.punch_animation.speed = (self.cooldowns.punch / 10) / slow_down
@@ -211,15 +211,6 @@ function Main.Enemy:update(dt, target, slow_down, tilemap, enemy_table)
                         if self.stats.hp <= 0 then
                             self.states.dead = true
                         end
-
-                        if self.states.dead then
-                            parts.add("burst", self.position.x, self.position.y)
-                            if set.screenshake_allowed then
-                                events.screenshake = true
-                                events.screenshake_duration = 0.3
-                                events.screenshake_magnitude = 10.0
-                            end
-                        end
                         self.hit_flag = true
                     else
                         self.hit_this_swing = true
@@ -243,15 +234,6 @@ function Main.Enemy:update(dt, target, slow_down, tilemap, enemy_table)
                         end
 
                         parts.add("blood", self.position.x, self.position.y)
-
-                        if self.states.dead then
-                            parts.add("burst", self.position.x, self.position.y)
-                            if set.screenshake_allowed then
-                                events.screenshake = true
-                                events.screenshake_duration = 0.3
-                                events.screenshake_magnitude = 10.0
-                            end
-                        end
                         self.hit_flag = true
                     end
                 else
@@ -313,6 +295,13 @@ function Main.Enemy:update(dt, target, slow_down, tilemap, enemy_table)
         self.animation = self.death_animation
         if self.animation.finished and self.render then
             self.render = false
+            parts.add("burst", self.position.x, self.position.y)
+            if set.screenshake_allowed then
+                events.screenshake = true
+                events.screenshake_duration = 0.3
+                events.screenshake_magnitude = 10.0
+            end
+            target.stats.souls = math.min(target.stats.souls + self.stats.soul_amount, target.stats.soul_limit)
         else
             self.animation:update(dt)
         end
