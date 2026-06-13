@@ -45,6 +45,14 @@ Main.MISS_SOUND = love.audio.newSource(Main.SOUND_PATH .. "punch_miss.wav", "sta
 Main.MISS_SOUND:setVolume(set.sfx_volume)
 Main.MISS_SOUND:setEffect("reverb")
 
+Main.PARRY_SOUND = love.audio.newSource(Main.SOUND_PATH .. "parry.mp3", "static")
+Main.PARRY_SOUND:setVolume(set.sfx_volume/2)
+Main.PARRY_SOUND:setEffect("reverb")
+
+Main.PARRY_END_SOUND = love.audio.newSource(Main.SOUND_PATH .. "parry_end.mp3", "static")
+Main.PARRY_SOUND:setVolume(set.sfx_volume/2)
+Main.PARRY_SOUND:setEffect("reverb")
+
 Main.MIN_ENEMY_SOUL = 5
 Main.MAX_ENEMY_SOUL = 20
 Main.MIN_ENEMY_ESSENCE = 5

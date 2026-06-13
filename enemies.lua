@@ -79,7 +79,7 @@ function Main.Enemy:new(o)
     return o
 end --R Main.Enemy is shared so i shoved it in here instead
 
-function Main.Enemy:update(dt, target, slow_down, tilemap, enemy_table)
+function Main.Enemy:update(dt, target, slow_down, tilemap, enemy_table, weapon_table)
     if not self.states.dead then
         local speed = self.stats.speed * slow_down
         self.punch_animation.speed = (self.cooldowns.punch / 10) / slow_down
@@ -211,15 +211,6 @@ function Main.Enemy:update(dt, target, slow_down, tilemap, enemy_table)
                         if self.stats.hp <= 0 then
                             self.states.dead = true
                         end
-
-                        if self.states.dead then
-                            parts.add("burst", self.position.x, self.position.y)
-                            if set.screenshake_allowed then
-                                events.screenshake = true
-                                events.screenshake_duration = 0.3
-                                events.screenshake_magnitude = 10.0
-                            end
-                        end
                         self.hit_flag = true
                     else
                         self.hit_this_swing = true
@@ -243,15 +234,6 @@ function Main.Enemy:update(dt, target, slow_down, tilemap, enemy_table)
                         end
 
                         parts.add("blood", self.position.x, self.position.y)
-
-                        if self.states.dead then
-                            parts.add("burst", self.position.x, self.position.y)
-                            if set.screenshake_allowed then
-                                events.screenshake = true
-                                events.screenshake_duration = 0.3
-                                events.screenshake_magnitude = 10.0
-                            end
-                        end
                         self.hit_flag = true
                     end
                 else
@@ -267,14 +249,8 @@ function Main.Enemy:update(dt, target, slow_down, tilemap, enemy_table)
         if math.abs(self.knockback_velx) > 0.1 or math.abs(self.knockback_vely) > 0.1 then
             self.position.x = self.position.x + self.knockback_velx * dt
             self.position.y = self.position.y + self.knockback_vely * dt
-            self.knockback_velx = self.knockback_velx * (1 - 7 * dt)
-            self.knockback_vely = self.knockback_vely * (1 - 7 * dt)
-        end
-
-        if self.states.fall then
-            self.hitbox.types = {"hitbox"}
-        else
-            self.hitbox.types = {"hitbox", "enemycollisionbox"}
+            self.knockback_velx = utils.lerp(self.knockback_velx, 0, 7, dt)
+            self.knockback_vely = utils.lerp(self.knockback_vely, 0, 7, dt)
         end
 
         self.hitbox.x = self.position.x
@@ -283,10 +259,13 @@ function Main.Enemy:update(dt, target, slow_down, tilemap, enemy_table)
         for i = 1, #tilemap.walls do
             utils.check_collision(self.hitbox, tilemap.walls[i])
         end
-        
-        for i = 1, #enemy_table do
-            if enemy_table[i] ~= self then
-                utils.check_collision(self.hitbox, enemy_table[i].hitbox)
+
+        if self.states.fall then
+        else
+            for i = 1, #enemy_table do
+                if enemy_table[i] ~= self then
+                    utils.check_collision(self.hitbox, enemy_table[i].hitbox)
+                end
             end
         end
 
@@ -313,6 +292,13 @@ function Main.Enemy:update(dt, target, slow_down, tilemap, enemy_table)
         self.animation = self.death_animation
         if self.animation.finished and self.render then
             self.render = false
+            parts.add("burst", self.position.x, self.position.y)
+            if set.screenshake_allowed then
+                events.screenshake = true
+                events.screenshake_duration = 0.1
+                events.screenshake_magnitude = 7.0
+            end
+            target.stats.souls = math.min(target.stats.souls + self.stats.soul_amount, target.stats.soul_limit)
         else
             self.animation:update(dt)
         end

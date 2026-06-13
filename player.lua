@@ -38,14 +38,14 @@ local Player = {
     stats = {
         speed = DEFAULT_SPEED,
         friction = 1, --R Floor friction
-        attack_damage = 40, --R We should prolly replace this with "dmg bonus" since stuff will have predetermined dmg
+        attack_damage = 4, --R We should prolly replace this with "dmg bonus" since stuff will have predetermined dmg
         attack_speed = 5,
         crit_chance = 1, --R You did mention something about adding critical hits to the game didn't you? -- No, but it's a good idea.
         knockback = 400,
         stagger = 25,
-        souls = 30, --R In seconds perhaps?
-        soul_gain = 4, -- We could possibly add some randomness.
-        soul_limit = 60,
+        souls = 15, --R In seconds perhaps?
+        soul_gain = 1, -- We could possibly add some randomness. --R extra soul gain
+        soul_limit = 25,
         essence = 0, -- Money.
         essence_gain = 5, -- Add some randomness.
         essence_limit = 100,
@@ -55,7 +55,7 @@ local Player = {
         ammo_boost = 1, -- How much your ammo is multiplied by. By default it's nothing (1), but the Reichmann Relic changes it to 2, duplicating ammo.
         stun_duration = 0,
         stun_reduction = 0,
-        stability = 300,
+        stability = 30,
         recovery_speed = 0.5 -- How much faster you get up while spamming space.
     },
     states = {
@@ -66,6 +66,7 @@ local Player = {
         dead = false,
     },
     hit_this_swing = false,
+    parried_this_swing = false,
     iframe_timer = 0,
     knockback_velx = 0,
     knockback_vely = 0,
@@ -73,10 +74,11 @@ local Player = {
     animation = walk_animation,
     hitbox = {x = 320, y = 180, width = consts.CHARACTER_SIZE / 2, height = consts.CHARACTER_SIZE / 2, types = {"hitbox", "playercollisionbox"}},
     punch_hurtbox = {x = 0, y = 0, width = 20, height = 20, types = {"hurtbox"}, active = false},
+    held_weapon = nil, --R will be the current weapon held, if none then nil
     render = true
 }
 
-function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_down, tilemap)
+function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_down, tilemap, weapon_table)
     self.targets = targets
 
     local speed = self.stats.speed * slow_down
@@ -91,6 +93,11 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
     walk_animation.speed = 55.0 / (speed * 5)
 
     local movement_vector = utils.Vector:new()
+
+    self.stats.souls = self.stats.souls - dt * slow_down
+    if self.stats.souls <= 0 then
+        self.states.dead = true
+    end
 
     if self.stats.stun_duration <= 0 then
         if love.keyboard.isDown("w") then
@@ -181,17 +188,33 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
             targets[i].punch_animation.current_frame >= 5 and targets[i].punch_animation.current_frame <= 7 and
             utils.check_collision(self.punch_hurtbox, targets[i].punch_hurtbox) then
 
-                self.punch_hurtbox.active = false
-                targets[i].punch_hurtbox.active = false
-                local angle = math.atan2(targets[i].position.y - self.position.y, targets[i].position.x - self.position.x)
-                local force = -(targets[i].stats.knockback * 0.8 / self.stats.weight)
-                self.knockback_velx = math.cos(angle) * force
-                self.knockback_vely = math.sin(angle) * force
+                if not self.parried_this_swing then
+                    self.parried_this_swing = true
 
-                angle = math.atan2(self.position.y - targets[i].position.y, self.position.x - targets[i].position.x)
-                force = -(self.stats.knockback * 1.2 / targets[i].stats.weight)
-                targets[i].knockback_velx = math.cos(angle) * force
-                targets[i].knockback_vely = math.sin(angle) * force
+                    self.punch_hurtbox.active = false
+                    targets[i].punch_hurtbox.active = false
+
+                    consts.PARRY_SOUND:stop()
+                    consts.PARRY_SOUND:play()
+                    
+                    events.freezeframe_duration = 0.15
+                    if set.screenshake_allowed then
+                        events.screenshake = true
+                        events.screenshake_delay = 0.15
+                        events.screenshake_duration = 0.2
+                        events.screenshake_magnitude = 8.0
+                    end
+
+                    local angle = math.atan2(targets[i].position.y - self.position.y, targets[i].position.x - self.position.x)
+                    local force = -(targets[i].stats.knockback * 1.1 / self.stats.weight)
+                    self.knockback_velx = math.cos(angle) * force
+                    self.knockback_vely = math.sin(angle) * force
+
+                    angle = math.atan2(self.position.y - targets[i].position.y, self.position.x - targets[i].position.x)
+                    force = -(self.stats.knockback * 1.4 / targets[i].stats.weight)
+                    targets[i].knockback_velx = math.cos(angle) * force
+                    targets[i].knockback_vely = math.sin(angle) * force
+                end
             end
             if not self.hit_this_swing and self.iframe_timer <= 0 and utils.check_collision(self.hitbox, targets[i].punch_hurtbox) then
                 self.hit_this_swing = true
@@ -223,8 +246,8 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
     if math.abs(self.knockback_velx or 0) > 0.1 or math.abs(self.knockback_vely or 0) > 0.1 then
         self.position.x = self.position.x + self.knockback_velx * dt
         self.position.y = self.position.y + self.knockback_vely * dt
-        self.knockback_velx = self.knockback_velx * (1 - 7 * dt)
-        self.knockback_vely = self.knockback_vely * (1 - 7 * dt)
+        self.knockback_velx = utils.lerp(self.knockback_velx, 0, 7, dt)
+        self.knockback_vely = utils.lerp(self.knockback_vely, 0, 7, dt)
     end
 
     if self.stats.stun_duration > 0 then
@@ -252,7 +275,7 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
     self.position.x = self.hitbox.x
     self.position.y = self.hitbox.y
 
-    for i = 1, #walk_sound_table do
+    for i = #walk_sound_table, 1, -1 do
         if walk_sound_timer <= 0 then
             walk_sound_table[i]:setPitch((love.math.random(50, 100) / 100) * slow_down * speed / DEFAULT_SPEED)
             walk_sound_table[i]:play()
@@ -276,6 +299,7 @@ end
 
 function Player:punch()
     if not self.states.punch and self.stats.stun_duration <= 0 then
+        self.parried_this_swing = false
         self.states.punch = true
         self.animation = punch_animation
         punch_animation.current_frame = 1
@@ -290,7 +314,7 @@ function Player:mousepressed(button)
     end
 
     if button == 2 then
-        
+        --R ill figure this shit out later
     end
 end
 

@@ -120,7 +120,7 @@ function love.load()
     local map_w = tilemap.width * consts.TILE_SIZE
     local map_h = tilemap.height * consts.TILE_SIZE
 
-    for i = 1, 1 do
+    for i = 1, 6 do
         local x = love.math.random(consts.TILE_SIZE, map_w - consts.TILE_SIZE)
         local y = love.math.random(consts.TILE_SIZE, map_h - consts.TILE_SIZE)
 
@@ -156,6 +156,24 @@ function love.update(dt)
         dt = 0
     end
 
+    if events.screenshake_delay > 0 then
+        events.screenshake_delay = events.screenshake_delay - dt
+
+        if events.screenshake_delay <= 0 then
+            consts.PARRY_END_SOUND:stop()
+            consts.PARRY_END_SOUND:play()
+        end
+    elseif events.screenshake and events.screenshake_duration > 0 then
+        events.screenshake_duration = events.screenshake_duration - dt
+    elseif events.screenshake_duration <= 0 then
+        events.screenshake = false
+    end
+
+    if events.freezeframe_duration > 0 then
+        events.freezeframe_duration = events.freezeframe_duration - dt
+        dt = 0
+    end
+
     if love.keyboard.isDown(set.keybinds.exit) and quit_timer > 0 and not paused then
         quit_timer = quit_timer - dt
         quitting = true
@@ -173,12 +191,6 @@ function love.update(dt)
 
     camera_movement = player.stats.speed / 25 -- So that when the player gets fast it stays on the screen.
 
-    if events.screenshake and events.screenshake_duration > 0 then
-        events.screenshake_duration = events.screenshake_duration - dt
-    elseif events.screenshake_duration <= 0 then
-        events.screenshake = false
-    end
-
     local target_x = -player.position.x + consts.RENDER_WIDTH / 2 - (player.velocity.x / player.stats.speed) * look_ahead
     local target_y = -player.position.y + consts.RENDER_HEIGHT / 2 - (player.velocity.y / player.stats.speed) * look_ahead
 
@@ -193,24 +205,25 @@ function love.update(dt)
     cursor_selection_box.y = mouse_y - global_offset_y
 
     if not paused and love.window.hasFocus() then
-        for weapon = 1, #weapon_table do
-            weapon_table[weapon]:update(dt, cursor_selection_box)
-        end
+        if events.freezeframe_duration <= 0 then
+            for weapon = 1, #weapon_table do
+                weapon_table[weapon]:update(dt, cursor_selection_box)
+            end
 
-        for item = 1, #enemy_table do
-            enemy_table[item]:update(dt, player, slow_down, tilemap, enemy_table)
-        end
+            for item = 1, #enemy_table do
+                enemy_table[item]:update(dt, player, slow_down, tilemap, enemy_table)
+            end
 
-        player:update(dt, scale_x, scale_y, global_offset_x, global_offset_y, enemy_table, slow_down, tilemap)
+            player:update(dt, scale_x, scale_y, global_offset_x, global_offset_y, enemy_table, slow_down, tilemap, weapon_table)
 
-        -- Enemy management.
-        for i = #enemy_table, 1, -1 do
-            if not enemy_table[i].render then
-                table.remove(enemy_table, i)
+            for i = #enemy_table, 1, -1 do
+                if not enemy_table[i].render then
+                    table.remove(enemy_table, i)
+                end
             end
         end
 
-        parts.update()
+        parts.update() --R keeping ts outside cuz it'll prolly look awesome
     end
 
     -- Shaders.
@@ -239,7 +252,7 @@ function love.draw()
     love.graphics.push()
     love.graphics.translate(global_offset_x, global_offset_y)
 
-    if events.screenshake and not paused then
+    if events.screenshake and (events.screenshake_delay or 0) <= 0 and not paused then
         local dx = love.math.random(-events.screenshake_magnitude, events.screenshake_magnitude)
         local dy = love.math.random(-events.screenshake_magnitude, events.screenshake_magnitude)
         love.graphics.translate(dx, dy)
@@ -263,18 +276,25 @@ function love.draw()
 
     -- HUD/GUI goes here.
     soul_bar_bg:draw(65, 20)
-    soul_bar:draw(65, 20, 0, 1, set.shading, 0, 4)
+    love.graphics.setScissor(9 * scale_x, 4 * scale_y , 35 * player.stats.souls / player.stats.soul_limit * scale_x, 32 * scale_y)
+    soul_bar:draw(65, 20, 0, 1, set.shading, 0, 4) --R shit above is being held up by hopes and prayers
+    love.graphics.setScissor()
     soul_bar_frame:draw(65, 20)
 
     if set.show_fps and not paused then -- Unholy math here.
         local length = #tostring(fps)
         local x = (1.0 / length) * (consts.RENDER_WIDTH * length * 0.95) + (3 - length) * 7
-
         love.graphics.setColor(0, 0, 0, 0.5)
         love.graphics.rectangle("fill", x - length, 1, length * 9, 12, 3, 3)
         love.graphics.setColor(1, 1, 1)
 
         love.graphics.print(fps, x, 0)
+    end
+
+    if events.freezeframe_duration > 0 then
+        love.graphics.setColor(1, 1, 1, .3)
+        love.graphics.rectangle("fill", 0, 0, consts.RENDER_WIDTH, consts.RENDER_HEIGHT)
+        love.graphics.setColor(1, 1, 1)
     end
 
     if quitting and not paused then
