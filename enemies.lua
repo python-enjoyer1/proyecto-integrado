@@ -253,22 +253,19 @@ function Main.Enemy:update(dt, target, slow_down, tilemap, enemy_table, weapon_t
             self.knockback_vely = utils.lerp(self.knockback_vely, 0, 7, dt)
         end
 
-        if self.states.fall then
-            self.hitbox.types = {"hitbox"}
-        else
-            self.hitbox.types = {"hitbox", "enemycollisionbox"}
-        end
-
         self.hitbox.x = self.position.x
         self.hitbox.y = self.position.y
 
         for i = 1, #tilemap.walls do
             utils.check_collision(self.hitbox, tilemap.walls[i])
         end
-        
-        for i = 1, #enemy_table do
-            if enemy_table[i] ~= self then
-                utils.check_collision(self.hitbox, enemy_table[i].hitbox)
+
+        if self.states.fall then
+        else
+            for i = 1, #enemy_table do
+                if enemy_table[i] ~= self then
+                    utils.check_collision(self.hitbox, enemy_table[i].hitbox)
+                end
             end
         end
 
@@ -298,8 +295,8 @@ function Main.Enemy:update(dt, target, slow_down, tilemap, enemy_table, weapon_t
             parts.add("burst", self.position.x, self.position.y)
             if set.screenshake_allowed then
                 events.screenshake = true
-                events.screenshake_duration = 0.3
-                events.screenshake_magnitude = 10.0
+                events.screenshake_duration = 0.1
+                events.screenshake_magnitude = 7.0
             end
             target.stats.souls = math.min(target.stats.souls + self.stats.soul_amount, target.stats.soul_limit)
         else

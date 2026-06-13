@@ -200,7 +200,7 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
                     events.freezeframe_duration = 0.15 
                     if set.screenshake_allowed then
                         events.screenshake = true
-                        events.screenshake_delay = 0.4
+                        events.screenshake_delay = 0.15
                         events.screenshake_duration = 0.2
                         events.screenshake_magnitude = 8.0
                     end
