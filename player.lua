@@ -296,14 +296,7 @@ function Player:mousepressed(button)
     end
 
     if button == 2 then
-        if not self.held_weapon then
-            for i=1,#weapon_table do
-                if weapon_table[i].mouse_on then
-                    self.held_weapon = weapon_table[i]
-                    weapon_table[i].render = false
-                end
-            end
-        end
+        --R ill figure this shit out later
     end
 end
 
