@@ -30,13 +30,24 @@ function Main.HeavyGun:new(o)
     o.mouse_on = false
     o.whiteout_shader = love.graphics.newShader("stuff/shaders/whiteout.fs")
     o.hold = false
+    o.distance = 100
+    o.max_distance = 45
 
     return o
 end
 
-function Main.HeavyGun:update(dt, mouse_selection_box)
+function Main.HeavyGun:update(dt, mouse_selection_box, player)
+    self.player = player
+    self.distance = math.sqrt((player.position.x - self.position.x) ^ 2 + (player.position.y - self.position.y) ^ 2)
+    self.interact_box.x = self.position.x
+    self.interact_box.y = self.position.y
+
+
     if self.hold then
+        self.position.x = self.player.position.x
+        self.position.y = self.player.position.y
         self.sprite = self.hold_sprite
+        player.holding = {true, "heavy_gun"}
     else
         self.mouse_on = utils.check_collision(mouse_selection_box, self.interact_box)
         self.sprite = self.floor_sprite
@@ -50,12 +61,12 @@ function Main.HeavyGun:draw(offset_x, offset_y)
             if not self.hold then
                 love.graphics.draw(self.sprite, self.position.x, self.position.y + 2.0, math.rad(self.rotation), 0.5, 0.5, self.image_dimensions[1] / 2, self.image_dimensions[2] / 2)
             else
-                love.graphics.draw(self.sprite, self.position.x, self.position.y + 2.0)
+                love.graphics.draw(self.sprite, self.player.position.x, self.player.position.y + 2.0, self.player.angle)
             end
             love.graphics.setColor(1, 1, 1)
         end
 
-        if self.mouse_on and not self.hold then
+        if (self.mouse_on or self.distance <= self.max_distance) and not self.hold then
             local offset = 1
             love.graphics.setShader(self.whiteout_shader)
             love.graphics.draw(self.sprite, self.position.x + offset, self.position.y, math.rad(self.rotation), 0.5, 0.5, self.image_dimensions[1] / 2, self.image_dimensions[2] / 2)
@@ -68,7 +79,7 @@ function Main.HeavyGun:draw(offset_x, offset_y)
         if not self.hold then
             love.graphics.draw(self.sprite, self.position.x, self.position.y, math.rad(self.rotation), 0.5, 0.5, self.image_dimensions[1] / 2, self.image_dimensions[2] / 2)
         else
-            love.graphics.draw(self.sprite, self.position.x, self.position.y)
+            love.graphics.draw(self.sprite, self.player.position.x, self.player.position.y, self.player.angle)
         end
     end
     if set.debug then
@@ -77,7 +88,13 @@ function Main.HeavyGun:draw(offset_x, offset_y)
 end
 
 function Main.HeavyGun:mousepressed(button)
-    if self.mouse_on and button == 2 then
+    if button == 2 and self.mouse_on then
+        self.hold = true
+    end
+end
+
+function Main.HeavyGun:keypressed(key)
+    if key == set.keybinds.pick_up and self.distance <= self.max_distance then
         self.hold = true
     end
 end

@@ -13,7 +13,8 @@ Main.vsync = false
 Main.debug = true
 Main.keybinds = {
     exit = "f1",
-    pause = "escape"
+    pause = "escape",
+    pick_up = "f"
 }
 
 return Main

@@ -11,7 +11,10 @@ local punch_animation = utils.Animation:new({speed = 0.04, looping = false})
 punch_animation:manage_spritesheet(consts.CONSUMER_PATH .. "consumer_punch.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 10, 3)
 
 local fall_animation = utils.Animation:new({speed = 0.1, looping = true})
-fall_animation:manage_spritesheet(consts.CONSUMER_PATH .. "consumer_fall.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 1, 1) --R placeholder
+fall_animation:manage_spritesheet(consts.CONSUMER_PATH .. "consumer_fall.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 1, 1) --R placeholderlocal fall_animation = utils.Animation:new({speed = 0.1, looping = true})
+
+local heavy_gun_animation = utils.Animation:new({speed = 0.1, looping = false})
+heavy_gun_animation:manage_spritesheet(consts.CONSUMER_PATH .. "consumer_heavy_gun.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 5, 2) --R placeholderlocal fall_animation = utils.Animation:new({speed = 0.1, looping = true})
 
 local mouse_x, mouse_y
 
@@ -74,11 +77,12 @@ local Player = {
     animation = walk_animation,
     hitbox = {x = 320, y = 180, width = consts.CHARACTER_SIZE / 2, height = consts.CHARACTER_SIZE / 2, types = {"hitbox", "playercollisionbox"}},
     punch_hurtbox = {x = 0, y = 0, width = 20, height = 20, types = {"hurtbox"}, active = false},
-    held_weapon = nil, --R will be the current weapon held, if none then nil
+    holding = {false, nil},
     render = true
 }
 
 function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_down, tilemap, weapon_table)
+    self.weapon_table = weapon_table
     self.targets = targets
 
     local speed = self.stats.speed * slow_down
@@ -92,9 +96,16 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
 
     walk_animation.speed = 55.0 / (speed * 5)
 
+    if self.holding[1] then
+        if self.holding[2] == "heavy_gun" then
+            self.animation = heavy_gun_animation
+        end
+    end
+
     local movement_vector = utils.Vector:new()
 
     self.stats.souls = self.stats.souls - dt * slow_down
+    self.stats.souls = math.max(self.stats.souls, 0)
     if self.stats.souls <= 0 then
         self.states.dead = true
     end
@@ -133,9 +144,9 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
         end
 
         self.states.idle = false
-        if self.states.punch == true then
+        if self.states.punch == true and not self.holding[1] then
             self.animation = punch_animation
-        else
+        elseif not self.holding[1] then
             self.animation = walk_animation
         end
     end
@@ -196,7 +207,7 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
 
                     consts.PARRY_SOUND:stop()
                     consts.PARRY_SOUND:play()
-                    
+
                     events.freezeframe_duration = 0.15
                     if set.screenshake_allowed then
                         events.screenshake = true
@@ -253,9 +264,13 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
     if self.stats.stun_duration > 0 then
         self.stats.stun_duration = self.stats.stun_duration - (dt * slow_down)
         self.animation = fall_animation
+        for i = 1, #self.weapon_table do
+            self.weapon_table[i].hold = false
+            self.holding = {false, nil}
+        end
         self.punch_hurtbox.active = false
     else
-        if not self.states.punch then
+        if not self.states.punch and not self.holding[1] then
             self.animation = walk_animation
         end
         self.states.fall = false
@@ -298,7 +313,7 @@ function Player:draw()
 end
 
 function Player:punch()
-    if not self.states.punch and self.stats.stun_duration <= 0 then
+    if not self.states.punch and self.stats.stun_duration <= 0  and not self.holding[1] then
         self.parried_this_swing = false
         self.states.punch = true
         self.animation = punch_animation
@@ -311,10 +326,6 @@ end
 function Player:mousepressed(button)
     if button == 1 then
         self:punch()
-    end
-
-    if button == 2 then
-        --R ill figure this shit out later
     end
 end
 
