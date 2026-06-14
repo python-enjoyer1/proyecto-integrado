@@ -20,7 +20,7 @@ function Main.HeavyGun:new(o) --R we should js replace this with "Gun" we can ad
         projectile_speed = 300,
         damage = 3,
         weight = 1,
-        pierce = 0, --R pierces through enemies or walls perhaps
+        pierce = 1, --R pierces through enemies or walls perhaps
         bounces = 0, --R bounces on walls
         hold_fire = true --R click or hold 2 shoot
     }

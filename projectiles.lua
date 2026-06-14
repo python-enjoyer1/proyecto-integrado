@@ -36,7 +36,7 @@ function Main.update(dt, enemy_table)
             local enemy = enemy_table[j]
             if enemy.render and utils.check_collision(proj.hitbox, enemy.hitbox) then
                 local angle = math.atan2(enemy.position.y - proj.y, enemy.position.x - proj.x)
-                local force = 200 / enemy.stats.weight  -- tune this
+                local force = 200 / enemy.stats.weight  --R tune this pls
                 enemy.knockback_velx = math.cos(angle) * force
                 enemy.knockback_vely = math.sin(angle) * force
                 enemy.stats.stun_duration = 1
