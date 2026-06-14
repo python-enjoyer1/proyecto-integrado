@@ -9,6 +9,7 @@ local events = require("events")
 local set = require("settings")
 local parts = require("particles")
 local weapons = require("weapons")
+local titlescreen = require("titlescreen")
 
 local canvas
 
@@ -63,6 +64,9 @@ function love.load()
     quitting = false
 
     paused = false
+
+    titlescreen.show = false
+    titlescreen:init()
 
     seed = utils.generate_seed()
 
@@ -150,11 +154,105 @@ function love.load()
 end
 
 function love.update(dt)
-    if love.window.hasFocus() and not paused then
-        love.audio.setVolume(1.0)
+    if not titlescreen.show then
+        if love.window.hasFocus() and not paused then
+            love.audio.setVolume(1.0)
+        else
+            dt = 0
+        end
+
+        if events.screenshake_delay > 0 then
+            events.screenshake_delay = events.screenshake_delay - dt
+
+            if events.screenshake_delay <= 0 then
+                consts.PARRY_END_SOUND:stop()
+                consts.PARRY_END_SOUND:play()
+            end
+        elseif events.screenshake and events.screenshake_duration > 0 then
+            events.screenshake_duration = events.screenshake_duration - dt
+        elseif events.screenshake_duration <= 0 then
+            events.screenshake = false
+        end
+
+        if events.freezeframe_duration > 0 then
+            events.freezeframe_duration = events.freezeframe_duration - dt
+            dt = 0
+        end
+
+        if love.keyboard.isDown(set.keybinds.exit) and quit_timer > 0 and not paused then
+            quit_timer = quit_timer - dt
+            quitting = true
+        elseif love.keyboard.isDown(set.keybinds.exit) and quit_timer <= 0 then
+            love.event.quit()
+        end
+
+        love.window.setVSync(set.vsync)
+
+        fps = love.timer.getFPS()
+
+        if not paused then
+            time = love.timer.getTime() * slow_down
+        end
+
+        camera_movement = player.stats.speed / 25 -- So that when the player gets fast it stays on the screen.
+
+        local target_x = -player.position.x + consts.RENDER_WIDTH / 2 - (player.velocity.x / player.stats.speed) * look_ahead
+        local target_y = -player.position.y + consts.RENDER_HEIGHT / 2 - (player.velocity.y / player.stats.speed) * look_ahead
+
+        global_offset_x = utils.lerp(global_offset_x, target_x, camera_movement, dt)
+        global_offset_y = utils.lerp(global_offset_y, target_y, camera_movement, dt)
+
+        mouse_x, mouse_y = love.mouse.getPosition()
+        mouse_x = (mouse_x / scale_x)
+        mouse_y = (mouse_y / scale_y)
+
+        cursor_selection_box.x = mouse_x - global_offset_x
+        cursor_selection_box.y = mouse_y - global_offset_y
+
+        if not paused and love.window.hasFocus() then
+            if events.freezeframe_duration <= 0 then
+                for weapon = 1, #weapon_table do
+                    weapon_table[weapon]:update(dt, cursor_selection_box, player)
+                end
+
+                for item = 1, #enemy_table do
+                    enemy_table[item]:update(dt, player, slow_down, tilemap, enemy_table)
+                end
+
+                player:update(dt, scale_x, scale_y, global_offset_x, global_offset_y, enemy_table, slow_down, tilemap, weapon_table)
+
+                for i = #enemy_table, 1, -1 do
+                    if not enemy_table[i].render then
+                        table.remove(enemy_table, i)
+                    end
+                end
+            end
+
+            parts.update() --R keeping ts outside cuz it'll prolly look awesome
+        end
+
+        -- Shaders.
+        shaders.backgrounds[background_index]:send("resolution", {consts.RENDER_WIDTH, consts.RENDER_HEIGHT})
+        shaders.backgrounds[background_index]:send("time", time)
+
+        shaders.game_over:send("resolution", {consts.RENDER_WIDTH, consts.RENDER_HEIGHT})
+        shaders.game_over:send("time", time)
+
+        -- HUD/GUI goes here.
+        soul_bar_bg:update(dt)
+        soul_bar:update(dt)
+        soul_bar_frame:update(dt)
+        cursor:update(dt)
     else
-        dt = 0
+        titlescreen:update(dt)
     end
+
+    mouse_x, mouse_y = love.mouse.getPosition()
+    mouse_x = (mouse_x / scale_x)
+    mouse_y = (mouse_y / scale_y)
+
+    cursor_selection_box.x = mouse_x - global_offset_x
+    cursor_selection_box.y = mouse_y - global_offset_y
 
     if events.screenshake_delay > 0 then
         events.screenshake_delay = events.screenshake_delay - dt
@@ -173,71 +271,6 @@ function love.update(dt)
         events.freezeframe_duration = events.freezeframe_duration - dt
         dt = 0
     end
-
-    if love.keyboard.isDown(set.keybinds.exit) and quit_timer > 0 and not paused then
-        quit_timer = quit_timer - dt
-        quitting = true
-    elseif love.keyboard.isDown(set.keybinds.exit) and quit_timer <= 0 then
-        love.event.quit()
-    end
-
-    love.window.setVSync(set.vsync)
-
-    fps = love.timer.getFPS()
-
-    if not paused then
-        time = love.timer.getTime() * slow_down
-    end
-
-    camera_movement = player.stats.speed / 25 -- So that when the player gets fast it stays on the screen.
-
-    local target_x = -player.position.x + consts.RENDER_WIDTH / 2 - (player.velocity.x / player.stats.speed) * look_ahead
-    local target_y = -player.position.y + consts.RENDER_HEIGHT / 2 - (player.velocity.y / player.stats.speed) * look_ahead
-
-    global_offset_x = utils.lerp(global_offset_x, target_x, camera_movement, dt)
-    global_offset_y = utils.lerp(global_offset_y, target_y, camera_movement, dt)
-
-    mouse_x, mouse_y = love.mouse.getPosition()
-    mouse_x = (mouse_x / scale_x)
-    mouse_y = (mouse_y / scale_y)
-
-    cursor_selection_box.x = mouse_x - global_offset_x
-    cursor_selection_box.y = mouse_y - global_offset_y
-
-    if not paused and love.window.hasFocus() then
-        if events.freezeframe_duration <= 0 then
-            for weapon = 1, #weapon_table do
-                weapon_table[weapon]:update(dt, cursor_selection_box, player)
-            end
-
-            for item = 1, #enemy_table do
-                enemy_table[item]:update(dt, player, slow_down, tilemap, enemy_table)
-            end
-
-            player:update(dt, scale_x, scale_y, global_offset_x, global_offset_y, enemy_table, slow_down, tilemap, weapon_table)
-
-            for i = #enemy_table, 1, -1 do
-                if not enemy_table[i].render then
-                    table.remove(enemy_table, i)
-                end
-            end
-        end
-
-        parts.update() --R keeping ts outside cuz it'll prolly look awesome
-    end
-
-    -- Shaders.
-    shaders.backgrounds[background_index]:send("resolution", {consts.RENDER_WIDTH, consts.RENDER_HEIGHT})
-    shaders.backgrounds[background_index]:send("time", time)
-
-    shaders.game_over:send("resolution", {consts.RENDER_WIDTH, consts.RENDER_HEIGHT})
-    shaders.game_over:send("time", time)
-
-    -- HUD/GUI goes here.
-    soul_bar_bg:update(dt)
-    soul_bar:update(dt)
-    soul_bar_frame:update(dt)
-    cursor:update(dt)
 end
 
 function love.draw()
@@ -245,12 +278,100 @@ function love.draw()
     love.graphics.setCanvas(canvas)
     love.graphics.clear()
 
-    love.graphics.setShader(shaders.backgrounds[background_index])
-    love.graphics.rectangle("fill", 0, 0, consts.RENDER_WIDTH, consts.RENDER_HEIGHT)
-    love.graphics.setShader()
+    if not titlescreen.show then
+        love.graphics.setShader(shaders.backgrounds[background_index])
+        love.graphics.rectangle("fill", 0, 0, consts.RENDER_WIDTH, consts.RENDER_HEIGHT)
+        love.graphics.setShader()
 
-    love.graphics.push()
-    love.graphics.translate(global_offset_x, global_offset_y)
+        love.graphics.push()
+        love.graphics.translate(global_offset_x, global_offset_y)
+
+        if events.screenshake and (events.screenshake_delay or 0) <= 0 and not paused then
+            local dx = love.math.random(-events.screenshake_magnitude, events.screenshake_magnitude)
+            local dy = love.math.random(-events.screenshake_magnitude, events.screenshake_magnitude)
+            love.graphics.translate(dx, dy)
+        end
+
+        tilemap:draw(global_offset_x, global_offset_y)
+
+        parts.draw(global_offset_x, global_offset_y)
+
+        for weapon = 1, #weapon_table do
+            if not weapon_table[weapon].hold then
+                weapon_table[weapon]:draw(global_offset_x, global_offset_y)
+            else
+                break
+            end
+        end
+
+        for i = 1, #enemy_table do
+            enemy_table[i]:draw()
+        end
+
+        player:draw()
+
+        for weapon = 1, #weapon_table do
+            if weapon_table[weapon].hold then
+                weapon_table[weapon]:draw(global_offset_x, global_offset_y)
+            else
+                break
+            end
+        end
+
+        love.graphics.pop()
+
+        -- HUD/GUI goes here.
+        soul_bar_bg:draw(65, 20)
+        love.graphics.setScissor(9 * scale_x, 4 * scale_y, 35 * player.stats.souls / player.stats.soul_limit * scale_x, 32 * scale_y)
+        soul_bar:draw(65, 20, 0, 1, set.shading, 0, 4) --R shit above is being held up by hopes and prayers
+        love.graphics.setScissor()
+        soul_bar_frame:draw(65, 20)
+
+        if set.show_fps and not paused then -- Unholy math here.
+            local length = #tostring(fps)
+            local x = (1.0 / length) * (consts.RENDER_WIDTH * length * 0.95) + (3 - length) * 7
+            love.graphics.setColor(0, 0, 0, 0.5)
+            love.graphics.rectangle("fill", x - length, 1, length * 9, 12, 3, 3)
+            love.graphics.setColor(1, 1, 1)
+
+            love.graphics.print(fps, x, 0)
+        end
+
+        if events.freezeframe_duration > 0 then
+            love.graphics.setColor(1, 1, 1, .3)
+            love.graphics.rectangle("fill", 0, 0, consts.RENDER_WIDTH, consts.RENDER_HEIGHT)
+            love.graphics.setColor(1, 1, 1)
+        end
+
+        if quitting and not paused then
+            love.graphics.setColor(1, 1, 1, 0.5)
+            love.graphics.print("QUITTING...", 5, 345)
+            love.graphics.setColor(1, 1, 1)
+        end
+
+        if paused then
+            love.graphics.setColor(0, 0, 0, 0.75)
+            love.graphics.rectangle("fill", 0, 0, consts.RENDER_WIDTH, consts.RENDER_HEIGHT)
+            love.graphics.setColor(1, 1, 1)
+        end
+
+        if paused then
+            love.graphics.push()
+            love.graphics.translate(-(vcr_osd_mono:getWidth("PAUSED") / 2), -(vcr_osd_mono:getHeight("PAUSED") / 2))
+            love.graphics.print("PAUSED", consts.RENDER_WIDTH / 2, consts.RENDER_HEIGHT / 2)
+            love.graphics.pop()
+        end
+
+        love.graphics.setColor(1, 1, 1)
+
+        if set.debug then
+            utils.draw_collision({x = mouse_x, y = mouse_y, width = 9, height = 8, types = {"cursorselectionbox"}})
+        end
+    else
+        titlescreen:draw()
+    end
+
+    cursor:draw(mouse_x, mouse_y, 0, 1, set.shading, 0, 2)
 
     if events.screenshake and (events.screenshake_delay or 0) <= 0 and not paused then
         local dx = love.math.random(-events.screenshake_magnitude, events.screenshake_magnitude)
@@ -258,82 +379,7 @@ function love.draw()
         love.graphics.translate(dx, dy)
     end
 
-    tilemap:draw(global_offset_x, global_offset_y)
-
-    parts.draw(global_offset_x, global_offset_y)
-
-    for weapon = 1, #weapon_table do
-        if not weapon_table[weapon].hold then
-            weapon_table[weapon]:draw(global_offset_x, global_offset_y)
-        else
-            break
-        end
-    end
-
-    for i = 1, #enemy_table do
-        enemy_table[i]:draw()
-    end
-
-    player:draw()
-
-    for weapon = 1, #weapon_table do
-        if weapon_table[weapon].hold then
-            weapon_table[weapon]:draw(global_offset_x, global_offset_y)
-        else
-            break
-        end
-    end
-
-    love.graphics.pop()
-
-    -- HUD/GUI goes here.
-    soul_bar_bg:draw(65, 20)
-    love.graphics.setScissor(9 * scale_x, 4 * scale_y, 35 * player.stats.souls / player.stats.soul_limit * scale_x, 32 * scale_y)
-    soul_bar:draw(65, 20, 0, 1, set.shading, 0, 4) --R shit above is being held up by hopes and prayers
-    love.graphics.setScissor()
-    soul_bar_frame:draw(65, 20)
-
-    if set.show_fps and not paused then -- Unholy math here.
-        local length = #tostring(fps)
-        local x = (1.0 / length) * (consts.RENDER_WIDTH * length * 0.95) + (3 - length) * 7
-        love.graphics.setColor(0, 0, 0, 0.5)
-        love.graphics.rectangle("fill", x - length, 1, length * 9, 12, 3, 3)
-        love.graphics.setColor(1, 1, 1)
-
-        love.graphics.print(fps, x, 0)
-    end
-
-    if events.freezeframe_duration > 0 then
-        love.graphics.setColor(1, 1, 1, .3)
-        love.graphics.rectangle("fill", 0, 0, consts.RENDER_WIDTH, consts.RENDER_HEIGHT)
-        love.graphics.setColor(1, 1, 1)
-    end
-
-    if quitting and not paused then
-        love.graphics.setColor(1, 1, 1, 0.5)
-        love.graphics.print("QUITTING...", 5, 345)
-        love.graphics.setColor(1, 1, 1)
-    end
-
-    if paused then
-        love.graphics.setColor(0, 0, 0, 0.75)
-        love.graphics.rectangle("fill", 0, 0, consts.RENDER_WIDTH, consts.RENDER_HEIGHT)
-        love.graphics.setColor(1, 1, 1)
-    end
-
-    if paused then
-        love.graphics.push()
-        love.graphics.translate(-(vcr_osd_mono:getWidth("PAUSED") / 2), -(vcr_osd_mono:getHeight("PAUSED") / 2))
-        love.graphics.print("PAUSED", consts.RENDER_WIDTH / 2, consts.RENDER_HEIGHT / 2)
-        love.graphics.pop()
-    end
-
-    love.graphics.setColor(1, 1, 1)
-
-    cursor:draw(mouse_x, mouse_y, 0, 1, set.shading, 0, 2)
-    utils.draw_collision({x = mouse_x, y = mouse_y, width = 9, height = 8, types = {"cursorselectionbox"}})
     love.graphics.setCanvas()
-
     love.graphics.draw(canvas, 0, 0, 0, scale_x, scale_y)
     love.graphics.setShader()
 end
