@@ -247,6 +247,8 @@ function love.update(dt)
         shaders.game_over:send("resolution", {consts.RENDER_WIDTH, consts.RENDER_HEIGHT})
         shaders.game_over:send("time", time)
 
+        shaders.chromatic_abr:send("offset", {1 / math.max(player.stats.souls, 0) * 0.005, 1 / math.max(player.stats.souls, 0) * 0.005})
+
         -- HUD/GUI goes here.
         soul_bar_bg:update(dt)
         soul_bar:update(dt)
