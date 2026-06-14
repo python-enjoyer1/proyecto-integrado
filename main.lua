@@ -410,7 +410,7 @@ function love.mousepressed(x, y, button)
 end
 
 function love.keypressed(key, scancode)
-    if scancode == set.keybinds.pause then
+    if scancode == set.keybinds.pause and not events.game_over then
         paused = not paused
     end
 
