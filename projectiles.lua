@@ -22,7 +22,7 @@ function Main.add(x, y, angle, stats) --R projectiles yum yum
 end
 
 function Main.update(dt, enemy_table)
-    for i=#projectiles, 1, -1 do
+    for i = #projectiles, 1, -1 do
         local proj = projectiles[i]
         proj.x = proj.x + math.cos(proj.angle) * proj.speed * dt
         proj.y = proj.y + math.sin(proj.angle) * proj.speed * dt

@@ -36,6 +36,7 @@ local cursor
 local cursor_selection_box
 
 local background_index
+local game_over_background
 
 local vcr_osd_mono
 
@@ -73,7 +74,8 @@ function love.load()
 
     love.math.setRandomSeed(seed)
 
-    background_index = love.math.random(1, #shaders.backgrounds) -- Do not touch this line. I'll mess with it later.
+    background_index = love.math.random(1, #shaders.backgrounds)
+    game_over_background = shaders.game_over
 
     vcr_osd_mono = love.graphics.newFont(consts.FONT_PATH .. "vcr_osd_mono.ttf")
     vcr_osd_mono:setFilter(consts.DEFAULT_FILTER, consts.DEFAULT_FILTER)
@@ -153,12 +155,16 @@ function love.load()
 
     table.insert(weapon_table, weapons.HeavyGun:new())
 end
-
+ 
 function love.update(dt)
     if not titlescreen.show then
+        if events.game_over then
+            slow_down = 0.01
+        end
+
         if love.window.hasFocus() and not paused then
             love.audio.setVolume(1.0)
-        else
+        elseif not events.game_over then
             dt = 0
         end
 
@@ -192,7 +198,7 @@ function love.update(dt)
         fps = love.timer.getFPS()
 
         if not paused then
-            time = love.timer.getTime() * slow_down
+            time = love.timer.getTime()
         end
 
         camera_movement = player.stats.speed / 25 -- So that when the player gets fast it stays on the screen.
@@ -282,7 +288,12 @@ function love.draw()
     love.graphics.clear()
 
     if not titlescreen.show then
-        love.graphics.setShader(shaders.backgrounds[background_index])
+        if not events.game_over then
+            love.graphics.setShader(shaders.backgrounds[background_index])
+        else
+            love.graphics.setShader(shaders.game_over)
+        end
+
         love.graphics.rectangle("fill", 0, 0, consts.RENDER_WIDTH, consts.RENDER_HEIGHT)
         love.graphics.setShader()
 
@@ -374,6 +385,13 @@ function love.draw()
         end
     else
         titlescreen:draw()
+    end
+
+    if events.game_over then
+        love.graphics.push()
+        love.graphics.translate(-(vcr_osd_mono:getWidth("GAME OVER") / 2), -(vcr_osd_mono:getHeight("GAME OVER") / 2))
+        love.graphics.print("GAME OVER", consts.RENDER_WIDTH / 2, consts.RENDER_HEIGHT / 2)
+        love.graphics.pop()
     end
 
     cursor:draw(mouse_x, mouse_y, 0, 1, set.shading, 0, 2)

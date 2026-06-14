@@ -7,4 +7,6 @@ Main.screenshake_delay = 0
 
 Main.freezeframe_duration = 0 --R timer 4 freezeframes
 
+Main.game_over = false
+
 return Main
