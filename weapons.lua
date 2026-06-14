@@ -109,7 +109,7 @@ function Main.HeavyGun:draw(offset_x, offset_y)
 end
 
 function Main.HeavyGun:mousepressed(button)
-    if button == 2 and self.mouse_on then
+    if button == 2 and self.mouse_on and self.distance <= self.max_distance then
         self.hold = true
     end
 end

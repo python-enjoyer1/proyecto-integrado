@@ -30,6 +30,7 @@ Main.PARTICLE_PATH = "stuff/assets/particles/"
 Main.FONT_PATH = "stuff/assets/fonts/"
 Main.ENEMY_PATH = "stuff/assets/characters/enemies/"
 Main.WEAPON_PATH = "stuff/assets/weapons/"
+Main.TITLESCREEN_PATH = "stuff/assets/titlescreen/"
 
 love.audio.setEffect("reverb", {type = "reverb"})
 
@@ -46,7 +47,7 @@ Main.MISS_SOUND:setVolume(set.sfx_volume)
 Main.MISS_SOUND:setEffect("reverb")
 
 Main.PARRY_SOUND = love.audio.newSource(Main.SOUND_PATH .. "parry.mp3", "static")
-Main.PARRY_SOUND:setVolume(set.sfx_volume/2)
+Main.PARRY_SOUND:setVolume(set.sfx_volume / 2)
 Main.PARRY_SOUND:setEffect("reverb")
 
 Main.PARRY_END_SOUND = love.audio.newSource(Main.SOUND_PATH .. "parry_end.mp3", "static")
