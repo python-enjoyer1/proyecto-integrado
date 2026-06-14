@@ -221,7 +221,7 @@ function love.update(dt)
 
         if not paused and love.window.hasFocus() then
             if events.freezeframe_duration <= 0 then
-                spawn_timer = spawn_timer + dt
+                spawn_timer = spawn_timer + dt * slow_down
 
                 if spawn_timer >= spawn_interval then
                     spawn_timer = 0
