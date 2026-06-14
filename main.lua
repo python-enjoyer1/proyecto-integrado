@@ -207,7 +207,7 @@ function love.update(dt)
     if not paused and love.window.hasFocus() then
         if events.freezeframe_duration <= 0 then
             for weapon = 1, #weapon_table do
-                weapon_table[weapon]:update(dt, cursor_selection_box)
+                weapon_table[weapon]:update(dt, cursor_selection_box, player)
             end
 
             for item = 1, #enemy_table do
@@ -263,7 +263,11 @@ function love.draw()
     parts.draw(global_offset_x, global_offset_y)
 
     for weapon = 1, #weapon_table do
-        weapon_table[weapon]:draw(global_offset_x, global_offset_y)
+        if not weapon_table[weapon].hold then
+            weapon_table[weapon]:draw(global_offset_x, global_offset_y)
+        else
+            break
+        end
     end
 
     for i = 1, #enemy_table do
@@ -272,11 +276,19 @@ function love.draw()
 
     player:draw()
 
+    for weapon = 1, #weapon_table do
+        if weapon_table[weapon].hold then
+            weapon_table[weapon]:draw(global_offset_x, global_offset_y)
+        else
+            break
+        end
+    end
+
     love.graphics.pop()
 
     -- HUD/GUI goes here.
     soul_bar_bg:draw(65, 20)
-    love.graphics.setScissor(9 * scale_x, 4 * scale_y , 35 * player.stats.souls / player.stats.soul_limit * scale_x, 32 * scale_y)
+    love.graphics.setScissor(9 * scale_x, 4 * scale_y, 35 * player.stats.souls / player.stats.soul_limit * scale_x, 32 * scale_y)
     soul_bar:draw(65, 20, 0, 1, set.shading, 0, 4) --R shit above is being held up by hopes and prayers
     love.graphics.setScissor()
     soul_bar_frame:draw(65, 20)
@@ -328,18 +340,26 @@ end
 
 function love.mousepressed(x, y, button)
     player:mousepressed(button)
+
+    for i = 1, #weapon_table do
+        weapon_table[i]:mousepressed(button)
+    end
 end
 
-function love.keypressed(key)
-    if key == "escape" then
+function love.keypressed(key, scancode)
+    if scancode == set.keybinds.pause then
         paused = not paused
     end
 
-    player:keypressed(key)
+    player:keypressed(scancode)
+
+    for i = 1, #weapon_table do
+        weapon_table[i]:keypressed(scancode)
+    end
 end
 
-function love.keyreleased(key)
-    if key == set.keybinds.exit then
+function love.keyreleased(key, scancode)
+    if scancode == set.keybinds.exit then
         quitting = false
         quit_timer = quit_hold_time
     end
