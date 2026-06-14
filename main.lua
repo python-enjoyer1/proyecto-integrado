@@ -378,12 +378,6 @@ function love.draw()
 
     cursor:draw(mouse_x, mouse_y, 0, 1, set.shading, 0, 2)
 
-    if events.screenshake and (events.screenshake_delay or 0) <= 0 and not paused then
-        local dx = love.math.random(-events.screenshake_magnitude, events.screenshake_magnitude)
-        local dy = love.math.random(-events.screenshake_magnitude, events.screenshake_magnitude)
-        love.graphics.translate(dx, dy)
-    end
-
     love.graphics.setCanvas()
     love.graphics.draw(canvas, 0, 0, 0, scale_x, scale_y)
     love.graphics.setShader()
