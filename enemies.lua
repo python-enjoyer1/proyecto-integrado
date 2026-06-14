@@ -55,8 +55,8 @@ function Main.Enemy:new(o)
         stun_duration = 0,
         stun_reduction = o.stats.stun_reduction or 0, --R seconds
         knockback = 400,
-        stagger = love.math.random(20,30),
-        stability = love.math.random(20,30)
+        stagger = love.math.random(20, 30),
+        stability = love.math.random(20, 30)
     }
     o.states = {
         idle = false,
