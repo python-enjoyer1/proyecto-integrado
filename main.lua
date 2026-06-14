@@ -55,6 +55,9 @@ local quitting
 local paused
 
 local seed
+--R temporary shit below
+local spawn_timer = 0
+local spawn_interval = 5
 
 -- For pre-loading. Loads stuff after loading modules.
 function love.load()
@@ -218,6 +221,35 @@ function love.update(dt)
 
         if not paused and love.window.hasFocus() then
             if events.freezeframe_duration <= 0 then
+                spawn_timer = spawn_timer + dt
+
+                if spawn_timer >= spawn_interval then
+                    spawn_timer = 0
+                    local x = love.math.random(consts.TILE_SIZE, tilemap.height * consts.TILE_SIZE - consts.TILE_SIZE)
+                    local y = love.math.random(consts.TILE_SIZE, tilemap.height * consts.TILE_SIZE - consts.TILE_SIZE)
+
+                    local variant = love.math.random(1, 3)
+
+                    local walk_animation = utils.Animation:new({speed = 0.1, looping = true})
+                    walk_animation:manage_spritesheet(consts.ENEMY_PATH.. "basic_enemy/variation".. variant.. "/enemy_walk.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 8, 3)
+                    local fall_animation = utils.Animation:new({speed = 0.1, looping = true})
+                    fall_animation:manage_spritesheet(consts.ENEMY_PATH.. "basic_enemy/variation".. variant.. "/enemy_fall.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 1, 1)
+                    local punch_animation = utils.Animation:new({speed = 0.05, looping = false})
+                    punch_animation:manage_spritesheet(consts.ENEMY_PATH.. "basic_enemy/variation".. variant.. "/enemy_punch.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 10, 3)
+                    local death_animation = utils.Animation:new({speed = 0.2, looping = false})
+                    death_animation:manage_spritesheet(consts.ENEMY_PATH.. "basic_enemy/variation".. variant.. "/enemy_death.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 5, 2)
+
+                    local enemy_variation = love.math.random(1, 3)
+
+                    if enemy_variation == 1 then
+                        table.insert(enemy_table, enemies.Enemy:new({walk_animation = walk_animation, fall_animation = fall_animation, punch_animation = punch_animation, death_animation = death_animation, position = {x = x, y = y}, stats = {hp = 10, speed = love.math.random(140, 160), weight = love.math.random(0.75, 0.85), stun_reduction = love.math.random(1.2, 1.4), stagger = love.math.random(18, 28) ,stability = love.math.random(18, 28)}})) --R sprinters
+                    elseif enemy_variation == 2 then
+                        table.insert(enemy_table, enemies.Enemy:new({walk_animation = walk_animation, fall_animation = fall_animation, punch_animation = punch_animation, death_animation = death_animation, position = {x = x, y = y}, stats = {hp = 20, speed = 100}}))
+                    elseif enemy_variation == 3 then
+                        table.insert(enemy_table, enemies.Enemy:new({walk_animation = walk_animation, fall_animation = fall_animation, punch_animation = punch_animation, death_animation = death_animation, position = {x = x, y = y}, stats = {hp = 34, speed = love.math.random(70, 90), weight = love.math.random(1.3, 1.45), stun_reduction = -love.math.random(.4, .7), stagger = love.math.random(23, 33), stability = love.math.random(23, 33), knockback = 500}})) --R heavy people
+                    end
+                end
+
                 for weapon = 1, #weapon_table do
                     weapon_table[weapon]:update(dt, cursor_selection_box, player)
                 end
