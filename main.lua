@@ -9,6 +9,7 @@ local events = require("events")
 local set = require("settings")
 local parts = require("particles")
 local weapons = require("weapons")
+local projs = require("projectiles")
 
 local canvas
 
@@ -221,6 +222,8 @@ function love.update(dt)
                     table.remove(enemy_table, i)
                 end
             end
+
+            projs.update(dt, enemy_table)
         end
 
         parts.update() --R keeping ts outside cuz it'll prolly look awesome
@@ -261,6 +264,8 @@ function love.draw()
     tilemap:draw(global_offset_x, global_offset_y)
 
     parts.draw(global_offset_x, global_offset_y)
+
+    projs.draw()
 
     for weapon = 1, #weapon_table do
         if not weapon_table[weapon].hold then

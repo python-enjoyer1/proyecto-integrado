@@ -325,7 +325,11 @@ end
 
 function Player:mousepressed(button)
     if button == 1 then
-        self:punch()
+        if self.hold and not self.stats.hold_fire then
+            self.fire_requested = true
+        elseif not self.hold then
+            self:punch()
+        end
     end
 end
 
