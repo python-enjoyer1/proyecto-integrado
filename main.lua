@@ -78,7 +78,6 @@ function love.load()
     love.math.setRandomSeed(seed)
 
     background_index = love.math.random(1, #shaders.backgrounds)
-    game_over_background = shaders.game_over
 
     vcr_osd_mono = love.graphics.newFont(consts.FONT_PATH .. "vcr_osd_mono.ttf")
     vcr_osd_mono:setFilter(consts.DEFAULT_FILTER, consts.DEFAULT_FILTER)
