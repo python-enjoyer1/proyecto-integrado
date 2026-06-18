@@ -51,8 +51,11 @@ Main.PARRY_SOUND:setVolume(set.sfx_volume / 2)
 Main.PARRY_SOUND:setEffect("reverb")
 
 Main.PARRY_END_SOUND = love.audio.newSource(Main.SOUND_PATH .. "parry_end.mp3", "static")
-Main.PARRY_END_SOUND:setVolume(set.sfx_volume/2)
+Main.PARRY_END_SOUND:setVolume(set.sfx_volume / 2)
 Main.PARRY_END_SOUND:setEffect("reverb")
+
+Main.VAS_INANIMATUM = love.audio.newSource("stuff/assets/music/vas_inanimatum.mp3", "stream")
+Main.VAS_INANIMATUM:setVolume(set.music_volume)
 
 Main.MIN_ENEMY_SOUL = 3
 Main.MAX_ENEMY_SOUL = 6

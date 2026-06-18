@@ -1,6 +1,7 @@
 local love = require("love")
 local consts = require("constants")
-local events = require("events")
+
+local shake_count = 3
 
 local TitleScreen = {
     background = love.graphics.newImage(consts.TITLESCREEN_PATH .. "background.png"),
@@ -20,6 +21,8 @@ end
 
 function TitleScreen:update(dt)
     if self.show then
+        consts.VAS_INANIMATUM:play()
+
         local foregrounds = {self.electrical_poles, self.mountains}
 
         if self.scrolling < 640 then
@@ -34,8 +37,12 @@ end
 function TitleScreen:draw()
     if self.show then
         love.graphics.draw(self.background, 0, 0)
-        love.graphics.draw(self.foreground, self.scrolling, 0)
+        love.graphics.draw(self.foreground, self.scrolling, 20)
+
+        love.graphics.push()
+        love.graphics.translate(love.math.random(-0.25, 0.25), love.math.random(-0.5, 0.5))
         love.graphics.draw(self.metro_light, 0, 0)
+        love.graphics.pop()
     end
 end
 

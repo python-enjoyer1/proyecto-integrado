@@ -70,7 +70,7 @@ function love.load()
 
     paused = false
 
-    titlescreen.show = false
+    titlescreen.show = true
     titlescreen:init()
 
     seed = utils.generate_seed()
@@ -171,24 +171,6 @@ function love.update(dt)
             dt = 0
         end
 
-        if events.screenshake_delay > 0 then
-            events.screenshake_delay = events.screenshake_delay - dt
-
-            if events.screenshake_delay <= 0 then
-                consts.PARRY_END_SOUND:stop()
-                consts.PARRY_END_SOUND:play()
-            end
-        elseif events.screenshake and events.screenshake_duration > 0 then
-            events.screenshake_duration = events.screenshake_duration - dt
-        elseif events.screenshake_duration <= 0 then
-            events.screenshake = false
-        end
-
-        if events.freezeframe_duration > 0 then
-            events.freezeframe_duration = events.freezeframe_duration - dt
-            dt = 0
-        end
-
         if love.keyboard.isDown(set.keybinds.exit) and quit_timer > 0 and not paused then
             quit_timer = quit_timer - dt
             quitting = true
@@ -285,10 +267,28 @@ function love.update(dt)
         soul_bar_bg:update(dt)
         soul_bar:update(dt)
         soul_bar_frame:update(dt)
-        cursor:update(dt)
     else
         titlescreen:update(dt)
     end
+
+    if events.screenshake_delay > 0 then
+        events.screenshake_delay = events.screenshake_delay - dt
+        if events.screenshake_delay <= 0 then
+            consts.PARRY_END_SOUND:stop()
+            consts.PARRY_END_SOUND:play()
+        end
+    elseif events.screenshake and events.screenshake_duration > 0 then
+        events.screenshake_duration = events.screenshake_duration - dt
+    elseif events.screenshake_duration <= 0 then
+        events.screenshake = false
+    end
+
+    if events.freezeframe_duration > 0 then
+        events.freezeframe_duration = events.freezeframe_duration - dt
+        dt = 0
+    end
+
+    cursor:update(dt)
 
     mouse_x, mouse_y = love.mouse.getPosition()
     mouse_x = (mouse_x / scale_x)
@@ -333,12 +333,6 @@ function love.draw()
 
         love.graphics.push()
         love.graphics.translate(global_offset_x, global_offset_y)
-
-        if events.screenshake and (events.screenshake_delay or 0) <= 0 and not paused then
-            local dx = love.math.random(-events.screenshake_magnitude, events.screenshake_magnitude)
-            local dy = love.math.random(-events.screenshake_magnitude, events.screenshake_magnitude)
-            love.graphics.translate(dx, dy)
-        end
 
         tilemap:draw(global_offset_x, global_offset_y)
 
@@ -419,6 +413,10 @@ function love.draw()
         end
     else
         titlescreen:draw()
+        love.graphics.setColor(0, 0, 0)
+        love.graphics.rectangle("fill", 0, 0, 640, 20)
+        love.graphics.rectangle("fill", 0, 340, 640, 20)
+        love.graphics.setColor(1, 1, 1)
     end
 
     if events.game_over then
@@ -429,6 +427,12 @@ function love.draw()
     end
 
     cursor:draw(mouse_x, mouse_y, 0, 1, set.shading, 0, 2)
+
+    if events.screenshake and (events.screenshake_delay or 0) <= 0 and not paused then
+        local dx = love.math.random(-events.screenshake_magnitude, events.screenshake_magnitude)
+        local dy = love.math.random(-events.screenshake_magnitude, events.screenshake_magnitude)
+        love.graphics.translate(dx, dy)
+    end
 
     love.graphics.setCanvas()
     love.graphics.draw(canvas, 0, 0, 0, scale_x, scale_y)
