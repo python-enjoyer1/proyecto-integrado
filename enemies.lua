@@ -44,7 +44,6 @@ function enemies.Enemy:new(o)
     --R general enemy stuff
     o.velocity = utils.Vector:new()
     o.position = {x = o.position and o.position.x or 50, y = o.position and o.position.y or 50}
-    o.type = o.type or "chaser"
     o.stats = {
         hp = o.stats.hp or 20,
         speed = o.stats.speed or 100,
@@ -62,7 +61,9 @@ function enemies.Enemy:new(o)
         idle = false,
         punch = false,
         fall = false,
-        dead = false
+        dead = false,
+        chasing = true,
+        run_away = false -- If they were to grab a gun.
     }
     o.cooldowns = {
         punch = 0.5
@@ -86,9 +87,12 @@ function enemies.Enemy:update(dt, target, slow_down, tilemap, enemy_table, weapo
         self.punch_animation.speed = (self.cooldowns.punch / 10) / slow_down
         self.walk_animation.speed = 55.0 / (speed * 5)
 
-        if self.type == "chaser" then
+        if self.states.chasing then
             self.movement_vector.x = (target.position.x - self.position.x)
             self.movement_vector.y = (target.position.y - self.position.y)
+        elseif self.states.run_away then
+            self.movement_vector.x = (self.position.x - target.position.x)
+            self.movement_vector.y = (self.position.y - target.position.y)
         end
 
         for enemy = 1, #enemy_table do
