@@ -20,7 +20,7 @@ function projectiles.add(x, y, angle, stats) --R projectiles yum yum
     })
 end
 
-function projectiles.update(dt, enemy_table)
+function projectiles.update(dt, enemy_table, decals)
     for i = #projectiles, 1, -1 do
         local proj = projectiles[i]
         proj.x = proj.x + math.cos(proj.angle) * proj.speed * dt
@@ -38,6 +38,17 @@ function projectiles.update(dt, enemy_table)
                 enemy.knockback_vely = math.sin(angle) * force
                 enemy.stats.stun_duration = 1
 
+                local image = consts.BLOOD[1]
+                table.insert(
+                    decals,
+                    {
+                        image = image,
+                        x = enemy.position.x,
+                        y = enemy.position.y,
+                        rotation = math.rad(love.math.random(0, 360)),
+                        scale = math.min(love.math.random(), 0.5)
+                    }
+                )
                 enemy.stats.hp = enemy.stats.hp - proj.damage
                 if enemy.stats.hp <= 0 then
                     enemy.states.dead = true

@@ -51,6 +51,8 @@ local slow_down
 local enemy_table
 local weapon_table
 
+local enemy_types
+
 local quit_timer
 local quit_hold_time
 local quitting
@@ -58,6 +60,8 @@ local quitting
 local paused
 
 local seed
+
+local chromatic_abr_offset
 
 --R temporary shit below
 local spawn_timer = 0
@@ -93,6 +97,10 @@ function love.load()
         set.show_fps = true
     end
 
+    enemy_types = {
+        "chaser"
+    }
+
     slow_down = 1.0 -- Might change name later, bigger means faster, smaller means slower.
 
     canvas = love.graphics.newCanvas(consts.RENDER_WIDTH, consts.RENDER_HEIGHT)
@@ -117,8 +125,8 @@ function love.load()
     tilemap = utils.Tilemap:new({size = {tilemap_width, tilemap_height}})
     tilemap:generate()
 
-    player.position.x = tilemap.center_position[1]
-    player.position.y = tilemap.center_position[2]
+    player.position.x = tilemap_width * consts.TILE_SIZE / 2
+    player.position.y = tilemap_height * consts.TILE_SIZE / 2
 
     soul_bar = utils.Animation:new({speed = 0.07, looping = true})
     soul_bar:manage_spritesheet(consts.ASSETS_PATH .. "hud/soul_bar.png", 128, 32, 21, 2)
@@ -158,7 +166,7 @@ function love.load()
         local enemy_variation = love.math.random(1, 3)
 
         if enemy_variation == 1 then
-            table.insert(enemy_table, enemies.Enemy:new({walk_animation = walk_animation, fall_animation = fall_animation, punch_animation = punch_animation, death_animation = death_animation, position = {x = x, y = y}, stats = {hp = 10, speed = love.math.random(140, 160), weight = love.math.random(0.75, 0.85), stun_reduction = love.math.random(1.2, 1.4), stagger = love.math.random(18, 28) ,stability = love.math.random(18, 28)}})) --R sprinters
+            table.insert(enemy_table, enemies.Enemy:new({walk_animation = walk_animation, fall_animation = fall_animation, punch_animation = punch_animation, death_animation = death_animation, position = {x = x, y = y}, stats = {hp = 10, speed = love.math.random(140, 160), weight = love.math.random(0.75, 0.85), stun_reduction = love.math.random(1.2, 1.4), stagger = love.math.random(18, 28), stability = love.math.random(18, 28)}})) --R sprinters
         elseif enemy_variation == 2 then
             table.insert(enemy_table, enemies.Enemy:new({walk_animation = walk_animation, fall_animation = fall_animation, punch_animation = punch_animation, death_animation = death_animation, position = {x = x, y = y}, stats = {hp = 20, speed = 100}}))
         elseif enemy_variation == 3 then
@@ -221,8 +229,8 @@ function love.update(dt)
 
                 if spawn_timer >= spawn_interval then
                     spawn_timer = 0
-                    local x = love.math.random(consts.TILE_SIZE, tilemap.size[2] * consts.TILE_SIZE - consts.TILE_SIZE)
-                    local y = love.math.random(consts.TILE_SIZE, tilemap.size[2] * consts.TILE_SIZE - consts.TILE_SIZE)
+                    local x = love.math.random(consts.TILE_SIZE,tilemap.size[1])
+                    local y = love.math.random(consts.TILE_SIZE, tilemap.size[2])
 
                     local variant = love.math.random(1, 3)
 
@@ -262,7 +270,7 @@ function love.update(dt)
                     end
                 end
 
-                projs.update(dt, enemy_table)
+                projs.update(dt, enemy_table, decals)
             end
         end
 
@@ -273,7 +281,19 @@ function love.update(dt)
         shaders.game_over:send("resolution", {consts.RENDER_WIDTH, consts.RENDER_HEIGHT})
         shaders.game_over:send("time", time)
 
-        shaders.chromatic_abr:send("offset", {1 / math.max(player.stats.souls, 0) * 0.005, 1 / math.max(player.stats.souls, 0) * 0.005})
+        if not events.game_over then
+            if chromatic_abr_offset == nil then
+                chromatic_abr_offset = math.min(1 / player.stats.souls * 0.005, 0.005)
+            else
+                chromatic_abr_offset = utils.lerp(chromatic_abr_offset, math.min(1 / player.stats.souls * 0.005, 0.005), 1, dt)
+            end
+        else
+            chromatic_abr_offset = utils.lerp(chromatic_abr_offset, 0, 1, dt)
+        end
+
+        print(chromatic_abr_offset)
+        shaders.chromatic_abr:send("offset", {chromatic_abr_offset, chromatic_abr_offset})
+
 
         -- HUD/GUI goes here.
         soul_bar_bg:update(dt)
@@ -339,9 +359,8 @@ function love.draw()
         love.graphics.rectangle("fill", 0, 0, consts.RENDER_WIDTH, consts.RENDER_HEIGHT)
         love.graphics.setShader()
 
-        love.graphics.push()
-
         love.graphics.setCanvas(decal_canvas)
+        love.graphics.clear()
         for decal = 1, #decals do
             local width, height = decals[decal].image:getWidth(), decals[decal].image:getHeight()
             love.graphics.draw(
@@ -355,7 +374,10 @@ function love.draw()
                 height / 2
             )
         end
+        love.graphics.setColor(1, 1, 1)
         love.graphics.setCanvas(canvas)
+
+        love.graphics.push()
 
         love.graphics.translate(camera_x, camera_y)
 
@@ -460,6 +482,9 @@ function love.draw()
     end
 
     love.graphics.setCanvas()
+    if not titlescreen.show then
+        love.graphics.setShader(shaders.chromatic_abr)
+    end
     love.graphics.draw(canvas, 0, 0, 0, scale_x, scale_y)
     love.graphics.setShader()
 end

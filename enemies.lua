@@ -44,10 +44,11 @@ function enemies.Enemy:new(o)
     --R general enemy stuff
     o.velocity = utils.Vector:new()
     o.position = {x = o.position and o.position.x or 50, y = o.position and o.position.y or 50}
+    o.type = o.type or "chaser"
     o.stats = {
         hp = o.stats.hp or 20,
         speed = o.stats.speed or 100,
-        attack_damage = 5,
+        attack_damage = 3,
         soul_amount = love.math.random(consts.MIN_ENEMY_SOUL, consts.MAX_ENEMY_SOUL),
         essence_amount = love.math.random(consts.MIN_ENEMY_ESSENCE, consts.MAX_ENEMY_ESSENCE),
         weight = o.stats.weight or 1,
@@ -75,6 +76,7 @@ function enemies.Enemy:new(o)
     o.knockback_velx = 0
     o.knockback_vely = 0
     o.render = true
+    o.damage = true
     return o
 end --R Main.Enemy is shared so i shoved it in here instead
 
@@ -84,12 +86,10 @@ function enemies.Enemy:update(dt, target, slow_down, tilemap, enemy_table, weapo
         self.punch_animation.speed = (self.cooldowns.punch / 10) / slow_down
         self.walk_animation.speed = 55.0 / (speed * 5)
 
-        local offset_multiplier = love.math.random(20, 35)
-        local time_multiplier = love.math.random()
-        local time = love.timer.getTime() * time_multiplier
-
-        self.movement_vector.x = (target.position.x - self.position.x) + love.math.noise(time - 0.5) * offset_multiplier
-        self.movement_vector.y = (target.position.y - self.position.y) + love.math.noise(time + 1000) * offset_multiplier
+        if self.type == "chaser" then
+            self.movement_vector.x = (target.position.x - self.position.x)
+            self.movement_vector.y = (target.position.y - self.position.y)
+        end
 
         for enemy = 1, #enemy_table do
             if enemy_table[enemy].position.x ~= self.position.x and enemy_table[enemy].position.y ~= self.position.y then
@@ -161,11 +161,17 @@ function enemies.Enemy:update(dt, target, slow_down, tilemap, enemy_table, weapo
 
         if self.stats.stun_duration <= 0 then
             if not self.states.punch then
+                self.damage = true
                 self.animation = self.walk_animation
             else
                 self.animation = self.punch_animation
                 if self.punch_animation.current_frame >= 5 and self.punch_animation.current_frame <= 7 then
+                    self.punch_sound:setPitch(slow_down)
                     self.punch_sound:play()
+                    if self.damage then
+                        target.stats.souls = target.stats.souls - self.stats.attack_damage
+                        self.damage = false
+                    end
                     self.punch_hurtbox.active = true
                     local reach = 20
                     self.punch_hurtbox.x = self.position.x + math.cos(self.angle) * reach
@@ -190,6 +196,17 @@ function enemies.Enemy:update(dt, target, slow_down, tilemap, enemy_table, weapo
             --R so enemy doesnt get fucking comboed in 1 punch
             if not self.hit_this_swing then
                 if utils.check_collision(self.hitbox, target.punch_hurtbox) and not self.states.fall then
+                    local image = consts.BLOOD[1]
+                    table.insert(
+                        decals,
+                        {
+                            image = image,
+                            x = self.position.x,
+                            y = self.position.y,
+                            rotation = math.rad(love.math.random(0, 360)),
+                            scale = math.max(0.5, love.math.random())
+                        }
+                    )
                     if target.stats.stagger < self.stats.stability then
                         self.hit_this_swing = true
 
@@ -203,18 +220,6 @@ function enemies.Enemy:update(dt, target, slow_down, tilemap, enemy_table, weapo
                             events.screenshake_duration = consts.DEFAULT_SCREENSHAKE_DURATION
                             events.screenshake_magnitude = 2.5
                         end
-
-                        local image = consts.BLOOD[1]
-                        table.insert(
-                            decals,
-                            {
-                                image = image,
-                                x = self.position.x,
-                                y = self.position.y,
-                                rotation = math.rad(love.math.random(0, 360)),
-                                scale = math.max(0.3, love.math.random())
-                            }
-                        )
 
                         self.stats.hp = self.stats.hp - target.stats.attack_damage
                         if self.stats.hp <= 0 then
@@ -299,6 +304,17 @@ function enemies.Enemy:update(dt, target, slow_down, tilemap, enemy_table, weapo
     else
         self.animation = self.death_animation
         if self.animation.finished and self.render then
+            local image = consts.BLOOD[1]
+            table.insert(
+                decals,
+                {
+                    image = image,
+                    x = self.position.x,
+                    y = self.position.y,
+                    rotation = math.rad(love.math.random(0, 360)),
+                    scale = 1
+                }
+            )
             self.render = false
             if set.screenshake_allowed then
                 events.screenshake = true
