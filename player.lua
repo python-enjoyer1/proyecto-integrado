@@ -109,6 +109,13 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
 
         self.stats.souls = self.stats.souls - dt * slow_down
         self.stats.souls = math.max(self.stats.souls, 0)
+
+        if self.stats.souls <= self.stats.soul_limit / 3 then
+            events.screenshake = true
+            events.screenshake_magnitude = 1.0
+            events.screenshake_duration = 0.1
+        end
+
         if self.stats.souls <= 0 then
             self.states.dead = true
             events.game_over = true

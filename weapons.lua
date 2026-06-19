@@ -39,6 +39,7 @@ function weapons.HeavyGun:new(o) --R we should js replace this with "Gun" we can
     o.hold = false
     o.distance = 100
     o.max_distance = 45
+    o.ammo = 30
 
     return o
 end
@@ -57,7 +58,7 @@ function weapons.HeavyGun:update(dt, mouse_selection_box, player)
         player.holding = {true, "heavy_gun"}
 
         self.fire_timer = self.fire_timer - dt
-        if self.fire_timer <= 0 then
+        if self.fire_timer <= 0 and self.ammo > 0 then
             if self.stats.hold_fire and love.mouse.isDown(1) or self.fire_requested then
                 projs.add(
                     player.position.x + math.cos(player.angle) * self.projectile_offset.front + math.cos(player.angle + math.pi / 2) * self.projectile_offset.right,
@@ -65,17 +66,20 @@ function weapons.HeavyGun:update(dt, mouse_selection_box, player)
                     player.angle,
                     self.stats
                 )
+                self.ammo = self.ammo - 1
                 self.fire_timer = 1 / self.stats.firerate
                 self.fire_requested = false
             end
         end
     else
+        player.holding[1] = false
+        player.states.idle = true
         self.mouse_on = utils.check_collision(mouse_selection_box, self.interact_box)
         self.sprite = self.floor_sprite
     end
 end
 
-function weapons.HeavyGun:draw(offset_x, offset_y)
+function weapons.HeavyGun:draw()
     if self.render then
         if set.shading then
             love.graphics.setColor(consts.SHADOW_COLOR)
@@ -109,14 +113,18 @@ function weapons.HeavyGun:draw(offset_x, offset_y)
 end
 
 function weapons.HeavyGun:mousepressed(button)
-    if button == 2 and self.mouse_on and self.distance <= self.max_distance then
+    if button == 2 and self.mouse_on and self.distance <= self.max_distance and not self.hold then
         self.hold = true
+    elseif button == 2 and self.hold then
+        self.hold = false
     end
 end
 
 function weapons.HeavyGun:keypressed(key)
-    if key == set.keybinds.pick_up and self.distance <= self.max_distance then
+    if key == set.keybinds.pick_up and self.distance <= self.max_distance and not self.hold then
         self.hold = true
+    elseif key == set.keybinds.pick_up and self.hold then
+        self.hold = false
     end
 end
 

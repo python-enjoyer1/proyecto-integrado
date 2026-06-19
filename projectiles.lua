@@ -13,6 +13,7 @@ function projectiles.add(x, y, angle, stats) --R projectiles yum yum
         damage = stats.damage,
         pierce = stats.pierce,
         bounces = stats.bounces,
+        fall = stats.fall or false,
         hits = 0,
         bounces_left = stats.bounces,
         hitbox = {x = x, y = y, width = 4, height = 4, types = {"projectile"}},
@@ -34,9 +35,13 @@ function projectiles.update(dt, enemy_table, decals)
             if enemy.render and utils.check_collision(proj.hitbox, enemy.hitbox) then
                 local angle = math.atan2(enemy.position.y - proj.y, enemy.position.x - proj.x)
                 local force = 200 / enemy.stats.weight  --R tune this pls
+
+                if proj.fall then
+                    enemy.stats.stun_duration = 1.0
+                end
+
                 enemy.knockback_velx = math.cos(angle) * force
                 enemy.knockback_vely = math.sin(angle) * force
-                enemy.stats.stun_duration = 1
 
                 local image = consts.BLOOD[1]
                 table.insert(

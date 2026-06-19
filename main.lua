@@ -97,10 +97,6 @@ function love.load()
         set.show_fps = true
     end
 
-    enemy_types = {
-        "chaser"
-    }
-
     slow_down = 1.0 -- Might change name later, bigger means faster, smaller means slower.
 
     canvas = love.graphics.newCanvas(consts.RENDER_WIDTH, consts.RENDER_HEIGHT)
@@ -283,9 +279,9 @@ function love.update(dt)
 
         if not events.game_over then
             if chromatic_abr_offset == nil then
-                chromatic_abr_offset = math.min(1 / player.stats.souls * 0.005, 0.005)
+                chromatic_abr_offset = math.min(1 / player.stats.souls * 0.005, 0.01)
             else
-                chromatic_abr_offset = utils.lerp(chromatic_abr_offset, math.min(1 / player.stats.souls * 0.005, 0.005), 1, dt)
+                chromatic_abr_offset = utils.lerp(chromatic_abr_offset, math.min(1 / player.stats.souls * 0.005, 0.01), 1, dt)
             end
         else
             chromatic_abr_offset = utils.lerp(chromatic_abr_offset, 0, 1, dt)
