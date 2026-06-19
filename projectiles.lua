@@ -1,13 +1,10 @@
 local love = require("love")
 local consts = require("constants")
 local utils = require("utils")
-local parts = require("particles")
-
-local Main = {}
 
 local projectiles = {}
 
-function Main.add(x, y, angle, stats) --R projectiles yum yum
+function projectiles.add(x, y, angle, stats) --R projectiles yum yum
     table.insert(projectiles, {
         x = x,
         y = y,
@@ -23,7 +20,7 @@ function Main.add(x, y, angle, stats) --R projectiles yum yum
     })
 end
 
-function Main.update(dt, enemy_table)
+function projectiles.update(dt, enemy_table)
     for i = #projectiles, 1, -1 do
         local proj = projectiles[i]
         proj.x = proj.x + math.cos(proj.angle) * proj.speed * dt
@@ -40,8 +37,6 @@ function Main.update(dt, enemy_table)
                 enemy.knockback_velx = math.cos(angle) * force
                 enemy.knockback_vely = math.sin(angle) * force
                 enemy.stats.stun_duration = 1
-
-                parts.add("blood", enemy.position.x, enemy.position.y)
 
                 enemy.stats.hp = enemy.stats.hp - proj.damage
                 if enemy.stats.hp <= 0 then
@@ -62,7 +57,7 @@ function Main.update(dt, enemy_table)
     end
 end
 
-function Main.draw()
+function projectiles.draw()
     for i = 1, #projectiles do
         --R temporary projectile sprite replacement
         love.graphics.setColor(1, 1, 0)
@@ -71,4 +66,4 @@ function Main.draw()
     end
 end
 
-return Main
+return projectiles

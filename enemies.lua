@@ -3,9 +3,8 @@ local utils = require("utils")
 local consts = require("constants")
 local set = require("settings")
 local events = require("events")
-local parts = require("particles")
 
-local Main = {}
+local enemies = {}
 
 love.audio.setEffect("reverb", {type = "reverb"})
 
@@ -21,10 +20,10 @@ default_punch_animation:manage_spritesheet(consts.ASSETS_PATH .. "characters/ene
 local default_death_animation = utils.Animation:new({speed = 0.2, looping = false})
 default_death_animation:manage_spritesheet(consts.ASSETS_PATH .. "characters/enemies/basic_enemy/variation1/enemy_death.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 5, 2)
 
-Main.Enemy = {}
+enemies.Enemy = {}
 
 -- This is just so we can have inheritance between different enemy variations.
-function Main.Enemy:new(o)
+function enemies.Enemy:new(o)
     o = o or {}
     setmetatable(o, self)
     self.__index = self
@@ -44,7 +43,7 @@ function Main.Enemy:new(o)
 
     --R general enemy stuff
     o.velocity = utils.Vector:new()
-    o.position = {x = o.position and o.position.x or 100, y = o.position and o.position.y or 100}
+    o.position = {x = o.position and o.position.x or 50, y = o.position and o.position.y or 50}
     o.stats = {
         hp = o.stats.hp or 20,
         speed = o.stats.speed or 100,
@@ -79,7 +78,7 @@ function Main.Enemy:new(o)
     return o
 end --R Main.Enemy is shared so i shoved it in here instead
 
-function Main.Enemy:update(dt, target, slow_down, tilemap, enemy_table, weapon_table)
+function enemies.Enemy:update(dt, target, slow_down, tilemap, enemy_table, weapon_table, decals)
     if not self.states.dead then
         local speed = self.stats.speed * slow_down
         self.punch_animation.speed = (self.cooldowns.punch / 10) / slow_down
@@ -205,7 +204,17 @@ function Main.Enemy:update(dt, target, slow_down, tilemap, enemy_table, weapon_t
                             events.screenshake_magnitude = 2.5
                         end
 
-                        parts.add("blood", self.position.x, self.position.y)
+                        local image = consts.BLOOD[1]
+                        table.insert(
+                            decals,
+                            {
+                                image = image,
+                                x = self.position.x,
+                                y = self.position.y,
+                                rotation = math.rad(love.math.random(0, 360)),
+                                scale = love.math.random()
+                            }
+                        )
 
                         self.stats.hp = self.stats.hp - target.stats.attack_damage
                         if self.stats.hp <= 0 then
@@ -233,7 +242,6 @@ function Main.Enemy:update(dt, target, slow_down, tilemap, enemy_table, weapon_t
                             self.states.dead = true
                         end
 
-                        parts.add("blood", self.position.x, self.position.y)
                         self.hit_flag = true
                     end
                 else
@@ -256,8 +264,8 @@ function Main.Enemy:update(dt, target, slow_down, tilemap, enemy_table, weapon_t
         self.hitbox.x = self.position.x
         self.hitbox.y = self.position.y
 
-        for i = 1, #tilemap.walls do
-            utils.check_collision(self.hitbox, tilemap.walls[i])
+        for collision = 1, #tilemap.walls do
+            utils.check_collision(self.hitbox, tilemap.walls[collision])
         end
 
         if self.states.fall then
@@ -292,7 +300,6 @@ function Main.Enemy:update(dt, target, slow_down, tilemap, enemy_table, weapon_t
         self.animation = self.death_animation
         if self.animation.finished and self.render then
             self.render = false
-            parts.add("burst", self.position.x, self.position.y)
             if set.screenshake_allowed then
                 events.screenshake = true
                 events.screenshake_duration = 0.1
@@ -305,7 +312,7 @@ function Main.Enemy:update(dt, target, slow_down, tilemap, enemy_table, weapon_t
     end
 end
 
-function Main.Enemy:draw()
+function enemies.Enemy:draw()
     if self.render then
         self.animation:draw(self.position.x, self.position.y, self.angle, 1, set.shading, 0, 3)
     end
@@ -318,4 +325,4 @@ function Main.Enemy:draw()
     end
 end
 
-return Main
+return enemies

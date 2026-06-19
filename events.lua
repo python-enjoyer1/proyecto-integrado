@@ -1,12 +1,12 @@
-local Main = {}
+local events = {}
 
-Main.screenshake = false
-Main.screenshake_magnitude = 1
-Main.screenshake_duration = 1
-Main.screenshake_delay = 0
+events.screenshake = false
+events.screenshake_magnitude = 1
+events.screenshake_duration = 1
+events.screenshake_delay = 0
 
-Main.freezeframe_duration = 0 --R timer 4 freezeframes
+events.freezeframe_duration = 0 --R timer 4 freezeframes
 
-Main.game_over = false
+events.game_over = false
 
-return Main
+return events

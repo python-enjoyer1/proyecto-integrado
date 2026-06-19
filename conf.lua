@@ -6,4 +6,5 @@ function love.conf(t)
     t.window.height = 360
     t.window.fullscreen = true
     t.window.fullscreentype = "desktop"
+    t.window.icon = "icon.png"
 end

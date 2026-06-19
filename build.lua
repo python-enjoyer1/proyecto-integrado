@@ -1,7 +1,7 @@
 return {
-    name = "METRO ANIMUS",      -- Change this to your game's name
-    version = "0.5",          -- Your version
-    output = "dist",          -- The folder where the game will be created
-    love = "11.5",            -- Make sure this matches your LÖVE version
+    name = "METRO ANIMUS",
+    version = "0.5",
+    output = "dist",
+    love = "11.5",
     icon = "icon.png"
 }

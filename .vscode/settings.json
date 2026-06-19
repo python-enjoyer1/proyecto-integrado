@@ -1,6 +1,7 @@
 {
     "Lua.diagnostics.disable": [
-        "deprecated"
+        "deprecated",
+        "undefined-field"
     ],
     "Lua.completion.autoRequire": false
 }

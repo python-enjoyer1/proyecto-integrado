@@ -4,13 +4,13 @@ local set = require("settings")
 local utils = require("utils")
 local projs = require("projectiles")
 
-local Main = {}
+local weapons = {}
 
-Main.Weapons = {}
+weapons.Weapons = {}
 
-Main.HeavyGun = {}
+weapons.HeavyGun = {}
 
-function Main.HeavyGun:new(o) --R we should js replace this with "Gun" we can add an o.GunType in this or smth
+function weapons.HeavyGun:new(o) --R we should js replace this with "Gun" we can add an o.GunType in this or smth
     o = o or {}
     setmetatable(o, self)
     self.__index = self
@@ -43,7 +43,7 @@ function Main.HeavyGun:new(o) --R we should js replace this with "Gun" we can ad
     return o
 end
 
-function Main.HeavyGun:update(dt, mouse_selection_box, player)
+function weapons.HeavyGun:update(dt, mouse_selection_box, player)
     self.player = player
     self.distance = math.sqrt((player.position.x - self.position.x) ^ 2 + (player.position.y - self.position.y) ^ 2)
     self.interact_box.x = self.position.x
@@ -75,7 +75,7 @@ function Main.HeavyGun:update(dt, mouse_selection_box, player)
     end
 end
 
-function Main.HeavyGun:draw(offset_x, offset_y)
+function weapons.HeavyGun:draw(offset_x, offset_y)
     if self.render then
         if set.shading then
             love.graphics.setColor(consts.SHADOW_COLOR)
@@ -108,16 +108,16 @@ function Main.HeavyGun:draw(offset_x, offset_y)
     end
 end
 
-function Main.HeavyGun:mousepressed(button)
+function weapons.HeavyGun:mousepressed(button)
     if button == 2 and self.mouse_on and self.distance <= self.max_distance then
         self.hold = true
     end
 end
 
-function Main.HeavyGun:keypressed(key)
+function weapons.HeavyGun:keypressed(key)
     if key == set.keybinds.pick_up and self.distance <= self.max_distance then
         self.hold = true
     end
 end
 
-return Main
+return weapons

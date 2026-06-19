@@ -1,4 +1,5 @@
--- It seems that making the repo private does not change much.
+-- Relax, I will eventually add the wall shadows back.
+-- Also, need to fix the player spawn location.
 local love = require("love")
 local player = require("player")
 local enemies = require("enemies")
@@ -7,12 +8,13 @@ local consts = require("constants")
 local shaders = require("shaders")
 local events = require("events")
 local set = require("settings")
-local parts = require("particles")
 local weapons = require("weapons")
 local projs = require("projectiles")
 local titlescreen = require("titlescreen")
 
 local canvas
+local decal_canvas
+local decals
 
 -- Declare variables here, local please.
 local desktop_width, desktop_height
@@ -20,8 +22,8 @@ local scale_x, scale_y
 local mouse_x, mouse_y
 
 local camera_movement
-local global_offset_x
-local global_offset_y
+local camera_x
+local camera_y
 local look_ahead
 
 --R Tilemap shits
@@ -32,11 +34,12 @@ local soul_bar
 local soul_bar_bg
 local soul_bar_frame
 
+local icon
+
 local cursor
 local cursor_selection_box
 
 local background_index
-local game_over_background
 
 local vcr_osd_mono
 
@@ -55,6 +58,7 @@ local quitting
 local paused
 
 local seed
+
 --R temporary shit below
 local spawn_timer = 0
 local spawn_interval = 5
@@ -70,7 +74,7 @@ function love.load()
 
     paused = false
 
-    titlescreen.show = true
+    titlescreen.show = false
     titlescreen:init()
 
     seed = utils.generate_seed()
@@ -94,20 +98,27 @@ function love.load()
     canvas = love.graphics.newCanvas(consts.RENDER_WIDTH, consts.RENDER_HEIGHT)
     canvas:setFilter(consts.DEFAULT_FILTER, consts.DEFAULT_FILTER)
 
+    decal_canvas = love.graphics.newCanvas(consts.RENDER_WIDTH, consts.RENDER_HEIGHT)
+    decal_canvas:setFilter(consts.DEFAULT_FILTER, consts.DEFAULT_FILTER)
+
+    decals = {}
+
     camera_movement = 0
-    global_offset_x = 0
-    global_offset_y = 0
+    camera_x = 0
+    camera_y = 0
     look_ahead = 40
 
     desktop_width, desktop_height = love.window.getDesktopDimensions()
     scale_x = desktop_width / consts.RENDER_WIDTH
     scale_y = desktop_height / consts.RENDER_HEIGHT
 
-    tilemap = utils.Tilemap:new({type = "high", width = 1, height = 1})
-    tilemap:generate(3, 3)
+    local tilemap_width = love.math.random(consts.HIGH_MIN_WIDTH, consts.HIGH_MAX_WIDTH)
+    local tilemap_height = love.math.random(consts.HIGH_MIN_HEIGHT, consts.HIGH_MAX_HEIGHT)
+    tilemap = utils.Tilemap:new({size = {tilemap_width, tilemap_height}})
+    tilemap:generate()
 
-    player.position.x = (tilemap.width * consts.TILE_SIZE) / 2
-    player.position.y = (tilemap.height * consts.TILE_SIZE) / 2
+    player.position.x = tilemap.center_position[1]
+    player.position.y = tilemap.center_position[2]
 
     soul_bar = utils.Animation:new({speed = 0.07, looping = true})
     soul_bar:manage_spritesheet(consts.ASSETS_PATH .. "hud/soul_bar.png", 128, 32, 21, 2)
@@ -126,8 +137,8 @@ function love.load()
     enemy_table = {}
     weapon_table = {}
 
-    local map_w = tilemap.width * consts.TILE_SIZE
-    local map_h = tilemap.height * consts.TILE_SIZE
+    local map_w = tilemap_width * consts.TILE_SIZE
+    local map_h = tilemap_height * consts.TILE_SIZE
 
     for i = 1, 6 do
         local x = love.math.random(consts.TILE_SIZE, map_w - consts.TILE_SIZE)
@@ -157,17 +168,21 @@ function love.load()
 
     table.insert(weapon_table, weapons.HeavyGun:new())
 end
- 
+
 function love.update(dt)
+    mouse_x, mouse_y = love.mouse.getPosition()
+    mouse_x = (mouse_x / scale_x)
+    mouse_y = (mouse_y / scale_y)
+
+    if love.window.hasFocus() and not paused then
+        love.audio.setVolume(set.master_volume)
+    elseif not events.game_over then
+        dt = 0
+    end
+
     if not titlescreen.show then
         if events.game_over then
             slow_down = 0.01
-        end
-
-        if love.window.hasFocus() and not paused then
-            love.audio.setVolume(1.0)
-        elseif not events.game_over then
-            dt = 0
         end
 
         if love.keyboard.isDown(set.keybinds.exit) and quit_timer > 0 and not paused then
@@ -190,15 +205,15 @@ function love.update(dt)
         local target_x = -player.position.x + consts.RENDER_WIDTH / 2 - (player.velocity.x / player.stats.speed) * look_ahead
         local target_y = -player.position.y + consts.RENDER_HEIGHT / 2 - (player.velocity.y / player.stats.speed) * look_ahead
 
-        global_offset_x = utils.lerp(global_offset_x, target_x, camera_movement, dt)
-        global_offset_y = utils.lerp(global_offset_y, target_y, camera_movement, dt)
+        camera_x = utils.lerp(camera_x, target_x, camera_movement, dt)
+        camera_y = utils.lerp(camera_y, target_y, camera_movement, dt)
 
         mouse_x, mouse_y = love.mouse.getPosition()
         mouse_x = (mouse_x / scale_x)
         mouse_y = (mouse_y / scale_y)
 
-        cursor_selection_box.x = mouse_x - global_offset_x
-        cursor_selection_box.y = mouse_y - global_offset_y
+        cursor_selection_box.x = mouse_x - camera_x
+        cursor_selection_box.y = mouse_y - camera_y
 
         if not paused and love.window.hasFocus() then
             if events.freezeframe_duration <= 0 then
@@ -206,8 +221,8 @@ function love.update(dt)
 
                 if spawn_timer >= spawn_interval then
                     spawn_timer = 0
-                    local x = love.math.random(consts.TILE_SIZE, tilemap.height * consts.TILE_SIZE - consts.TILE_SIZE)
-                    local y = love.math.random(consts.TILE_SIZE, tilemap.height * consts.TILE_SIZE - consts.TILE_SIZE)
+                    local x = love.math.random(consts.TILE_SIZE, tilemap.size[2] * consts.TILE_SIZE - consts.TILE_SIZE)
+                    local y = love.math.random(consts.TILE_SIZE, tilemap.size[2] * consts.TILE_SIZE - consts.TILE_SIZE)
 
                     local variant = love.math.random(1, 3)
 
@@ -236,10 +251,10 @@ function love.update(dt)
                 end
 
                 for item = 1, #enemy_table do
-                    enemy_table[item]:update(dt, player, slow_down, tilemap, enemy_table)
+                    enemy_table[item]:update(dt, player, slow_down, tilemap, enemy_table, weapon_table, decals)
                 end
 
-                player:update(dt, scale_x, scale_y, global_offset_x, global_offset_y, enemy_table, slow_down, tilemap, weapon_table)
+                player:update(dt, scale_x, scale_y, camera_x, camera_y, enemy_table, slow_down, tilemap, weapon_table)
 
                 for i = #enemy_table, 1, -1 do
                     if not enemy_table[i].render then
@@ -249,8 +264,6 @@ function love.update(dt)
 
                 projs.update(dt, enemy_table)
             end
-
-            parts.update() --R keeping ts outside cuz it'll prolly look awesome
         end
 
         -- Shaders.
@@ -267,7 +280,7 @@ function love.update(dt)
         soul_bar:update(dt)
         soul_bar_frame:update(dt)
     else
-        titlescreen:update(dt)
+        titlescreen:update(dt, mouse_x, mouse_y)
     end
 
     if events.screenshake_delay > 0 then
@@ -289,12 +302,8 @@ function love.update(dt)
 
     cursor:update(dt)
 
-    mouse_x, mouse_y = love.mouse.getPosition()
-    mouse_x = (mouse_x / scale_x)
-    mouse_y = (mouse_y / scale_y)
-
-    cursor_selection_box.x = mouse_x - global_offset_x
-    cursor_selection_box.y = mouse_y - global_offset_y
+    cursor_selection_box.x = mouse_x - camera_x
+    cursor_selection_box.y = mouse_y - camera_y
 
     if events.screenshake_delay > 0 then
         events.screenshake_delay = events.screenshake_delay - dt
@@ -331,17 +340,34 @@ function love.draw()
         love.graphics.setShader()
 
         love.graphics.push()
-        love.graphics.translate(global_offset_x, global_offset_y)
 
-        tilemap:draw(global_offset_x, global_offset_y)
+        love.graphics.setCanvas(decal_canvas)
+        for decal = 1, #decals do
+            local width, height = decals[decal].image:getWidth(), decals[decal].image:getHeight()
+            love.graphics.draw(
+                decals[decal].image,
+                decals[decal].x,
+                decals[decal].y,
+                decals[decal].rotation,
+                decals[decal].scale,
+                decals[decal].scale,
+                width / 2,
+                height / 2
+            )
+        end
+        love.graphics.setCanvas(canvas)
 
-        parts.draw(global_offset_x, global_offset_y)
+        love.graphics.translate(camera_x, camera_y)
+
+        tilemap:draw(camera_x, camera_y)
+
+        love.graphics.draw(decal_canvas, 0, 0)
 
         projs.draw()
 
         for weapon = 1, #weapon_table do
             if not weapon_table[weapon].hold then
-                weapon_table[weapon]:draw(global_offset_x, global_offset_y)
+                weapon_table[weapon]:draw(camera_x, camera_y)
             else
                 break
             end
@@ -355,7 +381,7 @@ function love.draw()
 
         for weapon = 1, #weapon_table do
             if weapon_table[weapon].hold then
-                weapon_table[weapon]:draw(global_offset_x, global_offset_y)
+                weapon_table[weapon]:draw(camera_x, camera_y)
             else
                 break
             end
@@ -449,6 +475,14 @@ end
 function love.keypressed(key, scancode)
     if scancode == set.keybinds.pause and not events.game_over then
         paused = not paused
+    end
+
+    if scancode == set.keybinds.lower_vol then
+        set.master_volume = math.max(set.master_volume - 0.1, 0)
+    end
+
+    if scancode == set.keybinds.raise_vol then
+        set.master_volume = math.min(set.master_volume + 0.1, 2.0)
     end
 
     player:keypressed(scancode)

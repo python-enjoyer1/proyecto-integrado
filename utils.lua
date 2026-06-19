@@ -2,20 +2,20 @@ local love = require("love")
 local consts = require("constants")
 local set = require("settings")
 
-local Main = {}
+local utils = {}
 
-Main.Vector = {x = 0, y = 0}
-Main.Animation = {speed = 1, current_frame = 1}
-Main.Tilemap = {type = "high", width = 1, height = 1, walls = {}} -- Higher floors refer to earlier floors, since you descend in this game.
+utils.Vector = {x = 0, y = 0}
+utils.Animation = {speed = 1, current_frame = 1}
+utils.Tilemap = {} -- Higher floors refer to earlier floors, since you descend in this game.
 
-function Main.Vector:new(o)
+function utils.Vector:new(o)
     o = o or {}
     setmetatable(o, self)
     self.__index = self
     return o
 end
 
-function Main.Vector:normalize()
+function utils.Vector:normalize()
     local length = math.sqrt(self.x ^ 2 + self.y ^ 2)
     if length > 0 then
         self.x = self.x / length
@@ -23,7 +23,7 @@ function Main.Vector:normalize()
     end
 end
 
-function Main.Animation:new(o)
+function utils.Animation:new(o)
     o = o or {}
     setmetatable(o, self)
     self.__index = self
@@ -32,7 +32,7 @@ end
 
 -- Basically, we have to add the quad thingy.
 
-function Main.Animation:manage_spritesheet(image, width, height, sprite_number, columns) -- Don't call this on update, call on load.
+function utils.Animation:manage_spritesheet(image, width, height, sprite_number, columns) -- Don't call this on update, call on load.
     self.image = love.graphics.newImage(image)
     self.image:setFilter(consts.DEFAULT_FILTER, consts.DEFAULT_FILTER)
     self.frames = {}
@@ -49,7 +49,7 @@ function Main.Animation:manage_spritesheet(image, width, height, sprite_number, 
 end
 
 -- Add the main animation. Basically increases the current_frame until you reach the last frame, then resets current_frame. Also wait based on the speed var.
-function Main.Animation:update(dt, paused)
+function utils.Animation:update(dt, paused)
     paused = paused or false
     if not paused then
         self.timer = (self.timer or 0) + dt
@@ -70,7 +70,7 @@ function Main.Animation:update(dt, paused)
     end
 end
 
-function Main.Animation:draw(x, y, rotate, size, shade, shade_offset_x, shade_offset_y, shade_color)
+function utils.Animation:draw(x, y, rotate, size, shade, shade_offset_x, shade_offset_y, shade_color)
     rotate = rotate or 0
     size = size or 1
     shade = shade or false
@@ -89,15 +89,15 @@ function Main.Animation:draw(x, y, rotate, size, shade, shade_offset_x, shade_of
     love.graphics.draw(self.image, self.frames[self.current_frame], x, y, rotate, size, size, origin_x, origin_y)
 end
 
-function Main.has_type(collision, type) --R ts makes it easy to check for collision types
+function utils.has_type(collision, type) --R ts makes it easy to check for collision types
     for i, v in ipairs(collision.types) do
         if v == type then return true end
     end
     return false
 end
 
-function Main.Animation:clone()
-    local o = Main.Animation:new({
+function utils.Animation:clone()
+    local o = utils.Animation:new({
         speed = self.speed,
         looping = self.looping,
         image = self.image,
@@ -111,7 +111,7 @@ function Main.Animation:clone()
     return o
 end
 
-function Main.check_collision(collision1, collision2)
+function utils.check_collision(collision1, collision2)
     local x = collision1.x - collision1.width / 2
     local y = collision1.y - collision1.height / 2
     local x2 = collision2.x - collision2.width / 2
@@ -129,11 +129,11 @@ function Main.check_collision(collision1, collision2)
         local overlap_y = (collision1.height / 2 + collision2.height / 2) - math.abs(dy)
 
         --R figure out which one actually gets pushed
-        local c1_moves = Main.has_type(collision1, "playercollisionbox") or Main.has_type(collision1, "enemycollisionbox")
-        local c2_moves = Main.has_type(collision2, "playercollisionbox") or Main.has_type(collision2, "enemycollisionbox")
-        local either_is_main = Main.has_type(collision1, "maincollisionbox") or Main.has_type(collision2, "maincollisionbox")
-        local both_are_enemies = Main.has_type(collision1, "enemycollisionbox") and Main.has_type(collision2, "enemycollisionbox")
-        local selection_on_interactable = Main.has_type(collision1, "cursorselectionbox") and Main.has_type(collision2, "interactbox")
+        local c1_moves = utils.has_type(collision1, "playercollisionbox") or utils.has_type(collision1, "enemycollisionbox")
+        local c2_moves = utils.has_type(collision2, "playercollisionbox") or utils.has_type(collision2, "enemycollisionbox")
+        local either_is_main = utils.has_type(collision1, "maincollisionbox") or utils.has_type(collision2, "maincollisionbox")
+        local both_are_enemies = utils.has_type(collision1, "enemycollisionbox") and utils.has_type(collision2, "enemycollisionbox")
+        local selection_on_interactable = utils.has_type(collision1, "cursorselectionbox") and utils.has_type(collision2, "interactbox")
 
         if (either_is_main or both_are_enemies or selection_on_interactable) and (c1_moves or c2_moves) then
             if both_are_enemies then
@@ -173,7 +173,7 @@ function Main.check_collision(collision1, collision2)
     return hit
 end
 
-function Main.draw_collision(collision)
+function utils.draw_collision(collision)
     local r, g, b = 0, 0, 0
     local count = 0
 
@@ -211,235 +211,160 @@ function Main.draw_collision(collision)
     love.graphics.setColor(1, 1, 1)
 end
 
-function Main.Tilemap:new(o)
+function utils.Tilemap:new(o)
     o = o or {}
     setmetatable(o, self)
     self.__index = self
+
+    o.type = o.type or "high"
+    o.size = o.size or {50, 50}
+    o.floor_tiles = o.floor_tiles or consts.HIGH_FLOOR_TILES
+    o.wall_tiles = o.wall_tiles or consts.HIGH_WALL_TILES
+    o.tilemap = o.tilemap or {}
+    o.walls = {}
+
     return o
 end
 
--- Small note: [1] = corner, [2] = connector, [3] = edge.
-function Main.Tilemap:generate(tile_number, wall_tile_number, premade) --R keeping premade js in case we do make premade maps
-    self.walls = {}
-    self.tilemap = {}
+function utils.Tilemap:generate()
+    self.center_position = {
+        self.size[1] / 2 + consts.RENDER_WIDTH / 2 - consts.TILE_SIZE / 2,
+        self.size[2] / 2 + consts.RENDER_HEIGHT / 2 - consts.TILE_SIZE / 2
+    }
 
-    local corner_index = 1
-    local connector_index = 2
-    local edge_index = 3
-
-    premade = premade or nil
-    wall_tile_number = wall_tile_number or 0
-
-    self.width = self.width * love.math.random(consts.MIN_WIDTH_TILEMAP, consts.MAX_WIDTH_TILEMAP)
-    self.height = self.height * love.math.random(consts.MIN_HEIGHT_TILEMAP, consts.MAX_HEIGHT_TILEMAP)
-
-    local tiles = {}
-    for i = 1, tile_number do
-        local tile = love.graphics.newImage(consts.TILE_PATH .. "/" .. self.type .. "/" .. self.type .. i .. ".png")
-        tile:setFilter(consts.DEFAULT_FILTER, consts.DEFAULT_FILTER)
-        table.insert(tiles, tile)
-    end
-
-    local wall_tiles = {}
-    for i = 1, wall_tile_number do
-        local wall_tile = love.graphics.newImage(consts.TILE_PATH .. "/" .. self.type .. "_walls/" .. self.type .. "_wall" .. i .. ".png")
-        wall_tile:setFilter(consts.DEFAULT_FILTER, consts.DEFAULT_FILTER)
-        table.insert(wall_tiles, wall_tile)
-    end
-
-    self.tilemap = {}
-    local y = 0
-    for row = 1, self.height do
-        local x = 0
-        for col = 1, self.width do
-            table.insert(self.tilemap, {
-                tile = tiles[love.math.random(1, #tiles)],
-                position = {x = x, y = y},
-                rotation = 0
-            })
-            x = x + consts.TILE_SIZE
+    for x = 1, self.size[1] do
+        self.tilemap[x] = {}
+        for y = 1, self.size[2] do
+            if x > 1 and y == 1 then
+                if x < self.size[1] then
+                    self.tilemap[x][y] = {
+                        index = 3,
+                        type = "wall",
+                        rotation = math.rad(180),
+                    }
+                else
+                    self.tilemap[x][y] = {
+                        index = 1,
+                        type = "wall"
+                    }
+                end
+            elseif x == 1 and y == 1 then
+                self.tilemap[x][y] = {
+                    index = 1,
+                    type = "wall",
+                    rotation = math.rad(90)
+                }
+            elseif x == 1 and y > 1 then
+                if y < self.size[2] then
+                    self.tilemap[x][y] = {
+                        index = 3,
+                        type = "wall",
+                        rotation = math.rad(270)
+                    }
+                else
+                    self.tilemap[x][y] = {
+                        index = 1, type = "wall",
+                        rotation = math.rad(360)
+                    }
+                end
+            elseif x < self.size[1] and y == self.size[2] then
+                self.tilemap[x][y] = {
+                    index = 3,
+                    type = "wall"
+                }
+            elseif x == self.size[1] and y < self.size[2] then
+                self.tilemap[x][y] = {
+                    index = 3,
+                    type = "wall",
+                    rotation = math.rad(270)
+                }
+            elseif x == self.size[1] and y == self.size[2] then
+                self.tilemap[x][y] = {
+                    index = 1,
+                    type = "wall"
+                }
+            else
+                self.tilemap[x][y] = {
+                    index = love.math.random(#self.floor_tiles),
+                    type = "floor"
+                }
+            end
         end
-        y = y + consts.TILE_SIZE
     end
 
-    local wall_x = -consts.WALL_TILE_SIZE / 2-- So they also fill the corners.
-    local wall_y = -consts.WALL_TILE_SIZE / 2
-
-    for i = 1, (self.height * 2 + -wall_y / consts.WALL_TILE_SIZE) + 1 do
-        table.insert(self.tilemap, {
-            tile = wall_tiles[edge_index],
-            position = {x = wall_x, y = wall_y},
-            rotation = math.rad(90),
-            origin_x = consts.WALL_TILE_SIZE / 2,
-            origin_y = consts.WALL_TILE_SIZE / 2,
-            tile_type = "left"
-        })
-        wall_y = wall_y + consts.WALL_TILE_SIZE
-    end
-
-    wall_x = 0
-    wall_y = consts.WALL_TILE_SIZE - consts.TILE_SIZE
-
-    for i = 1, self.width * (consts.TILE_SIZE / consts.WALL_TILE_SIZE) do
-        table.insert(self.tilemap, {
-                tile = wall_tiles[edge_index],
-                position = {x = wall_x, y = wall_y},
-                tile_type = "upper"
-        })
-
-        wall_x = wall_x + consts.WALL_TILE_SIZE
-    end
-
-    local right_x = self.width * consts.TILE_SIZE + consts.WALL_TILE_SIZE / 2
-    local right_y = -consts.WALL_TILE_SIZE + consts.WALL_TILE_SIZE / 2
-
-    for i = 1, (self.height * 2) + 1 do
-        table.insert(self.tilemap, {
-            tile = wall_tiles[edge_index],
-            position = {x = right_x, y = right_y + consts.WALL_TILE_SIZE},
-            rotation = math.rad(90),
-            origin_x = consts.WALL_TILE_SIZE / 2,
-            origin_y = consts.WALL_TILE_SIZE / 2,
-            tile_type = "right"
-        })
-        right_y = right_y + consts.WALL_TILE_SIZE
-    end
-
-    local bottom_x = 0
-    local bottom_y = self.height * consts.TILE_SIZE
-
-
-    for i = 1, self.width * (consts.TILE_SIZE / consts.WALL_TILE_SIZE) do
-        table.insert(self.tilemap, {
-            tile = wall_tiles[edge_index],
-            position = {x = bottom_x, y = bottom_y},
-            tile_type = "lower"
-        })
-        bottom_x = bottom_x + consts.WALL_TILE_SIZE
-    end
-
-    -- Top right corner.
-    table.insert(self.tilemap, {
-        tile = wall_tiles[corner_index],
-        position = {x = wall_x + consts.WALL_TILE_SIZE, y = wall_y + consts.WALL_TILE_SIZE},
-        rotation = math.rad(180)
-    })
-
-    -- Bottom right corner.
-    table.insert(self.tilemap, {
-        tile = wall_tiles[corner_index],
-        position = {x = wall_x, y = consts.WALL_TILE_SIZE * (self.height * 2) + consts.WALL_TILE_SIZE},
-        rotation = math.rad(270)
-    })
-
-    -- Bottom left corner.
-    table.insert(self.tilemap, {
-        tile = wall_tiles[corner_index],
-        position = {x = -consts.WALL_TILE_SIZE, y = consts.WALL_TILE_SIZE * (self.height * 2)}
-    })
-
-    -- Top left corner.
-    table.insert(self.tilemap, {
-        tile = wall_tiles[corner_index],
-        position = {x = 0, y = -consts.WALL_TILE_SIZE},
-        rotation = math.rad(90)
-    })
-
-    --R left wall
-    table.insert(self.walls, {
-        x = -consts.WALL_TILE_SIZE / 2,
-        y = self.height * consts.TILE_SIZE / 2,
-        width = consts.WALL_TILE_SIZE,
-        height = self.height * consts.TILE_SIZE + consts.WALL_TILE_SIZE * 2,
-        types = {"maincollisionbox"}
-    })
-
-    --R right wall
-    table.insert(self.walls, {
-        x = self.width * consts.TILE_SIZE + consts.WALL_TILE_SIZE / 2,
-        y = self.height * consts.TILE_SIZE / 2,
-        width = consts.WALL_TILE_SIZE,
-        height = self.height * consts.TILE_SIZE + consts.WALL_TILE_SIZE * 2,
-        types = {"maincollisionbox"}
-    })
-
-    --R top wall
-    table.insert(self.walls, {
-        x = self.width * consts.TILE_SIZE / 2,
-        y = -consts.WALL_TILE_SIZE / 2,
-        width = self.width * consts.TILE_SIZE + consts.WALL_TILE_SIZE * 2,
-        height = consts.WALL_TILE_SIZE,
-        types = {"maincollisionbox"}
-    })
-
-    --R bottom wall
-    table.insert(self.walls, {
-        x = self.width * consts.TILE_SIZE / 2,
-        y = self.height * consts.TILE_SIZE + consts.WALL_TILE_SIZE / 2,
-        width = self.width * consts.TILE_SIZE + consts.WALL_TILE_SIZE * 2,
-        height = consts.WALL_TILE_SIZE,
-        types = {"maincollisionbox"}
-    })
+    local map_width = self.size[1] * consts.TILE_SIZE
+    local map_height = self.size[2] * consts.TILE_SIZE
+    local t_size = consts.TILE_SIZE
+    self.walls = {
+        {x = map_width / 2 - (t_size / 2), y = 0, width = map_width, height = t_size, types = {"maincollisionbox"}},
+        {x = 0, y = map_height / 2 - (t_size / 2), width = t_size, height = map_height, types = {"maincollisionbox"}},
+        {x = map_width / 2 - (t_size / 2), y = map_height - t_size, width = map_width, height = t_size, types = {"maincollisionbox"}},
+        {x = map_width - t_size, y = map_height - map_height / 2 - t_size / 2, width = t_size, height = map_height, types = {"maincollisionbox"}},
+    }
 end
 
-function Main.Tilemap:draw(offset_x, offset_y)
+function utils.Tilemap:draw(camera_x, camera_y)
+    for x = 1, self.size[1] do
+        for y = 1, self.size[2] do
+            local rotation = 0
 
-    for i = 1, #self.tilemap do
-        local tile = self.tilemap[i].tile
-        local x = self.tilemap[i].position.x
-        local y = self.tilemap[i].position.y
+            local screen_x = (x - 1) * consts.TILE_SIZE
+            local screen_y = (y - 1) * consts.TILE_SIZE
 
-        local r = self.tilemap[i].rotation or 0
-        local ox = self.tilemap[i].origin_x or 0
-        local oy = self.tilemap[i].origin_y or 0
-        local tile_type = self.tilemap[i].tile_type or nil
+            local offset = 10
 
-        local screen_x = x + offset_x
-        local screen_y = y + offset_y
-
-        if screen_x > -consts.WALL_TILE_SIZE * 2 and screen_x < consts.RENDER_WIDTH + consts.WALL_TILE_SIZE * 2 and
-        screen_y > -consts.WALL_TILE_SIZE * 2 and screen_y < consts.RENDER_HEIGHT + consts.WALL_TILE_SIZE * 2 then --R ts is getting long
-            -- Peak optimization done by ME. Basically any tiles that are not in the view of the player, are simply, not rendered. Quite awesome, isn't it?
-            if x < (consts.RENDER_WIDTH - offset_x) + 15 and y < (consts.RENDER_HEIGHT - offset_y) + 15 then
-                love.graphics.push()
-                love.graphics.scale(consts.TILE_SCALE, consts.TILE_SCALE)
-
-                if set.shading then
-                    love.graphics.setColor(consts.SHADOW_COLOR)
-                    if tile_type == "upper" then
-                        love.graphics.draw(tile, x, y + consts.WALL_SHADOW_OFFSET, r, 1, 1, ox, oy)
-                    elseif tile_type == "lower" then
-                        love.graphics.draw(tile, x, y - consts.WALL_SHADOW_OFFSET, r, 1, 1, ox, oy)
-                    elseif tile_type == "left" then
-                        love.graphics.draw(tile, x + consts.WALL_SHADOW_OFFSET, y, r, 1, 1, ox, oy)
-                    elseif tile_type == "right" then
-                        love.graphics.draw(tile, x - consts.WALL_SHADOW_OFFSET, y, r, 1, 1, ox, oy)
+            if screen_x < (consts.RENDER_WIDTH - camera_x) + offset and
+            screen_y < (consts.RENDER_HEIGHT - camera_y) + offset and
+            -screen_x < camera_x + offset and -screen_y < camera_y + offset then
+                if self.tilemap[x][y].type == "floor" then
+                    love.graphics.draw(
+                        self.floor_tiles[self.tilemap[x][y].index],
+                        screen_x,
+                        screen_y,
+                        0,
+                        1,
+                        1,
+                        consts.TILE_SIZE / 2,
+                        consts.TILE_SIZE / 2
+                    )
+                elseif self.tilemap[x][y].type == "wall" then
+                    love.graphics.push()
+                    if self.tilemap[x][y].rotation ~= nil then
+                        rotation = self.tilemap[x][y].rotation
                     end
-                end
 
-                love.graphics.setColor(1, 1, 1)
-                love.graphics.draw(tile, x, y, r, 1, 1, ox, oy)
-                love.graphics.pop()
+                    love.graphics.draw(
+                        self.wall_tiles[self.tilemap[x][y].index],
+                        screen_x,
+                        screen_y,
+                        rotation,
+                        1,
+                        1,
+                        consts.TILE_SIZE / 2,
+                        consts.TILE_SIZE / 2
+                    )
+                    love.graphics.pop()
+                end
             end
         end
     end
 
     if set.debug then
-        for i = 1, #self.walls do
-            Main.draw_collision(self.walls[i])
+        for collision = 1, #self.walls do
+            utils.draw_collision(self.walls[collision])
         end
     end
 end
 
-function Main.lerp(a, b, x, dt)
+function utils.lerp(a, b, x, dt)
     local t = (1.0 - math.exp(-x * dt))
     return a * (1.0 - t) + b * t
 end
 
 -- A bit complex, but basically, multiplying by big prime numbers replicates randomness very well.
-function Main.generate_seed()
+function utils.generate_seed()
     local seed = math.floor(os.time() + (love.timer.getTime() * 30666738388173)) % 2147483647
     return seed
 end
 
-return Main
+return utils

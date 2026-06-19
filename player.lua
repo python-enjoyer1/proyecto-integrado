@@ -288,8 +288,8 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
             self.iframe_timer = self.iframe_timer - dt
         end
 
-        for i = 1, #tilemap.walls do
-            utils.check_collision(self.hitbox, tilemap.walls[i])
+        for collision = 1, #tilemap.walls do
+            utils.check_collision(self.hitbox, tilemap.walls[collision])
         end
 
         self.position.x = self.hitbox.x
