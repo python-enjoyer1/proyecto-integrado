@@ -212,7 +212,7 @@ function enemies.Enemy:update(dt, target, slow_down, tilemap, enemy_table, weapo
                                 x = self.position.x,
                                 y = self.position.y,
                                 rotation = math.rad(love.math.random(0, 360)),
-                                scale = love.math.random()
+                                scale = math.max(0.3, love.math.random())
                             }
                         )
 
