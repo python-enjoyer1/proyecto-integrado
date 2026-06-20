@@ -218,6 +218,7 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
 
                         consts.PARRY_SOUND:stop()
                         consts.PARRY_SOUND:play()
+                        self.states.idle = true
                         self.stats.souls = math.min(self.stats.souls + 5, self.stats.soul_limit)
 
                         events.freezeframe_duration = 0.15

@@ -50,6 +50,9 @@ function weapons.HeavyGun:update(dt, mouse_selection_box, player)
     self.interact_box.x = self.position.x
     self.interact_box.y = self.position.y
 
+    if player.states.dead then
+        self.hold = false
+    end
 
     if self.hold then
         self.position.x = self.player.position.x

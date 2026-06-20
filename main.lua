@@ -287,7 +287,6 @@ function love.update(dt)
             chromatic_abr_offset = utils.lerp(chromatic_abr_offset, 0, 1, dt)
         end
 
-        print(chromatic_abr_offset)
         shaders.chromatic_abr:send("offset", {chromatic_abr_offset, chromatic_abr_offset})
 
 
@@ -299,23 +298,6 @@ function love.update(dt)
         titlescreen:update(dt, mouse_x, mouse_y)
     end
 
-    if events.screenshake_delay > 0 then
-        events.screenshake_delay = events.screenshake_delay - dt
-        if events.screenshake_delay <= 0 then
-            consts.PARRY_END_SOUND:stop()
-            consts.PARRY_END_SOUND:play()
-        end
-    elseif events.screenshake and events.screenshake_duration > 0 then
-        events.screenshake_duration = events.screenshake_duration - dt
-    elseif events.screenshake_duration <= 0 then
-        events.screenshake = false
-    end
-
-    if events.freezeframe_duration > 0 then
-        events.freezeframe_duration = events.freezeframe_duration - dt
-        dt = 0
-    end
-
     cursor:update(dt)
 
     cursor_selection_box.x = mouse_x - camera_x
@@ -323,7 +305,6 @@ function love.update(dt)
 
     if events.screenshake_delay > 0 then
         events.screenshake_delay = events.screenshake_delay - dt
-
         if events.screenshake_delay <= 0 then
             consts.PARRY_END_SOUND:stop()
             consts.PARRY_END_SOUND:play()
@@ -414,6 +395,14 @@ function love.draw()
         love.graphics.setScissor()
         soul_bar_frame:draw(65, 20)
 
+        for weapon = 1, #weapon_table do
+            if weapon_table[weapon].hold then
+                love.graphics.setColor(1, 1, 1, 0.5)
+                love.graphics.print(weapon_table[weapon].ammo, 10, 340)
+                love.graphics.setColor(1, 1, 1)
+            end
+        end
+
         if set.show_fps and not paused then -- Unholy math here.
             local length = #tostring(fps)
             local x = (1.0 / length) * (consts.RENDER_WIDTH * length * 0.95) + (3 - length) * 7
@@ -444,8 +433,8 @@ function love.draw()
 
         if paused then
             love.graphics.push()
-            love.graphics.translate(-(vcr_osd_mono:getWidth("PAUSED") / 2), -(vcr_osd_mono:getHeight("PAUSED") / 2))
-            love.graphics.print("PAUSED", consts.RENDER_WIDTH / 2, consts.RENDER_HEIGHT / 2)
+            love.graphics.translate(-(vcr_osd_mono:getWidth("PAUSED") / 2) * 2, -(vcr_osd_mono:getHeight("PAUSED") / 2) * 2)
+            love.graphics.print("PAUSED", consts.RENDER_WIDTH / 2, consts.RENDER_HEIGHT / 2, 0, 2, 2)
             love.graphics.pop()
         end
 
@@ -464,8 +453,8 @@ function love.draw()
 
     if events.game_over then
         love.graphics.push()
-        love.graphics.translate(-(vcr_osd_mono:getWidth("GAME OVER") / 2), -(vcr_osd_mono:getHeight("GAME OVER") / 2))
-        love.graphics.print("GAME OVER", consts.RENDER_WIDTH / 2, consts.RENDER_HEIGHT / 2)
+        love.graphics.translate(-(vcr_osd_mono:getWidth("GAME OVER") / 2) * 2, -(vcr_osd_mono:getHeight("GAME OVER") / 2) * 2)
+        love.graphics.print("GAME OVER", consts.RENDER_WIDTH / 2, consts.RENDER_HEIGHT / 2, 0, 2, 2)
         love.graphics.pop()
     end
 
@@ -494,7 +483,7 @@ function love.mousepressed(x, y, button)
 end
 
 function love.keypressed(key, scancode)
-    if scancode == set.keybinds.pause and not events.game_over then
+    if scancode == set.keybinds.pause and not events.game_over and not titlescreen.show then
         paused = not paused
     end
 
