@@ -1,5 +1,3 @@
--- Relax, I will eventually add the wall shadows back.
--- Also, need to fix the player spawn location.
 local love = require("love")
 local player = require("player")
 local enemies = require("enemies")
@@ -33,8 +31,6 @@ local tilemap
 local soul_bar
 local soul_bar_bg
 local soul_bar_frame
-
-local icon
 
 local cursor
 local cursor_selection_box
@@ -279,7 +275,7 @@ function love.update(dt)
             if chromatic_abr_offset == nil then
                 chromatic_abr_offset = math.min(1 / player.stats.souls * 0.005, 0.01)
             else
-                chromatic_abr_offset = utils.lerp(chromatic_abr_offset, math.min(1 / player.stats.souls * 0.005, 0.01), 1, dt)
+                chromatic_abr_offset = utils.lerp(chromatic_abr_offset, math.min(1 / player.stats.souls * 0.005, 0.01), 3, dt)
             end
         else
             chromatic_abr_offset = utils.lerp(chromatic_abr_offset, 0, 1, dt)
@@ -486,6 +482,7 @@ function love.draw()
     if not titlescreen.show then
         love.graphics.setShader(shaders.chromatic_abr)
     end
+
     love.graphics.draw(canvas, 0, 0, 0, scale_x, scale_y)
     love.graphics.setShader()
 end
