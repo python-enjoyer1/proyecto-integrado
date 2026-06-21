@@ -51,8 +51,6 @@ local slow_down
 local enemy_table
 local weapon_table
 
-local enemy_types
-
 local quit_timer
 local quit_hold_time
 local quitting
@@ -298,6 +296,23 @@ function love.update(dt)
         titlescreen:update(dt, mouse_x, mouse_y)
     end
 
+    if events.screenshake_delay > 0 then
+        events.screenshake_delay = events.screenshake_delay - dt
+        if events.screenshake_delay <= 0 then
+            consts.PARRY_END_SOUND:stop()
+            consts.PARRY_END_SOUND:play()
+        end
+    elseif events.screenshake and events.screenshake_duration > 0 then
+        events.screenshake_duration = events.screenshake_duration - dt
+    elseif events.screenshake_duration <= 0 then
+        events.screenshake = false
+    end
+
+    if events.freezeframe_duration > 0 then
+        events.freezeframe_duration = events.freezeframe_duration - dt
+        dt = 0
+    end
+
     cursor:update(dt)
 
     cursor_selection_box.x = mouse_x - camera_x
@@ -305,6 +320,7 @@ function love.update(dt)
 
     if events.screenshake_delay > 0 then
         events.screenshake_delay = events.screenshake_delay - dt
+
         if events.screenshake_delay <= 0 then
             consts.PARRY_END_SOUND:stop()
             consts.PARRY_END_SOUND:play()
