@@ -173,7 +173,7 @@ function enemies.Enemy:update(dt, target, slow_down, tilemap, enemy_table, weapo
                     self.punch_sound:setPitch(slow_down)
                     self.punch_sound:play()
                     if self.damage then
-                        target.stats.souls = target.stats.souls - self.stats.attack_damage
+                        target.stats.souls = math.max(target.stats.souls - self.stats.attack_damage, 0)
                         self.damage = false
                     end
                     self.punch_hurtbox.active = true
