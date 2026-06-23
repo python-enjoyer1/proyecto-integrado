@@ -277,8 +277,7 @@ function enemies.Enemy:update(dt, target, slow_down, tilemap, enemy_table, weapo
             utils.check_collision(self.hitbox, tilemap.walls[collision])
         end
 
-        if self.states.fall then
-        else
+        if not self.states.fall then
             for i = 1, #enemy_table do
                 if enemy_table[i] ~= self then
                     utils.check_collision(self.hitbox, enemy_table[i].hitbox)

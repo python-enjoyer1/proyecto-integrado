@@ -17,7 +17,7 @@ function weapons.HeavyGun:new(o) --R we should js replace this with "Gun" we can
 
     o.stats = {
         firerate = 10, --R per second
-        projectile_speed = 300,
+        projectile_speed = 500,
         damage = 3,
         weight = 1,
         pierce = 1, --R pierces through enemies or walls perhaps

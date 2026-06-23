@@ -8,5 +8,6 @@ events.screenshake_delay = 0
 events.freezeframe_duration = 0 --R timer 4 freezeframes
 
 events.game_over = false
+events.game_over_message = nil
 
 return events

@@ -89,5 +89,10 @@ for count = 1, 3 do
     table.insert(consts.HIGH_WALL_TILES, image)
 end
 
+consts.GAME_OVER_MESSAGES = {
+    "OBLITERATED",
+    "CONSUMED",
+    "DECIMATED"
+}
 
 return consts

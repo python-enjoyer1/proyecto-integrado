@@ -72,7 +72,7 @@ function love.load()
 
     paused = false
 
-    titlescreen.show = false
+    titlescreen.show = true
     titlescreen:init()
 
     seed = utils.generate_seed()
@@ -320,6 +320,9 @@ function love.draw()
 
         shaders.chromatic_abr:send("offset", {chromatic_abr_offset, chromatic_abr_offset})
 
+        shaders.static:send("time", time)
+        shaders.static:send("window_coords", {consts.RENDER_WIDTH, consts.RENDER_HEIGHT})
+
         if not events.game_over then
             love.graphics.setShader(shaders.backgrounds[background_index])
         else
@@ -430,22 +433,30 @@ function love.draw()
             love.graphics.setColor(0, 0, 0, 0.75)
             love.graphics.rectangle("fill", 0, 0, consts.RENDER_WIDTH, consts.RENDER_HEIGHT)
             love.graphics.setColor(1, 1, 1)
-        end
-
-        if paused then
             love.graphics.push()
-            love.graphics.translate(-(vcr_osd_mono:getWidth("PAUSED") / 2) * 2, -(vcr_osd_mono:getHeight("PAUSED") / 2) * 2)
-            love.graphics.print("PAUSED", consts.RENDER_WIDTH / 2, consts.RENDER_HEIGHT / 2, 0, 2, 2)
+            love.graphics.translate(-(vcr_osd_mono:getWidth("PAUSED") / 2), -(vcr_osd_mono:getHeight("PAUSED") / 2))
+            love.graphics.print("PAUSED", consts.RENDER_WIDTH / 2, consts.RENDER_HEIGHT / 2)
+            love.graphics.setColor(1, 1, 1)
             love.graphics.pop()
         end
 
-        love.graphics.setColor(1, 1, 1)
 
         if events.game_over then
             love.graphics.push()
-            love.graphics.translate(-(vcr_osd_mono:getWidth("OBLITERATED") / 2) * 2, -(vcr_osd_mono:getHeight("OBLITERATED") / 2) * 2)
-            love.graphics.setColor(1, 0, 0)
-            love.graphics.print("OBLITERATED", consts.RENDER_WIDTH / 2, consts.RENDER_HEIGHT / 2 - 50, 0, 2, 2)
+            if events.game_over_message == nil then
+                events.game_over_message = consts.GAME_OVER_MESSAGES[love.math.random(#consts.GAME_OVER_MESSAGES)]
+            end
+
+            love.graphics.translate(-(vcr_osd_mono:getWidth(events.game_over_message) / 2) * 2, -(vcr_osd_mono:getHeight(events.game_over_message) / 2) * 2)
+
+            -- Outline.
+            love.graphics.print(events.game_over_message, consts.RENDER_WIDTH / 2 - 1, consts.RENDER_HEIGHT / 2 - 100, 0, 2, 2)
+            love.graphics.print(events.game_over_message, consts.RENDER_WIDTH / 2 + 1, consts.RENDER_HEIGHT / 2 - 100, 0, 2, 2)
+            love.graphics.print(events.game_over_message, consts.RENDER_WIDTH / 2, consts.RENDER_HEIGHT / 2 - 100 - 1, 0, 2, 2)
+            love.graphics.print(events.game_over_message, consts.RENDER_WIDTH / 2, consts.RENDER_HEIGHT / 2 - 100 + 1, 0, 2, 2)
+
+            love.graphics.setColor(0, 0, 0)
+            love.graphics.print(events.game_over_message, consts.RENDER_WIDTH / 2, consts.RENDER_HEIGHT / 2 - 100, 0, 2, 2)
             love.graphics.setColor(1, 1, 1)
             love.graphics.pop()
         end
@@ -470,7 +481,9 @@ function love.draw()
     end
 
     love.graphics.setCanvas()
-    love.graphics.setShader(shaders.chromatic_abr)
+    if not paused then
+        love.graphics.setShader(shaders.chromatic_abr)
+    end
     love.graphics.draw(canvas, 0, 0, 0, scale_x, scale_y)
     love.graphics.setShader()
 end

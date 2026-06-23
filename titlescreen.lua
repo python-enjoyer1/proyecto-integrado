@@ -36,15 +36,15 @@ function TitleScreen:update(dt, mouse_x, mouse_y)
         mouse_y = mouse_y - consts.RENDER_HEIGHT / 2
 
         if move_x < 0 then
-            move_x = math.max(utils.lerp(move_x, -mouse_x / 2, 1, dt), offset_cap * -1)
+            move_x = math.max(utils.lerp(move_x, -mouse_x / 2, 2, dt), offset_cap * -1)
         else
-            move_x = math.min(utils.lerp(move_x, -mouse_x / 2, 1, dt), offset_cap)
+            move_x = math.min(utils.lerp(move_x, -mouse_x / 2, 2, dt), offset_cap)
         end
 
         if move_y < 0 then
-            move_y = math.max(utils.lerp(move_y, -mouse_y / 2, 1, dt), offset_cap * -1)
+            move_y = math.max(utils.lerp(move_y, -mouse_y / 2, 2, dt), offset_cap * -1)
         else
-            move_y = math.min(utils.lerp(move_y, -mouse_y / 2, 1, dt), offset_cap)
+            move_y = math.min(utils.lerp(move_y, -mouse_y / 2, 2, dt), offset_cap)
         end
 
         local foregrounds = {self.electrical_poles, self.mountains}

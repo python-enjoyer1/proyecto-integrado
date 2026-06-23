@@ -43,6 +43,8 @@ local Player = {
     velocity = utils.Vector:new(),
     stats = {
         speed = DEFAULT_SPEED,
+        dash_limit = 3,
+        dash = 3,
         friction = 1, --R Floor friction
         attack_damage = 4, --R We should prolly replace this with "dmg bonus" since stuff will have predetermined dmg
         attack_speed = 5,
@@ -50,7 +52,7 @@ local Player = {
         knockback = 400,
         stagger = 25,
         souls = 15, --R In seconds perhaps?
-        soul_gain = 1, -- We could possibly add some randomness. --R extra soul gain
+        soul_gain = 3, -- We could possibly add some randomness. --R extra soul gain
         soul_limit = 25,
         essence = 0, -- Money.
         essence_gain = 5, -- Add some randomness.
@@ -222,7 +224,7 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
                         consts.PARRY_SOUND:stop()
                         consts.PARRY_SOUND:play()
                         self.states.idle = true
-                        self.stats.souls = math.min(self.stats.souls + 5, self.stats.soul_limit)
+                        self.stats.souls = math.min(self.stats.souls + self.stats.soul_gain * 1.5, self.stats.soul_limit)
 
                         events.freezeframe_duration = 0.15
                         if set.screenshake_allowed then
@@ -325,7 +327,7 @@ end
 
 function Player:draw()
     if self.states.dead then
-        love.graphics.setShader(shaders.black_white)
+        love.graphics.setShader(shaders.static)
     end
 
     self.animation:draw(self.position.x, self.position.y, self.angle, 1, set.shading, 0, 3)
@@ -350,6 +352,12 @@ function Player:punch()
     end
 end
 
+function Player:dash()
+    if not self.states.dead and self.stats.stun_duration <= 0 then
+        self.states.dash = true
+    end
+end
+
 function Player:mousepressed(button)
     if button == 1 then
         if self.holding[1] and not self.weapon_table[1].stats.hold_fire then
@@ -365,6 +373,10 @@ function Player:keypressed(key)
         self.stats.stun_duration = self.stats.stun_duration - self.stats.recovery_speed * self.slow_down
     elseif self.stats.stun_duration <= 0 then
         self.stats.stun_duration = 0
+    end
+
+    if key == set.keybinds.dash then
+        self:dash()
     end
 end
 
