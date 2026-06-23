@@ -3,6 +3,7 @@ local utils = require("utils")
 local consts = require("constants")
 local set = require("settings")
 local events = require("events")
+local shaders = require("shaders")
 
 local walk_animation = utils.Animation:new({speed = 0.08, looping = true})
 walk_animation:manage_spritesheet(consts.CONSUMER_PATH .. "consumer_walk.png", consts.CHARACTER_SIZE, consts.CHARACTER_SIZE, 7, 3)
@@ -111,9 +112,11 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
         self.stats.souls = math.max(self.stats.souls, 0)
 
         if self.stats.souls <= self.stats.soul_limit / 3 then
-            events.screenshake = true
-            events.screenshake_magnitude = 1.0
-            events.screenshake_duration = 0.1
+            if set.screenshake_allowed then
+                events.screenshake = true
+                events.screenshake_magnitude = 1.0
+                events.screenshake_duration = 0.1
+            end
         end
 
         if self.stats.souls <= 0 then
@@ -314,14 +317,19 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
         end
 
         if self.states.dead then
-            self.animation = fall_animation
+            self.animation = walk_animation
             update = false
         end
     end
 end
 
 function Player:draw()
+    if self.states.dead then
+        love.graphics.setShader(shaders.black_white)
+    end
+
     self.animation:draw(self.position.x, self.position.y, self.angle, 1, set.shading, 0, 3)
+    love.graphics.setShader()
 
     if set.debug then
         utils.draw_collision(self.hitbox)

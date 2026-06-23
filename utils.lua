@@ -241,11 +241,13 @@ function utils.Tilemap:generate()
                         index = 3,
                         type = "wall",
                         rotation = math.rad(180),
+                        side = "up"
                     }
                 else
                     self.tilemap[x][y] = {
                         index = 1,
-                        type = "wall"
+                        type = "wall",
+                        rotation = math.rad(180)
                     }
                 end
             elseif x == 1 and y == 1 then
@@ -259,29 +261,34 @@ function utils.Tilemap:generate()
                     self.tilemap[x][y] = {
                         index = 3,
                         type = "wall",
-                        rotation = math.rad(270)
+                        rotation = math.rad(270),
+                        side = "left"
                     }
                 else
                     self.tilemap[x][y] = {
-                        index = 1, type = "wall",
+                        index = 1,
+                        type = "wall",
                         rotation = math.rad(360)
                     }
                 end
             elseif x < self.size[1] and y == self.size[2] then
                 self.tilemap[x][y] = {
                     index = 3,
-                    type = "wall"
+                    type = "wall",
+                    side = "down"
                 }
             elseif x == self.size[1] and y < self.size[2] then
                 self.tilemap[x][y] = {
                     index = 3,
                     type = "wall",
-                    rotation = math.rad(270)
+                    rotation = math.rad(270),
+                    side = "right"
                 }
             elseif x == self.size[1] and y == self.size[2] then
                 self.tilemap[x][y] = {
                     index = 1,
-                    type = "wall"
+                    type = "wall",
+                    rotation = math.rad(270)
                 }
             else
                 self.tilemap[x][y] = {
@@ -306,8 +313,6 @@ end
 function utils.Tilemap:draw(camera_x, camera_y)
     for x = 1, self.size[1] do
         for y = 1, self.size[2] do
-            local rotation = 0
-
             local screen_x = (x - 1) * consts.TILE_SIZE
             local screen_y = (y - 1) * consts.TILE_SIZE
 
@@ -327,10 +332,58 @@ function utils.Tilemap:draw(camera_x, camera_y)
                         consts.TILE_SIZE / 2,
                         consts.TILE_SIZE / 2
                     )
-                elseif self.tilemap[x][y].type == "wall" then
-                    love.graphics.push()
+                end
+            end
+        end
+    end
+    for x = 1, self.size[1] do
+        for y = 1, self.size[2] do
+            local rotation = 0
+
+            local screen_x = (x - 1) * consts.TILE_SIZE
+            local screen_y = (y - 1) * consts.TILE_SIZE
+
+            local offset = 10
+
+            if screen_x < (consts.RENDER_WIDTH - camera_x) + offset and
+            screen_y < (consts.RENDER_HEIGHT - camera_y) + offset and
+            -screen_x < camera_x + offset and -screen_y < camera_y + offset then
+                if self.tilemap[x][y].type == "wall" then
                     if self.tilemap[x][y].rotation ~= nil then
                         rotation = self.tilemap[x][y].rotation
+                    end
+
+                    if set.shading then
+                        love.graphics.push()
+                        love.graphics.setColor(consts.SHADOW_COLOR)
+
+                        local shadow_offset = 3
+
+                        if self.tilemap[x][y].side ~= nil then
+                            if self.tilemap[x][y].side == "up" then
+                                love.graphics.translate(0, shadow_offset)
+                            elseif self.tilemap[x][y].side == "down" then
+                                love.graphics.translate(0, -shadow_offset)
+                            elseif self.tilemap[x][y].side == "left" then
+                                love.graphics.translate(shadow_offset, 0)
+                            elseif self.tilemap[x][y].side == "right" then
+                                love.graphics.translate(-shadow_offset, 0)
+                            end
+                        end
+
+                        love.graphics.draw(
+                            self.wall_tiles[self.tilemap[x][y].index],
+                            screen_x,
+                            screen_y,
+                            rotation,
+                            1,
+                            1,
+                            consts.TILE_SIZE / 2,
+                            consts.TILE_SIZE / 2
+                        )
+
+                        love.graphics.setColor(1, 1, 1)
+                        love.graphics.pop()
                     end
 
                     love.graphics.draw(
@@ -343,7 +396,6 @@ function utils.Tilemap:draw(camera_x, camera_y)
                         consts.TILE_SIZE / 2,
                         consts.TILE_SIZE / 2
                     )
-                    love.graphics.pop()
                 end
             end
         end

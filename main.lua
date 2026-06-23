@@ -264,13 +264,6 @@ function love.update(dt)
             end
         end
 
-        -- Shaders.
-        shaders.backgrounds[background_index]:send("resolution", {consts.RENDER_WIDTH, consts.RENDER_HEIGHT})
-        shaders.backgrounds[background_index]:send("time", time)
-
-        shaders.game_over:send("resolution", {consts.RENDER_WIDTH, consts.RENDER_HEIGHT})
-        shaders.game_over:send("time", time)
-
         if not events.game_over then
             if chromatic_abr_offset == nil then
                 chromatic_abr_offset = math.min(1 / player.stats.souls * 0.005, 0.01)
@@ -281,13 +274,11 @@ function love.update(dt)
             chromatic_abr_offset = utils.lerp(chromatic_abr_offset, 0, 1, dt)
         end
 
-        shaders.chromatic_abr:send("offset", {chromatic_abr_offset, chromatic_abr_offset})
-
-
-        -- HUD/GUI goes here.
-        soul_bar_bg:update(dt)
-        soul_bar:update(dt)
-        soul_bar_frame:update(dt)
+        if not events.game_over then
+            soul_bar_bg:update(dt)
+            soul_bar:update(dt)
+            soul_bar_frame:update(dt)
+        end
     else
         titlescreen:update(dt, mouse_x, mouse_y)
     end
@@ -313,24 +304,6 @@ function love.update(dt)
 
     cursor_selection_box.x = mouse_x - camera_x
     cursor_selection_box.y = mouse_y - camera_y
-
-    if events.screenshake_delay > 0 then
-        events.screenshake_delay = events.screenshake_delay - dt
-
-        if events.screenshake_delay <= 0 then
-            consts.PARRY_END_SOUND:stop()
-            consts.PARRY_END_SOUND:play()
-        end
-    elseif events.screenshake and events.screenshake_duration > 0 then
-        events.screenshake_duration = events.screenshake_duration - dt
-    elseif events.screenshake_duration <= 0 then
-        events.screenshake = false
-    end
-
-    if events.freezeframe_duration > 0 then
-        events.freezeframe_duration = events.freezeframe_duration - dt
-        dt = 0
-    end
 end
 
 function love.draw()
@@ -339,6 +312,14 @@ function love.draw()
     love.graphics.clear()
 
     if not titlescreen.show then
+        shaders.backgrounds[background_index]:send("resolution", {consts.RENDER_WIDTH, consts.RENDER_HEIGHT})
+        shaders.backgrounds[background_index]:send("time", time)
+
+        shaders.game_over:send("resolution", {consts.RENDER_WIDTH, consts.RENDER_HEIGHT})
+        shaders.game_over:send("time", time)
+
+        shaders.chromatic_abr:send("offset", {chromatic_abr_offset, chromatic_abr_offset})
+
         if not events.game_over then
             love.graphics.setShader(shaders.backgrounds[background_index])
         else
@@ -350,6 +331,10 @@ function love.draw()
 
         love.graphics.setCanvas(decal_canvas)
         love.graphics.clear()
+
+        if not set.gore then
+            love.graphics.setColor(0, 0, 0)
+        end
         for decal = 1, #decals do
             local width, height = decals[decal].image:getWidth(), decals[decal].image:getHeight()
             love.graphics.draw(
@@ -401,17 +386,21 @@ function love.draw()
         love.graphics.pop()
 
         -- HUD/GUI goes here.
-        soul_bar_bg:draw(65, 20)
-        love.graphics.setScissor(9 * scale_x, 4 * scale_y, 35 * player.stats.souls / player.stats.soul_limit * scale_x, 32 * scale_y)
-        soul_bar:draw(65, 20, 0, 1, set.shading, 0, 4) --R shit above is being held up by hopes and prayers
-        love.graphics.setScissor()
-        soul_bar_frame:draw(65, 20)
+        if not events.game_over then
+            soul_bar_bg:draw(65, 20)
+            love.graphics.setScissor(9 * scale_x, 4 * scale_y, 35 * player.stats.souls / player.stats.soul_limit * scale_x, 32 * scale_y)
+            soul_bar:draw(65, 20, 0, 1, set.shading, 0, 4) --R shit above is being held up by hopes and prayers
+            love.graphics.setScissor()
+            soul_bar_frame:draw(65, 20)
+        end
 
         for weapon = 1, #weapon_table do
             if weapon_table[weapon].hold then
-                love.graphics.setColor(1, 1, 1, 0.5)
-                love.graphics.print(weapon_table[weapon].ammo, 10, 340)
-                love.graphics.setColor(1, 1, 1)
+                if weapon_table[weapon].ammo > 0 then
+                    love.graphics.print(weapon_table[weapon].ammo .. " BULLETS", 10, 340)
+                else
+                    love.graphics.print("NO AMMO :(", 10, 340)
+                end
             end
         end
 
@@ -452,6 +441,15 @@ function love.draw()
 
         love.graphics.setColor(1, 1, 1)
 
+        if events.game_over then
+            love.graphics.push()
+            love.graphics.translate(-(vcr_osd_mono:getWidth("OBLITERATED") / 2) * 2, -(vcr_osd_mono:getHeight("OBLITERATED") / 2) * 2)
+            love.graphics.setColor(1, 0, 0)
+            love.graphics.print("OBLITERATED", consts.RENDER_WIDTH / 2, consts.RENDER_HEIGHT / 2 - 50, 0, 2, 2)
+            love.graphics.setColor(1, 1, 1)
+            love.graphics.pop()
+        end
+
         if set.debug then
             utils.draw_collision({x = mouse_x, y = mouse_y, width = 9, height = 8, types = {"cursorselectionbox"}})
         end
@@ -463,13 +461,6 @@ function love.draw()
         love.graphics.setColor(1, 1, 1)
     end
 
-    if events.game_over then
-        love.graphics.push()
-        love.graphics.translate(-(vcr_osd_mono:getWidth("GAME OVER") / 2) * 2, -(vcr_osd_mono:getHeight("GAME OVER") / 2) * 2)
-        love.graphics.print("GAME OVER", consts.RENDER_WIDTH / 2, consts.RENDER_HEIGHT / 2, 0, 2, 2)
-        love.graphics.pop()
-    end
-
     cursor:draw(mouse_x, mouse_y, 0, 1, set.shading, 0, 2)
 
     if events.screenshake and (events.screenshake_delay or 0) <= 0 and not paused then
@@ -479,10 +470,7 @@ function love.draw()
     end
 
     love.graphics.setCanvas()
-    if not titlescreen.show then
-        love.graphics.setShader(shaders.chromatic_abr)
-    end
-
+    love.graphics.setShader(shaders.chromatic_abr)
     love.graphics.draw(canvas, 0, 0, 0, scale_x, scale_y)
     love.graphics.setShader()
 end

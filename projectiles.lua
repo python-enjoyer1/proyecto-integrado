@@ -43,15 +43,14 @@ function projectiles.update(dt, enemy_table, decals)
                 enemy.knockback_velx = math.cos(angle) * force
                 enemy.knockback_vely = math.sin(angle) * force
 
-                local image = consts.BLOOD[1]
                 table.insert(
                     decals,
                     {
-                        image = image,
+                        image = consts.BLOOD[1],
                         x = enemy.position.x,
                         y = enemy.position.y,
                         rotation = math.rad(love.math.random(0, 360)),
-                        scale = math.min(love.math.random(), 0.5)
+                        scale = math.max(0.5, love.math.random())
                     }
                 )
                 enemy.stats.hp = enemy.stats.hp - proj.damage

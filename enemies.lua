@@ -3,6 +3,7 @@ local utils = require("utils")
 local consts = require("constants")
 local set = require("settings")
 local events = require("events")
+local shaders = require("shaders")
 
 local enemies = {}
 
@@ -200,11 +201,10 @@ function enemies.Enemy:update(dt, target, slow_down, tilemap, enemy_table, weapo
             --R so enemy doesnt get fucking comboed in 1 punch
             if not self.hit_this_swing then
                 if utils.check_collision(self.hitbox, target.punch_hurtbox) and not self.states.fall then
-                    local image = consts.BLOOD[1]
                     table.insert(
                         decals,
                         {
-                            image = image,
+                            image = consts.BLOOD[1],
                             x = self.position.x,
                             y = self.position.y,
                             rotation = math.rad(love.math.random(0, 360)),
@@ -308,18 +308,17 @@ function enemies.Enemy:update(dt, target, slow_down, tilemap, enemy_table, weapo
     else
         self.animation = self.death_animation
         if self.animation.finished and self.render then
-            local image = consts.BLOOD[1]
+            self.render = false
             table.insert(
                 decals,
                 {
-                    image = image,
+                    image = consts.BLOOD[1],
                     x = self.position.x,
                     y = self.position.y,
                     rotation = math.rad(love.math.random(0, 360)),
                     scale = 1
                 }
             )
-            self.render = false
             if set.screenshake_allowed then
                 events.screenshake = true
                 events.screenshake_duration = 0.1
