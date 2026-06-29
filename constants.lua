@@ -92,7 +92,9 @@ end
 consts.GAME_OVER_MESSAGES = {
     "OBLITERATED",
     "CONSUMED",
-    "DECIMATED"
+    "DECIMATED",
+    "ERADICATED",
+    "DESECRATED"
 }
 
 return consts

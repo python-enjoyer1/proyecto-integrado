@@ -8,6 +8,9 @@ utils.Vector = {x = 0, y = 0}
 utils.Animation = {speed = 1, current_frame = 1}
 utils.Tilemap = {} -- Higher floors refer to earlier floors, since you descend in this game.
 
+utils.decal_update = false
+local decal
+
 function utils.Vector:new(o)
     o = o or {}
     setmetatable(o, self)
@@ -417,6 +420,43 @@ end
 function utils.generate_seed()
     local seed = math.floor(os.time() + (love.timer.getTime() * 30666738388173)) % 2147483647
     return seed
+end
+
+function utils.text_outline(text, x, y, offset, color, scale)
+    offset = offset or 1
+    color = color or {1, 1, 1}
+    scale = scale or 1
+
+    love.graphics.setColor(color)
+
+    love.graphics.print(text, x + offset, y, 0, scale, scale)
+    love.graphics.print(text, x - offset, y, 0, scale, scale)
+    love.graphics.print(text, x, y + offset, 0, scale, scale)
+    love.graphics.print(text, x, y - offset, 0, scale, scale)
+
+    love.graphics.setColor(1, 1, 1)
+end
+
+function utils.add_decal(d)
+    utils.decal_update = true
+    decal = d
+end
+
+-- Use in draw
+function utils.draw_decal()
+    if utils.decal_update then
+        love.graphics.draw(
+            decal.image,
+            decal.x,
+            decal.y,
+            decal.rotation,
+            decal.scale,
+            decal.scale,
+            decal.image:getWidth() / 2,
+            decal.image:getHeight() / 2
+        )
+        utils.decal_update = false
+    end
 end
 
 return utils

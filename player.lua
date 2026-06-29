@@ -36,6 +36,11 @@ local DEFAULT_SPEED = 150
 
 local update = true
 
+local image = love.graphics.newImage(consts.PARTICLE_PATH .. "red.png")
+local particle_system = love.graphics.newParticleSystem(image)
+
+local dash_timer = 1.0
+
 -- If you can think of more stats, then, add them.
 --R Remove the stats that you think wouldn't work, aight?
 local Player = {
@@ -45,6 +50,7 @@ local Player = {
         speed = DEFAULT_SPEED,
         dash_limit = 3,
         dash = 3,
+        dash_speed = 10,
         friction = 1, --R Floor friction
         attack_damage = 4, --R We should prolly replace this with "dmg bonus" since stuff will have predetermined dmg
         attack_speed = 5,
@@ -66,12 +72,16 @@ local Player = {
         stability = 30,
         recovery_speed = 0.5 -- How much faster you get up while spamming space.
     },
+    cooldowns = {
+        dash = 1.0
+    },
     states = {
         idle = true,
         punch = false,
         stunned = false,
         fall = false,
         dead = false,
+        dash = false
     },
     hit_this_swing = false,
     parried_this_swing = false,
@@ -167,11 +177,38 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
             end
         end
 
-        self.velocity.x = movement_vector.x * (speed)
-        self.velocity.y = movement_vector.y * (speed)
+        self.velocity.x = utils.lerp(self.velocity.x, movement_vector.x * (speed), 50, dt)
+        self.velocity.y = utils.lerp(self.velocity.y, movement_vector.y * (speed), 50, dt)
+
+        if self.states.dash then
+            self.velocity.x = self.velocity.x * self.stats.dash_speed
+            self.velocity.y = self.velocity.y * self.stats.dash_speed
+            self.stats.dash = math.max(self.stats.dash - 1, 0)
+            self.states.dash = false
+            self.iframe_timer = 0.5
+        elseif self.stats.dash < self.stats.dash_limit then
+            if dash_timer <= 0 then
+                self.stats.dash = math.min(self.stats.dash + 1, self.stats.dash_limit)
+                dash_timer = self.cooldowns.dash
+            else
+                dash_timer = dash_timer - dt
+            end
+        end
 
         self.position.x = self.position.x + (self.velocity.x * dt)
         self.position.y = self.position.y + (self.velocity.y * dt)
+
+        if self.position.x > 0 then
+            self.position.x = math.min(self.position.x, (tilemap.size[1] * consts.TILE_SIZE) - consts.CHARACTER_SIZE)
+        else
+            self.position.x = math.max(self.position.x, consts.TILE_SIZE + consts.CHARACTER_SIZE)
+        end
+
+        if self.position.y > 0 then
+            self.position.y = math.min(self.position.y, (tilemap.size[2] * consts.TILE_SIZE) - consts.CHARACTER_SIZE)
+        else
+            self.position.y = math.max(self.position.y, consts.TILE_SIZE + consts.CHARACTER_SIZE)
+        end
 
         mouse_x, mouse_y = love.mouse.getPosition()
         mouse_x = mouse_x / scale_x
@@ -319,7 +356,9 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
         end
 
         if self.states.dead then
-            self.animation = walk_animation
+            events.screenshake = true
+            events.screenshake_magnitude = 5
+            events.screenshake_duration = 0.5
             update = false
         end
     end
@@ -375,7 +414,7 @@ function Player:keypressed(key)
         self.stats.stun_duration = 0
     end
 
-    if key == set.keybinds.dash then
+    if key == set.keybinds.dash and self.stats.dash > 0 then
         self:dash()
     end
 end

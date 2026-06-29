@@ -21,7 +21,7 @@ function projectiles.add(x, y, angle, stats) --R projectiles yum yum
     })
 end
 
-function projectiles.update(dt, enemy_table, decals)
+function projectiles.update(dt, enemy_table, tilemap)
     for i = #projectiles, 1, -1 do
         local proj = projectiles[i]
         proj.x = proj.x + math.cos(proj.angle) * proj.speed * dt
@@ -29,6 +29,12 @@ function projectiles.update(dt, enemy_table, decals)
 
         proj.hitbox.x = proj.x
         proj.hitbox.y = proj.y
+
+        for wall = 1, #tilemap.walls do
+            if utils.check_collision(proj.hitbox, tilemap.walls[wall]) then
+                proj.active = false
+            end
+        end
 
         for j = 1, #enemy_table do
             local enemy = enemy_table[j]
@@ -43,16 +49,13 @@ function projectiles.update(dt, enemy_table, decals)
                 enemy.knockback_velx = math.cos(angle) * force
                 enemy.knockback_vely = math.sin(angle) * force
 
-                table.insert(
-                    decals,
-                    {
-                        image = consts.BLOOD[1],
-                        x = enemy.position.x,
-                        y = enemy.position.y,
-                        rotation = math.rad(love.math.random(0, 360)),
-                        scale = math.max(0.5, love.math.random())
-                    }
-                )
+                utils.add_decal({
+                    image = consts.BLOOD[love.math.random(#consts.BLOOD)],
+                    x = enemy.position.x,
+                    y = enemy.position.y,
+                    rotation = math.rad(love.math.random(0, 360)),
+                    scale = 0.5
+                })
                 enemy.stats.hp = enemy.stats.hp - proj.damage
                 if enemy.stats.hp <= 0 then
                     enemy.states.dead = true

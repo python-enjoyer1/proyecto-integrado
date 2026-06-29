@@ -12,12 +12,13 @@ local titlescreen = require("titlescreen")
 
 local canvas
 local decal_canvas
-local decals
 
 -- Declare variables here, local please.
 local desktop_width, desktop_height
 local scale_x, scale_y
 local mouse_x, mouse_y
+
+local sleep
 
 local camera_movement
 local camera_x
@@ -57,6 +58,9 @@ local seed
 
 local chromatic_abr_offset
 
+local min_dt
+local next_time
+
 --R temporary shit below
 local spawn_timer = 0
 local spawn_interval = 5
@@ -66,13 +70,18 @@ function love.load()
     love.mouse.setVisible(false)
     love.graphics.setDefaultFilter(consts.DEFAULT_FILTER, consts.DEFAULT_FILTER)
 
+    if set.fps_cap ~= nil then
+        min_dt = 1 / set.fps_cap
+        next_time = love.timer.getTime()
+    end
+
     quit_hold_time = 3
     quit_timer = quit_hold_time
     quitting = false
 
     paused = false
 
-    titlescreen.show = true
+    titlescreen.show = false
     titlescreen:init()
 
     seed = utils.generate_seed()
@@ -95,11 +104,6 @@ function love.load()
 
     canvas = love.graphics.newCanvas(consts.RENDER_WIDTH, consts.RENDER_HEIGHT)
     canvas:setFilter(consts.DEFAULT_FILTER, consts.DEFAULT_FILTER)
-
-    decal_canvas = love.graphics.newCanvas(consts.RENDER_WIDTH, consts.RENDER_HEIGHT)
-    decal_canvas:setFilter(consts.DEFAULT_FILTER, consts.DEFAULT_FILTER)
-
-    decals = {}
 
     camera_movement = 0
     camera_x = 0
@@ -138,6 +142,9 @@ function love.load()
     local map_w = tilemap_width * consts.TILE_SIZE
     local map_h = tilemap_height * consts.TILE_SIZE
 
+    decal_canvas = love.graphics.newCanvas(map_w, map_h)
+    decal_canvas:setFilter(consts.DEFAULT_FILTER, consts.DEFAULT_FILTER)
+
     for i = 1, 6 do
         local x = love.math.random(consts.TILE_SIZE, map_w - consts.TILE_SIZE)
         local y = love.math.random(consts.TILE_SIZE, map_h - consts.TILE_SIZE)
@@ -168,6 +175,14 @@ function love.load()
 end
 
 function love.update(dt)
+    if set.vsync then
+        set.fps_cap = nil
+    end
+
+    if set.fps_cap ~= nil then
+        next_time = next_time + min_dt
+    end
+
     mouse_x, mouse_y = love.mouse.getPosition()
     mouse_x = (mouse_x / scale_x)
     mouse_y = (mouse_y / scale_y)
@@ -249,7 +264,7 @@ function love.update(dt)
                 end
 
                 for item = 1, #enemy_table do
-                    enemy_table[item]:update(dt, player, slow_down, tilemap, enemy_table, weapon_table, decals)
+                    enemy_table[item]:update(dt, player, slow_down, tilemap, enemy_table, weapon_table)
                 end
 
                 player:update(dt, scale_x, scale_y, camera_x, camera_y, enemy_table, slow_down, tilemap, weapon_table)
@@ -260,7 +275,7 @@ function love.update(dt)
                     end
                 end
 
-                projs.update(dt, enemy_table, decals)
+                projs.update(dt, enemy_table, tilemap)
             end
         end
 
@@ -332,35 +347,27 @@ function love.draw()
         love.graphics.rectangle("fill", 0, 0, consts.RENDER_WIDTH, consts.RENDER_HEIGHT)
         love.graphics.setShader()
 
-        love.graphics.setCanvas(decal_canvas)
-        love.graphics.clear()
-
-        if not set.gore then
-            love.graphics.setColor(0, 0, 0)
-        end
-        for decal = 1, #decals do
-            local width, height = decals[decal].image:getWidth(), decals[decal].image:getHeight()
-            love.graphics.draw(
-                decals[decal].image,
-                decals[decal].x,
-                decals[decal].y,
-                decals[decal].rotation,
-                decals[decal].scale,
-                decals[decal].scale,
-                width / 2,
-                height / 2
-            )
-        end
-        love.graphics.setColor(1, 1, 1)
-        love.graphics.setCanvas(canvas)
-
         love.graphics.push()
 
         love.graphics.translate(camera_x, camera_y)
 
         tilemap:draw(camera_x, camera_y)
 
-        love.graphics.draw(decal_canvas, 0, 0)
+        love.graphics.pop()
+        love.graphics.setCanvas(decal_canvas)
+
+        if not set.gore then
+            love.graphics.setColor(0, 0, 0)
+        end
+
+        utils.draw_decal()
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.setCanvas(canvas)
+
+        love.graphics.draw(decal_canvas, camera_x, camera_y)
+        love.graphics.push()
+
+        love.graphics.translate(camera_x, camera_y)
 
         projs.draw()
 
@@ -400,9 +407,17 @@ function love.draw()
         for weapon = 1, #weapon_table do
             if weapon_table[weapon].hold then
                 if weapon_table[weapon].ammo > 0 then
+                    utils.text_outline(weapon_table[weapon].ammo .. " BULLETS", 10, 340)
+
+                    love.graphics.setColor(0, 0, 0)
                     love.graphics.print(weapon_table[weapon].ammo .. " BULLETS", 10, 340)
+                    love.graphics.setColor(1, 1, 1)
                 else
+                    utils.text_outline("NO AMMO :(", 10, 340)
+
+                    love.graphics.setColor(0, 0, 0)
                     love.graphics.print("NO AMMO :(", 10, 340)
+                    love.graphics.setColor(1, 1, 1)
                 end
             end
         end
@@ -410,11 +425,16 @@ function love.draw()
         if set.show_fps and not paused then -- Unholy math here.
             local length = #tostring(fps)
             local x = (1.0 / length) * (consts.RENDER_WIDTH * length * 0.95) + (3 - length) * 7
+
             love.graphics.setColor(0, 0, 0, 0.5)
             love.graphics.rectangle("fill", x - length, 1, length * 9, 12, 3, 3)
             love.graphics.setColor(1, 1, 1)
 
+            utils.text_outline(fps, x, 0)
+
+            love.graphics.setColor(0, 0, 0)
             love.graphics.print(fps, x, 0)
+            love.graphics.setColor(1, 1, 1)
         end
 
         if events.freezeframe_duration > 0 then
@@ -450,10 +470,7 @@ function love.draw()
             love.graphics.translate(-(vcr_osd_mono:getWidth(events.game_over_message) / 2) * 2, -(vcr_osd_mono:getHeight(events.game_over_message) / 2) * 2)
 
             -- Outline.
-            love.graphics.print(events.game_over_message, consts.RENDER_WIDTH / 2 - 1, consts.RENDER_HEIGHT / 2 - 100, 0, 2, 2)
-            love.graphics.print(events.game_over_message, consts.RENDER_WIDTH / 2 + 1, consts.RENDER_HEIGHT / 2 - 100, 0, 2, 2)
-            love.graphics.print(events.game_over_message, consts.RENDER_WIDTH / 2, consts.RENDER_HEIGHT / 2 - 100 - 1, 0, 2, 2)
-            love.graphics.print(events.game_over_message, consts.RENDER_WIDTH / 2, consts.RENDER_HEIGHT / 2 - 100 + 1, 0, 2, 2)
+            utils.text_outline(events.game_over_message, consts.RENDER_WIDTH / 2, consts.RENDER_HEIGHT / 2 - 100, 1, {1, 1, 1}, 2)
 
             love.graphics.setColor(0, 0, 0)
             love.graphics.print(events.game_over_message, consts.RENDER_WIDTH / 2, consts.RENDER_HEIGHT / 2 - 100, 0, 2, 2)
@@ -481,11 +498,20 @@ function love.draw()
     end
 
     love.graphics.setCanvas()
-    if not paused then
+    if not paused and set.ca_allowed then
         love.graphics.setShader(shaders.chromatic_abr)
     end
     love.graphics.draw(canvas, 0, 0, 0, scale_x, scale_y)
     love.graphics.setShader()
+
+    if set.fps_cap ~= nil then
+        local current_time = love.timer.getTime()
+        if next_time <= current_time then
+            next_time = current_time
+            return
+        end
+        love.timer.sleep(next_time - current_time)
+    end
 end
 
 function love.mousepressed(x, y, button)

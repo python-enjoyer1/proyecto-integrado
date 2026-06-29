@@ -79,14 +79,33 @@ function enemies.Enemy:new(o)
     o.knockback_vely = 0
     o.render = true
     o.damage = true
+    o.wanted_velocity = {x = 0, y = 0}
     return o
 end --R Main.Enemy is shared so i shoved it in here instead
 
-function enemies.Enemy:update(dt, target, slow_down, tilemap, enemy_table, weapon_table, decals)
+function enemies.Enemy:update(dt, target, slow_down, tilemap, enemy_table, weapon_table)
     if not self.states.dead then
+        self.movement_vector.x = 0
+        self.movement_vector.y = 0
+
+        self.wanted_velocity.x = 0
+        self.wanted_velocity.y = 0
+
         local speed = self.stats.speed * slow_down
         self.punch_animation.speed = (self.cooldowns.punch / 10) / slow_down
         self.walk_animation.speed = 55.0 / (speed * 5)
+
+        if self.position.x > 0 then
+            self.position.x = math.min(self.position.x, (tilemap.size[1] * consts.TILE_SIZE) - consts.CHARACTER_SIZE)
+        else
+            self.position.x = math.max(self.position.x, consts.TILE_SIZE + consts.CHARACTER_SIZE)
+        end
+
+        if self.position.y > 0 then
+            self.position.y = math.min(self.position.y, (tilemap.size[2] * consts.TILE_SIZE) - consts.CHARACTER_SIZE)
+        else
+            self.position.y = math.max(self.position.y, consts.TILE_SIZE + consts.CHARACTER_SIZE)
+        end
 
         if self.states.chasing then
             self.movement_vector.x = (target.position.x - self.position.x)
@@ -96,31 +115,7 @@ function enemies.Enemy:update(dt, target, slow_down, tilemap, enemy_table, weapo
             self.movement_vector.y = (self.position.y - target.position.y)
         end
 
-        for enemy = 1, #enemy_table do
-            if enemy_table[enemy].position.x ~= self.position.x and enemy_table[enemy].position.y ~= self.position.y then
-                local distance_x = self.position.x - enemy_table[enemy].position.x
-                local distance_y = self.position.y - enemy_table[enemy].position.y
-                local distance = math.sqrt(distance_x ^ 2 + distance_y ^ 2)
-                local min_distance = 30
-                local direction_x = distance_x
-                local direction_y = distance_y
-
-                if distance == 0 then
-                    direction_x = love.math.random(-1, 1) * 2 - 1
-                    direction_y = love.math.random(-1, 1) * 2 - 1
-                end
-
-                if distance < min_distance then
-                    local overlap = min_distance - distance
-                    local push_x = overlap * direction_x
-                    local push_y = overlap * direction_y
-                    local push_force = 3
-
-                    self.movement_vector.x = self.movement_vector.x + (push_x * push_force)
-                    self.movement_vector.y = self.movement_vector.y + (push_y * push_force)
-                end
-            end
-        end
+        self.movement_vector:normalize()
 
         local distance = math.sqrt((target.position.x - self.position.x) ^ 2 + (target.position.y - self.position.y) ^ 2)
         local min_distance = 30
@@ -134,10 +129,37 @@ function enemies.Enemy:update(dt, target, slow_down, tilemap, enemy_table, weapo
                 end
             end
 
+            for item = 1, #enemy_table do
+                local enemy = enemy_table[item]
+
+                if enemy ~= self then
+                    local dx = self.position.x - enemy.position.x
+                    local dy = self.position.y - enemy.position.y
+
+                    local enemy_distance = math.sqrt(dx ^ 2 + dy ^ 2)
+                    local min_enemy_distance = 50
+
+                    local push_x = (dx / enemy_distance)
+                    local push_y = (dy / enemy_distance)
+
+                    local force = (min_enemy_distance - enemy_distance) / min_distance
+
+                    if enemy_distance <= min_enemy_distance and enemy_distance > 0 then -- Avoid division by zero.
+                        self.movement_vector.x = self.movement_vector.x + push_x * force
+                        self.movement_vector.y = self.movement_vector.y + push_y * force
+                    end
+                end
+            end
+
             self.movement_vector:normalize()
 
-            self.velocity.x = self.movement_vector.x * speed
-            self.velocity.y = self.movement_vector.y * speed
+            self.wanted_velocity = {
+                x = self.wanted_velocity.x + self.movement_vector.x * speed,
+                y = self.wanted_velocity.y + self.movement_vector.y * speed
+            }
+
+            self.velocity.x = utils.lerp(self.velocity.x, self.wanted_velocity.x, 50, dt)
+            self.velocity.y = utils.lerp(self.velocity.y, self.wanted_velocity.y, 50, dt)
 
             if self.stats.stun_duration <= 0 then
                 self.position.x = self.position.x + (self.velocity.x * dt)
@@ -201,16 +223,14 @@ function enemies.Enemy:update(dt, target, slow_down, tilemap, enemy_table, weapo
             --R so enemy doesnt get fucking comboed in 1 punch
             if not self.hit_this_swing then
                 if utils.check_collision(self.hitbox, target.punch_hurtbox) and not self.states.fall then
-                    table.insert(
-                        decals,
-                        {
-                            image = consts.BLOOD[1],
-                            x = self.position.x,
-                            y = self.position.y,
-                            rotation = math.rad(love.math.random(0, 360)),
-                            scale = math.max(0.5, love.math.random())
-                        }
-                    )
+                    utils.add_decal({
+                        image = consts.BLOOD[love.math.random(#consts.BLOOD)],
+                        x = self.position.x,
+                        y = self.position.y,
+                        rotation = math.rad(love.math.random(0, 360)),
+                        scale = 1
+                    })
+
                     if target.stats.stagger < self.stats.stability then
                         self.hit_this_swing = true
 
@@ -307,17 +327,14 @@ function enemies.Enemy:update(dt, target, slow_down, tilemap, enemy_table, weapo
     else
         self.animation = self.death_animation
         if self.animation.finished and self.render then
+            utils.add_decal({
+                image = consts.BLOOD[love.math.random(#consts.BLOOD)],
+                x = self.position.x,
+                y = self.position.y,
+                rotation = math.rad(love.math.random(0, 360)),
+                scale = 1.5
+            })
             self.render = false
-            table.insert(
-                decals,
-                {
-                    image = consts.BLOOD[1],
-                    x = self.position.x,
-                    y = self.position.y,
-                    rotation = math.rad(love.math.random(0, 360)),
-                    scale = 1
-                }
-            )
             if set.screenshake_allowed then
                 events.screenshake = true
                 events.screenshake_duration = 0.1
