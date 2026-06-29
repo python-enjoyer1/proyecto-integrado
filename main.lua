@@ -423,28 +423,29 @@ function love.draw()
         end
 
         if set.show_fps and not paused then -- Unholy math here.
-            local length = #tostring(fps)
+            local length = #tostring(fps .. " FPS")
             local x = (1.0 / length) * (consts.RENDER_WIDTH * length * 0.95) + (3 - length) * 7
 
             love.graphics.setColor(0, 0, 0, 0.5)
             love.graphics.rectangle("fill", x - length, 1, length * 9, 12, 3, 3)
             love.graphics.setColor(1, 1, 1)
 
-            utils.text_outline(fps, x, 0)
+            utils.text_outline(fps .. " FPS", x, 0)
 
             love.graphics.setColor(0, 0, 0)
-            love.graphics.print(fps, x, 0)
+            love.graphics.print(fps .. " FPS", x, 0)
             love.graphics.setColor(1, 1, 1)
         end
 
         if events.freezeframe_duration > 0 then
-            love.graphics.setColor(1, 1, 1, .3)
+            love.graphics.setColor(1, 1, 1, 0.3)
             love.graphics.rectangle("fill", 0, 0, consts.RENDER_WIDTH, consts.RENDER_HEIGHT)
             love.graphics.setColor(1, 1, 1)
         end
 
         if quitting and not paused then
-            love.graphics.setColor(1, 1, 1, 0.5)
+            utils.text_outline("QUITTING...", 5, 345, 1, {1, 1, 1, 0.5})
+            love.graphics.setColor(0, 0, 0, 0.5)
             love.graphics.print("QUITTING...", 5, 345)
             love.graphics.setColor(1, 1, 1)
         end
@@ -455,8 +456,9 @@ function love.draw()
             love.graphics.setColor(1, 1, 1)
             love.graphics.push()
             love.graphics.translate(-(vcr_osd_mono:getWidth("PAUSED") / 2), -(vcr_osd_mono:getHeight("PAUSED") / 2))
+            utils.text_outline("PAUSED", consts.RENDER_WIDTH / 2, consts.RENDER_HEIGHT / 2)
+            love.graphics.setColor(0, 0, 0)
             love.graphics.print("PAUSED", consts.RENDER_WIDTH / 2, consts.RENDER_HEIGHT / 2)
-            love.graphics.setColor(1, 1, 1)
             love.graphics.pop()
         end
 

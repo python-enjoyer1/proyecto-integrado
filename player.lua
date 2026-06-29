@@ -118,6 +118,19 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
             end
         end
 
+        for item = 1, #weapon_table do
+            if self.stats.ammo_boost > 1 then
+                local weapon = weapon_table[item]
+
+                if weapon.boosted == nil then
+                    weapon.ammo = weapon.ammo * self.stats.ammo_boost
+                    weapon.boosted = true
+                end
+            else
+                break
+            end
+        end
+
         local movement_vector = utils.Vector:new()
 
         self.stats.souls = self.stats.souls - dt * slow_down
@@ -132,6 +145,9 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
         end
 
         if self.stats.souls <= 0 then
+            punch_sound:setPitch(5.0)
+            punch_sound:play()
+            events.freezeframe_duration = 0.1
             self.states.dead = true
             events.game_over = true
         end
@@ -365,12 +381,9 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
 end
 
 function Player:draw()
-    if self.states.dead then
-        love.graphics.setShader(shaders.static)
+    if not self.states.dead then
+        self.animation:draw(self.position.x, self.position.y, self.angle, 1, set.shading, 0, 3)
     end
-
-    self.animation:draw(self.position.x, self.position.y, self.angle, 1, set.shading, 0, 3)
-    love.graphics.setShader()
 
     if set.debug then
         utils.draw_collision(self.hitbox)

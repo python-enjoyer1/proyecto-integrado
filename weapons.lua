@@ -37,8 +37,8 @@ function weapons.HeavyGun:new(o) --R we should js replace this with "Gun" we can
     o.mouse_on = false
     o.whiteout_shader = love.graphics.newShader("stuff/shaders/whiteout.fs")
     o.hold = false
-    o.distance = 100
-    o.max_distance = 45
+    o.squared_distance = 10000
+    o.squared_max_distance = 2025
     o.ammo = 30
 
     return o
@@ -46,9 +46,12 @@ end
 
 function weapons.HeavyGun:update(dt, mouse_selection_box, player)
     self.player = player
-    self.distance = math.sqrt((player.position.x - self.position.x) ^ 2 + (player.position.y - self.position.y) ^ 2)
+    -- The reason I am using squared distance is because square roots have not great performance.
+    self.squared_distance = (player.position.x - self.position.x) ^ 2 + (player.position.y - self.position.y) ^ 2
     self.interact_box.x = self.position.x
     self.interact_box.y = self.position.y
+
+    self.ammo = math.floor(self.ammo)
 
     if player.states.dead then
         self.hold = false
@@ -94,7 +97,7 @@ function weapons.HeavyGun:draw()
             love.graphics.setColor(1, 1, 1)
         end
 
-        if (self.mouse_on or self.distance <= self.max_distance) and not self.hold then
+        if (self.mouse_on or self.squared_distance <= self.squared_max_distance) and not self.hold then
             local offset = 1
             love.graphics.setShader(self.whiteout_shader)
             love.graphics.draw(self.sprite, self.position.x + offset, self.position.y, math.rad(self.rotation), 0.5, 0.5, self.image_dimensions[1] / 2, self.image_dimensions[2] / 2)
@@ -116,7 +119,7 @@ function weapons.HeavyGun:draw()
 end
 
 function weapons.HeavyGun:mousepressed(button)
-    if button == 2 and self.mouse_on and self.distance <= self.max_distance and not self.hold then
+    if button == 2 and self.mouse_on and self.squared_distance <= self.squared_max_distance and not self.hold then
         self.hold = true
     elseif button == 2 and self.hold then
         self.hold = false
@@ -124,7 +127,7 @@ function weapons.HeavyGun:mousepressed(button)
 end
 
 function weapons.HeavyGun:keypressed(key)
-    if key == set.keybinds.pick_up and self.distance <= self.max_distance and not self.hold then
+    if key == set.keybinds.pick_up and self.squared_distance <= self.squared_max_distance and not self.hold then
         self.hold = true
     elseif key == set.keybinds.pick_up and self.hold then
         self.hold = false

@@ -80,6 +80,7 @@ function enemies.Enemy:new(o)
     o.render = true
     o.damage = true
     o.wanted_velocity = {x = 0, y = 0}
+    o.neighbors = {}
     return o
 end --R Main.Enemy is shared so i shoved it in here instead
 
@@ -129,22 +130,28 @@ function enemies.Enemy:update(dt, target, slow_down, tilemap, enemy_table, weapo
                 end
             end
 
-            for item = 1, #enemy_table do
-                local enemy = enemy_table[item]
+            self:manage_neighbors(enemy_table)
+
+            for item = 1, #self.neighbors do
+                local enemy = self.neighbors[item]
 
                 if enemy ~= self then
                     local dx = self.position.x - enemy.position.x
                     local dy = self.position.y - enemy.position.y
-
-                    local enemy_distance = math.sqrt(dx ^ 2 + dy ^ 2)
                     local min_enemy_distance = 50
 
-                    local push_x = (dx / enemy_distance)
-                    local push_y = (dy / enemy_distance)
+                    local squared_enemy_distance = dx ^ 2 + dy ^ 2
+                    local squared_min_enemy_distance = min_enemy_distance ^ 2
 
-                    local force = (min_enemy_distance - enemy_distance) / min_distance
+                    -- Square roots are computationally expensive.
+                    if squared_enemy_distance <= squared_min_enemy_distance and squared_enemy_distance > 0 then -- Avoid division by zero.
+                        local enemy_distance = math.sqrt(squared_enemy_distance)
 
-                    if enemy_distance <= min_enemy_distance and enemy_distance > 0 then -- Avoid division by zero.
+                        local push_x = (dx / enemy_distance)
+                        local push_y = (dy / enemy_distance)
+
+                        local force = (min_enemy_distance - enemy_distance) / min_distance
+
                         self.movement_vector.x = self.movement_vector.x + push_x * force
                         self.movement_vector.y = self.movement_vector.y + push_y * force
                     end
@@ -332,7 +339,7 @@ function enemies.Enemy:update(dt, target, slow_down, tilemap, enemy_table, weapo
                 x = self.position.x,
                 y = self.position.y,
                 rotation = math.rad(love.math.random(0, 360)),
-                scale = 1.5
+                scale = 1.25
             })
             self.render = false
             if set.screenshake_allowed then
@@ -356,6 +363,27 @@ function enemies.Enemy:draw()
         utils.draw_collision(self.hitbox)
         if self.punch_hurtbox.active then
             utils.draw_collision(self.punch_hurtbox)
+        end
+    end
+end
+
+function enemies.Enemy:manage_neighbors(enemy_table)
+    self.neighbors = {}
+    local squared_min_enemy_distance = 2500
+
+
+    for item = 1, #enemy_table do
+        local enemy = enemy_table[item]
+
+        if enemy ~= self then
+            local dx = self.position.x - enemy.position.x
+            local dy = self.position.y - enemy.position.y
+
+            local squared_enemy_distance = dx ^ 2 + dy ^ 2
+
+            if squared_enemy_distance <= squared_min_enemy_distance then
+                table.insert(self.neighbors, enemy)
+            end
         end
     end
 end
