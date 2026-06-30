@@ -9,6 +9,7 @@ local set = require("settings")
 local weapons = require("weapons")
 local projs = require("projectiles")
 local titlescreen = require("titlescreen")
+local gui = require("gui")
 
 local canvas
 local decal_canvas
@@ -267,7 +268,7 @@ function love.update(dt)
                     enemy_table[item]:update(dt, player, slow_down, tilemap, enemy_table, weapon_table)
                 end
 
-                player:update(dt, scale_x, scale_y, camera_x, camera_y, enemy_table, slow_down, tilemap, weapon_table)
+                player:update(dt, scale_x, scale_y, camera_x, camera_y, enemy_table, slow_down, tilemap, weapon_table, gui)
 
                 for i = #enemy_table, 1, -1 do
                     if not enemy_table[i].render then
@@ -290,6 +291,8 @@ function love.update(dt)
         end
 
         if not events.game_over then
+            gui:update(dt)
+
             soul_bar_bg:update(dt)
             soul_bar:update(dt)
             soul_bar_frame:update(dt)
@@ -402,6 +405,7 @@ function love.draw()
             soul_bar:draw(65, 20, 0, 1, set.shading, 0, 4) --R shit above is being held up by hopes and prayers
             love.graphics.setScissor()
             soul_bar_frame:draw(65, 20)
+            gui:draw(vcr_osd_mono)
         end
 
         for weapon = 1, #weapon_table do

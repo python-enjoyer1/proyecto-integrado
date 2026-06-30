@@ -96,7 +96,7 @@ local Player = {
     render = true
 }
 
-function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_down, tilemap, weapon_table)
+function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_down, tilemap, weapon_table, gui)
     if update then
         self.weapon_table = weapon_table
         self.targets = targets
@@ -270,6 +270,8 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
                 utils.check_collision(self.punch_hurtbox, targets[i].punch_hurtbox) then
 
                     if not self.parried_this_swing then
+                        table.insert(gui.style_messages, {message = "GET PARRIED", points = 1.5})
+
                         self.parried_this_swing = true
 
                         self.punch_hurtbox.active = false
