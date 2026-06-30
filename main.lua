@@ -171,7 +171,7 @@ function love.load()
         end
     end
 
-    table.insert(weapon_table, weapons.HeavyGun:new())
+    table.insert(weapon_table, weapons.Gun:new({type = "heavy_gun"}))
 end
 
 function love.update(dt)

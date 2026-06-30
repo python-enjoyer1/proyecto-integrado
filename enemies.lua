@@ -7,6 +7,8 @@ local shaders = require("shaders")
 
 local enemies = {}
 
+local particle_image = love.graphics.newImage(consts.PARTICLE_PATH .. "red.png")
+
 love.audio.setEffect("reverb", {type = "reverb"})
 
 local default_walk_animation = utils.Animation:new({speed = 0.1, looping = true})
@@ -81,11 +83,58 @@ function enemies.Enemy:new(o)
     o.damage = true
     o.wanted_velocity = {x = 0, y = 0}
     o.neighbors = {}
+    o.particle_system = love.graphics.newParticleSystem(particle_image)
+
+    o.particle_system:start()
+    o.particle_system:setSpread(math.rad(360))
+    o.particle_system:setSpeed(100, 200)
+    o.particle_system:setParticleLifetime(0.5)
+    o.particle_system:setSizes(1, 2)
+    local r, g, b
+
+    if not set.gore then
+        r = 0
+        g = 0
+        b = 0
+    else
+        r = 1
+        g = 1
+        b = 1
+    end
+
+    o.particle_system:setColors(
+        r,
+        g,
+        b,
+        1,
+
+        r,
+        g,
+        b,
+        0.75,
+
+        r,
+        g,
+        b,
+        0.5,
+
+        r,
+        g,
+        b,
+        0.25,
+
+        r,
+        g,
+        b,
+        0.0
+    )
     return o
 end --R Main.Enemy is shared so i shoved it in here instead
 
 function enemies.Enemy:update(dt, target, slow_down, tilemap, enemy_table, weapon_table)
     if not self.states.dead then
+        self.target = target
+
         self.movement_vector.x = 0
         self.movement_vector.y = 0
 
@@ -230,6 +279,8 @@ function enemies.Enemy:update(dt, target, slow_down, tilemap, enemy_table, weapo
             --R so enemy doesnt get fucking comboed in 1 punch
             if not self.hit_this_swing then
                 if utils.check_collision(self.hitbox, target.punch_hurtbox) and not self.states.fall then
+                    self.particle_system:emit(love.math.random(100, 300))
+
                     utils.add_decal({
                         image = consts.BLOOD[love.math.random(#consts.BLOOD)],
                         x = self.position.x,
@@ -331,7 +382,9 @@ function enemies.Enemy:update(dt, target, slow_down, tilemap, enemy_table, weapo
             end
         end
 
+        self.particle_system:update(dt)
     else
+        self.particle_system:release()
         self.animation = self.death_animation
         if self.animation.finished and self.render then
             utils.add_decal({
@@ -356,7 +409,16 @@ end
 
 function enemies.Enemy:draw()
     if self.render then
+        if self.target ~= nil and self.target.states.dead then
+            love.graphics.setShader(shaders.static)
+        end
+
         self.animation:draw(self.position.x, self.position.y, self.angle, 1, set.shading, 0, 3)
+
+        if not self.states.dead then
+            love.graphics.draw(self.particle_system, self.position.x, self.position.y)
+        end
+        love.graphics.setShader()
     end
 
     if set.debug and self.render then

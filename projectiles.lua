@@ -49,6 +49,10 @@ function projectiles.update(dt, enemy_table, tilemap)
                 enemy.knockback_velx = math.cos(angle) * force
                 enemy.knockback_vely = math.sin(angle) * force
 
+                if not enemy.states.dead then
+                    enemy.particle_system:emit(love.math.random(50, 75))
+                end
+
                 utils.add_decal({
                     image = consts.BLOOD[love.math.random(#consts.BLOOD)],
                     x = enemy.position.x,

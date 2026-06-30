@@ -146,6 +146,7 @@ function Player:update(dt, scale_x, scale_y, offset_x, offset_y, targets, slow_d
 
         if self.stats.souls <= 0 then
             punch_sound:setPitch(5.0)
+            punch_sound:stop()
             punch_sound:play()
             events.freezeframe_duration = 0.1
             self.states.dead = true
