@@ -50,7 +50,7 @@ function enemies.Enemy:new(o)
     o.stats = {
         hp = o.stats.hp or 20,
         speed = o.stats.speed or 100,
-        attack_damage = 3,
+        attack_damage = 2,
         soul_amount = love.math.random(consts.MIN_ENEMY_SOUL, consts.MAX_ENEMY_SOUL),
         essence_amount = love.math.random(consts.MIN_ENEMY_ESSENCE, consts.MAX_ENEMY_ESSENCE),
         weight = o.stats.weight or 1,

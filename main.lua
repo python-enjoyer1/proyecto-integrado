@@ -194,6 +194,8 @@ function love.update(dt)
         dt = 0
     end
 
+    dt = math.min(dt, 1 / 30) -- Remember, 1 / framerate = dt, because 1 / frecuency = period (AKA the time that one oscillation/loop takes).
+
     if not titlescreen.show then
         if events.game_over then
             slow_down = 0.01
@@ -387,6 +389,7 @@ function love.draw()
         end
 
         player:draw()
+        tilemap:draw_walls(camera_x, camera_y)
 
         for weapon = 1, #weapon_table do
             if weapon_table[weapon].hold then

@@ -339,7 +339,10 @@ function utils.Tilemap:draw(camera_x, camera_y)
             end
         end
     end
-    for x = 1, self.size[1] do
+end
+
+function utils.Tilemap:draw_walls(camera_x, camera_y)
+   for x = 1, self.size[1] do
         for y = 1, self.size[2] do
             local rotation = 0
 
