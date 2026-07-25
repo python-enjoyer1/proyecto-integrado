@@ -1,6 +1,6 @@
 local love = require("love")
-local consts = require("constants")
-local set = require("settings")
+local consts = require("scripts.constants")
+local set = require("scripts.settings")
 
 local utils = {}
 
@@ -363,7 +363,7 @@ function utils.Tilemap:draw_walls(camera_x, camera_y)
                         love.graphics.push()
                         love.graphics.setColor(consts.SHADOW_COLOR)
 
-                        local shadow_offset = 3
+                        local shadow_offset = 5
 
                         if self.tilemap[x][y].side ~= nil then
                             if self.tilemap[x][y].side == "up" then

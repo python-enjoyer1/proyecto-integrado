@@ -1,9 +1,9 @@
 local love = require("love")
-local utils = require("utils")
-local consts = require("constants")
-local set = require("settings")
-local events = require("events")
-local shaders = require("shaders")
+local utils = require("scripts.utils")
+local consts = require("scripts.constants")
+local set = require("scripts.settings")
+local events = require("scripts.events")
+local shaders = require("scripts.shaders")
 
 local enemies = {}
 

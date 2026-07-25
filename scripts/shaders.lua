@@ -1,5 +1,5 @@
 local love = require("love")
-local consts = require("constants")
+local consts = require("scripts.constants")
 
 local shaders = {
     backgrounds = {

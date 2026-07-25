@@ -1,15 +1,15 @@
 local love = require("love")
-local player = require("player")
-local enemies = require("enemies")
-local utils = require("utils")
-local consts = require("constants")
-local shaders = require("shaders")
-local events = require("events")
-local set = require("settings")
-local weapons = require("weapons")
-local projs = require("projectiles")
-local titlescreen = require("titlescreen")
-local gui = require("gui")
+local player = require("scripts.player")
+local enemies = require("scripts.enemies")
+local utils = require("scripts.utils")
+local consts = require("scripts.constants")
+local shaders = require("scripts.shaders")
+local events = require("scripts.events")
+local set = require("scripts.settings")
+local weapons = require("scripts.weapons")
+local projs = require("scripts.projectiles")
+local titlescreen = require("scripts.titlescreen")
+local gui = require("scripts.gui")
 
 local canvas
 local decal_canvas
@@ -19,8 +19,6 @@ local desktop_width, desktop_height
 local scale_x, scale_y
 local mouse_x, mouse_y
 
-local sleep
-
 local camera_movement
 local camera_x
 local camera_y
@@ -28,11 +26,6 @@ local look_ahead
 
 --R Tilemap shits
 local tilemap
-
--- HUD elements here.
-local soul_bar
-local soul_bar_bg
-local soul_bar_frame
 
 local cursor
 local cursor_selection_box
@@ -122,15 +115,6 @@ function love.load()
 
     player.position.x = tilemap_width * consts.TILE_SIZE / 2
     player.position.y = tilemap_height * consts.TILE_SIZE / 2
-
-    soul_bar = utils.Animation:new({speed = 0.07, looping = true})
-    soul_bar:manage_spritesheet(consts.ASSETS_PATH .. "hud/soul_bar.png", 128, 32, 21, 2)
-
-    soul_bar_bg = utils.Animation:new({speed = 0.07})
-    soul_bar_bg:manage_spritesheet(consts.ASSETS_PATH .. "hud/soul_bar_bg.png", 128, 32, 21, 2)
-
-    soul_bar_frame = utils.Animation:new({speed = 0.07, looping = true})
-    soul_bar_frame:manage_spritesheet(consts.ASSETS_PATH .. "hud/soul_bar_frame.png", 128, 32, 21, 2)
 
     cursor = utils.Animation:new({speed = 0.1, looping = true})
     cursor:manage_spritesheet(consts.ASSETS_PATH .. "hud/cursor.png", 8, 8, 4, 2)
@@ -294,10 +278,6 @@ function love.update(dt)
 
         if not events.game_over then
             gui:update(dt)
-
-            soul_bar_bg:update(dt)
-            soul_bar:update(dt)
-            soul_bar_frame:update(dt)
         end
     else
         titlescreen:update(dt, mouse_x, mouse_y)
@@ -403,12 +383,7 @@ function love.draw()
 
         -- HUD/GUI goes here.
         if not events.game_over then
-            soul_bar_bg:draw(65, 20)
-            love.graphics.setScissor(9 * scale_x, 4 * scale_y, 35 * player.stats.souls / player.stats.soul_limit * scale_x, 32 * scale_y)
-            soul_bar:draw(65, 20, 0, 1, set.shading, 0, 4) --R shit above is being held up by hopes and prayers
-            love.graphics.setScissor()
-            soul_bar_frame:draw(65, 20)
-            gui:draw(vcr_osd_mono)
+            gui:draw(vcr_osd_mono, scale_x, scale_y, player)
         end
 
         for weapon = 1, #weapon_table do

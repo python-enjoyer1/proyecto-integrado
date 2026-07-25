@@ -1,5 +1,5 @@
 local love = require("love")
-local set = require("settings")
+local set = require("scripts.settings")
 
 local consts = {}
 

@@ -1,8 +1,8 @@
 local love = require("love")
-local consts = require("constants")
-local set = require("settings")
-local utils = require("utils")
-local projs = require("projectiles")
+local consts = require("scripts.constants")
+local set = require("scripts.settings")
+local utils = require("scripts.utils")
+local projs = require("scripts.projectiles")
 
 local weapons = {}
 
@@ -53,10 +53,6 @@ function weapons.Gun:update(dt, mouse_selection_box, player)
 
     self.ammo = math.floor(self.ammo)
 
-    if player.states.dead then
-        self.hold = false
-    end
-
     if self.hold then
         self.position.x = self.player.position.x
         self.position.y = self.player.position.y
@@ -77,11 +73,14 @@ function weapons.Gun:update(dt, mouse_selection_box, player)
                 self.fire_requested = false
             end
         end
-    else
+    elseif not player.states.dead then
         player.holding[1] = false
         player.states.idle = true
         self.mouse_on = utils.check_collision(mouse_selection_box, self.interact_box)
         self.sprite = self.floor_sprite
+    else
+        player.holding[1] = false
+        self.mouse_on = false
     end
 end
 

@@ -1,6 +1,6 @@
 local love = require("love")
-local consts = require("constants")
-local utils = require("utils")
+local consts = require("scripts.constants")
+local utils = require("scripts.utils")
 
 local size = {640, 360}
 local move_x, move_y = 0, 0

@@ -1,6 +1,6 @@
 local love = require("love")
-local consts = require("constants")
-local utils = require("utils")
+local consts = require("scripts.constants")
+local utils = require("scripts.utils")
 
 local projectiles = {}
 
